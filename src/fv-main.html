@@ -1,0 +1,1609 @@
+<title>Föremålsverkstaden</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500&family=Pixelify+Sans:wght@500;600&display=swap">
+<style>
+/* Layout: the bench (tools, 16x16 icon grid or 64x64 armor map, colors) on the left; preview, guide, properties and the collection that becomes the add-on on the right */
+:root{
+  --bg:#E6E9EC; --panel:#F9FAFB; --panel-2:#EEF1F4; --ink:#1A1F26; --muted:#57606B; --line:#CBD1D8; --line-strong:#98A1AB;
+  --accent:#2F6B4F; --accent-ink:#FFFFFF; --accent-soft:#D9EADF;
+  --warm:#D7841C; --warm-soft:#F7E5C6; --danger:#C0392F; --ok:#2C8A55;
+  --check-a:#FFFFFF; --check-b:#DDE2E7; --grid:rgba(26,31,38,.15); --unused:#B5BEC7;
+  --p-head:#7457D4; --p-chest:#1C977A; --p-legs:#BF4279; --p-feet:#CF5B2A;
+  --slot:#8B8B8B; --slot-hi:#C6C6C6; --slot-lo:#373737; --tip-bg:#140A1E; --tip-edge:#2A0E5C; --tip-ink:#FFFFFF; --tip-muted:#A8A8A8;
+  --r-common:#FFFFFF; --r-uncommon:#FFFF55; --r-rare:#55FFFF; --r-epic:#FF55FF;
+  --f-display:"Pixelify Sans", ui-monospace, "Courier New", monospace;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101317; --panel:#181D23; --panel-2:#1F252D; --ink:#E5E8EB; --muted:#949DA7; --line:#2B323B; --line-strong:#4C5560;
+    --accent:#6FC398; --accent-ink:#0B1A12; --accent-soft:#1C3527;
+    --warm:#F0AD4C; --warm-soft:#3A2A12; --danger:#F07367; --ok:#5DC78E;
+    --check-a:#2A3038; --check-b:#21262D; --grid:rgba(229,232,235,.12); --unused:#3B4652;
+    --p-head:#A28DF2; --p-chest:#4BC6A0; --p-legs:#EC79A7; --p-feet:#F28A5B;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101317; --panel:#181D23; --panel-2:#1F252D; --ink:#E5E8EB; --muted:#949DA7; --line:#2B323B; --line-strong:#4C5560;
+  --accent:#6FC398; --accent-ink:#0B1A12; --accent-soft:#1C3527;
+  --warm:#F0AD4C; --warm-soft:#3A2A12; --danger:#F07367; --ok:#5DC78E;
+  --check-a:#2A3038; --check-b:#21262D; --grid:rgba(229,232,235,.12); --unused:#3B4652;
+  --p-head:#A28DF2; --p-chest:#4BC6A0; --p-legs:#EC79A7; --p-feet:#F28A5B;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--f-body)}
+.app{max-width:1340px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:18px}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px}
+.brand{display:flex;align-items:center;gap:14px}
+#logo{width:48px;height:48px;image-rendering:pixelated;border-radius:4px;background:var(--slot);box-shadow:inset 2px 2px 0 var(--slot-lo),inset -2px -2px 0 var(--slot-hi);padding:6px}
+h1{font:600 clamp(22px,6.2vw,30px)/1.05 var(--f-display);margin:0;letter-spacing:.01em;overflow-wrap:anywhere}
+.app>*,.brand,.brand>div{min-width:0}
+.tagline{margin:3px 0 0;color:var(--muted);font-size:15px}
+.files{margin-left:auto;display:flex;flex-wrap:wrap;gap:8px}
+.btn{border:1px solid var(--line-strong);background:var(--panel);border-radius:var(--r);padding:7px 13px;cursor:pointer;min-height:38px;font-size:15px;line-height:1.2}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.small{min-height:32px;padding:5px 10px;font-size:14px}
+.btn.danger{color:var(--danger);border-color:var(--danger)}
+.btn.warm{border-color:var(--warm);background:var(--warm-soft);font-weight:700}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line-strong);border-radius:var(--r);overflow:hidden;background:var(--panel)}
+.seg button{border:0;border-right:1px solid var(--line);background:transparent;font-size:14px;padding:6px 11px;cursor:pointer;min-height:34px}
+.seg button:last-child{border-right:0}
+.seg button:hover{background:var(--panel-2)}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);font-weight:700}
+.seg button.off{color:var(--muted);text-decoration:line-through}
+.chk{display:inline-flex;align-items:center;gap:7px;font-size:14px;cursor:pointer;user-select:none}
+.chk input{width:17px;height:17px;accent-color:var(--accent);margin:0}
+.lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-weight:700}
+select{border:1px solid var(--line-strong);border-radius:var(--r);background:var(--panel);padding:6px 8px;min-height:34px;font-size:14px;max-width:100%}
+.layout{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1000px){.layout{grid-template-columns:minmax(0,1fr) 400px;align-items:start}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.card h2{font:600 19px/1.2 var(--f-display);margin:0}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.bench{display:grid;grid-template-columns:76px minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:640px){.bench{grid-template-columns:minmax(0,1fr)}}
+.tools{display:flex;flex-direction:column;gap:6px;position:sticky;top:max(12px,env(safe-area-inset-top,0px))}
+@media (max-width:640px){.tools{flex-direction:row;flex-wrap:wrap;position:static}}
+.tool{display:grid;justify-items:center;gap:3px;padding:8px 4px 6px;border:1px solid var(--line);background:var(--panel);border-radius:var(--r);font-size:13px;line-height:1.1;cursor:pointer;min-width:66px}
+.tool:hover{border-color:var(--line-strong)}
+.tool svg{width:24px;height:24px}
+.tool kbd{font:500 10px/1 var(--f-mono);color:var(--muted)}
+.tool[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tool[aria-pressed="true"] kbd{color:var(--accent-ink)}
+.tool.act{border-style:dashed}
+.edcol{display:grid;gap:10px;min-width:0}
+.edbar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;max-width:620px}
+.edbar .grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.armorbar{padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.arrows{display:inline-flex;gap:4px}
+.arrows button{width:34px;min-height:32px;padding:0}
+.edbox{position:relative;width:100%;max-width:620px;aspect-ratio:1/1;border:1px solid var(--line-strong);border-radius:4px;overflow:hidden;
+  background:repeating-conic-gradient(var(--check-a) 0 25%, var(--check-b) 0 50%) 0 0/12.5% 12.5%;touch-action:none;user-select:none}
+.edbox.big{background-size:3.125% 3.125%}
+#paint,#ov{position:absolute;inset:0;width:100%;height:100%;display:block}
+#paint{image-rendering:pixelated;image-rendering:crisp-edges}
+#ov{cursor:crosshair}
+.status{font:13px/1.45 var(--f-mono);color:var(--muted);min-height:1.45em;display:flex;gap:4px 14px;flex-wrap:wrap;max-width:620px}
+.status b{color:var(--ink);font-weight:500}
+.chip{display:inline-block;width:11px;height:11px;border-radius:2px;border:1px solid var(--line-strong);vertical-align:-1px;margin-right:5px}
+.msg{margin:0;font-size:15px;min-height:1.5em;max-width:620px}
+.hint{font-size:14px;color:var(--muted);margin:0;max-width:620px}
+.colors{display:grid;gap:12px;max-width:620px}
+.cur{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.cur .big{width:44px;height:44px;border-radius:6px;border:1px solid var(--line-strong)}
+.cur input[type=color]{width:44px;height:38px;border:1px solid var(--line-strong);border-radius:var(--r);padding:2px;background:var(--panel);cursor:pointer}
+.cur code{font:500 15px var(--f-mono)}
+.crow{display:grid;grid-template-columns:78px minmax(0,1fr);gap:10px;align-items:center}
+@media (max-width:420px){.crow{grid-template-columns:minmax(0,1fr)}}
+.swrow{display:flex;flex-wrap:wrap;gap:5px}
+.sw{width:28px;height:28px;border-radius:4px;border:1px solid var(--line-strong);cursor:pointer;padding:0}
+.sw[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:2px}
+.shade-row .sw{width:34px}
+.empty{font-size:13px;color:var(--muted)}
+.side{display:grid;gap:16px}
+.stage{height:320px;position:relative;border-radius:6px;background:var(--panel-2);touch-action:none;margin:12px 0 10px;overflow:hidden}
+.stage canvas{display:block;width:100%;height:100%;cursor:grab}
+.stage.painting canvas{cursor:crosshair}
+.stage .no3d,.stage .hint3d{position:absolute;inset:auto 0 0 0;text-align:center;padding:10px 16px;margin:0;color:var(--muted);font-size:14px;pointer-events:none}
+.stage .no3d{inset:0;display:grid;place-items:center}
+.ingame{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.slot{width:52px;height:52px;background:var(--slot);box-shadow:inset 3px 3px 0 var(--slot-lo),inset -3px -3px 0 var(--slot-hi);display:grid;place-items:center;flex:none;position:relative}
+.slot canvas{width:32px;height:32px;image-rendering:pixelated}
+.slot .count{position:absolute;right:4px;bottom:2px;font:600 15px/1 var(--f-display);color:#FFFFFF;text-shadow:2px 2px 0 #3F3F3F}
+.tipbox{background:var(--tip-bg);border:2px solid var(--tip-edge);border-radius:3px;padding:6px 10px;font:500 15px/1.35 var(--f-display);color:var(--tip-ink);min-width:150px;max-width:100%}
+.tipbox .nm{font-weight:600}
+.tipbox .ln{color:var(--tip-muted);font-size:14px}
+.tipbox .ln.blue{color:#8C8CFF}
+.tipbox .ln.gold{color:#FFAA00}
+.tipbox .id{color:#8C8CFF;font-size:13px;font-family:var(--f-mono)}
+.note{font-size:14px;color:var(--muted);margin:10px 0 0}
+.pills{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:12px 0 10px;padding:0}
+.pills button{width:34px;height:34px;border:1px solid var(--line);background:var(--panel);border-radius:4px;font:600 16px/1 var(--f-display);cursor:pointer}
+.pills button.done{background:var(--accent-soft);border-color:var(--accent-soft)}
+.pills button[aria-current="step"]{background:var(--warm-soft);border-color:var(--warm);box-shadow:inset 0 0 0 1px var(--warm)}
+#stepTitle{font:600 22px/1.15 var(--f-display);margin:2px 0 6px;text-wrap:balance}
+#stepText{margin:0 0 10px;max-width:60ch}
+.tip{font-size:14px;color:var(--muted);border-left:3px solid var(--warm);border-radius:0;padding:2px 0 2px 10px;margin:0 0 12px}
+.tip code{font:500 13px var(--f-mono);color:var(--ink);word-break:break-all}
+.guide-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.guide-actions .spacer{flex:1}
+.form{display:grid;gap:12px;margin-top:12px}
+.field{display:grid;gap:6px}
+.field>label,.field>.lbl{font-size:13px;color:var(--muted);font-weight:700}
+.text{border:1px solid var(--line-strong);border-radius:var(--r);background:var(--panel);padding:7px 10px;font-size:15px;width:100%;min-width:0}
+.idline{font:13px var(--f-mono);color:var(--muted);word-break:break-all}
+.help{font-size:13px;line-height:1.45;color:var(--muted);margin:0}
+.range{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}
+.range input{accent-color:var(--accent);width:100%}
+.range output{font:500 14px var(--f-mono);min-width:5ch;text-align:right}
+.sub{display:grid;gap:12px;padding:12px;border:1px solid var(--line);border-radius:var(--r);background:var(--panel-2)}
+.prow{display:grid;grid-template-columns:116px minmax(0,1fr);gap:6px 10px;align-items:center;padding-top:10px;border-top:1px solid var(--line)}
+.prow:first-child{border-top:0;padding-top:0}
+.prow .range{grid-column:2}
+.prow.dim .text,.prow.dim .range{opacity:.45}
+.bonus{display:grid;gap:10px;padding-top:12px;border-top:1px solid var(--line)}
+.mfields{display:grid;gap:12px}
+.craft{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.grid3{display:grid;grid-template-columns:repeat(3,60px);gap:4px}
+.cell{width:60px;height:60px;border:0;background:var(--slot);box-shadow:inset 2px 2px 0 var(--slot-lo),inset -2px -2px 0 var(--slot-hi);border-radius:2px;padding:4px;display:grid;place-items:center;cursor:pointer;font:700 11px/1.15 var(--f-body);color:#FFFFFF;text-align:center;overflow:hidden;overflow-wrap:anywhere;text-shadow:1px 1px 0 #3F3F3F;position:relative}
+.cell:hover{filter:brightness(1.12)}
+.cell canvas{width:32px;height:32px;image-rendering:pixelated}
+.cell .count{position:absolute;right:4px;bottom:2px;font:600 15px/1 var(--f-display);color:#FFFFFF;text-shadow:2px 2px 0 #3F3F3F}
+.outcell{cursor:default}
+.outcell:hover{filter:none}
+.arrowx{font:600 24px/1 var(--f-display);color:var(--muted)}
+.coll{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:6px}
+.coll li{display:flex;align-items:center;gap:8px}
+.coll .pick{flex:1;min-width:0;display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--panel);border-radius:var(--r);padding:6px 10px;cursor:pointer;text-align:left}
+.coll .pick[aria-current="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
+.coll canvas{width:32px;height:32px;image-rendering:pixelated;flex:none;background:var(--slot);box-shadow:inset 2px 2px 0 var(--slot-lo),inset -2px -2px 0 var(--slot-hi);padding:4px}
+.coll .nm{font-weight:700;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.coll .ty{font-size:13px;color:var(--muted)}
+.coll .meta{min-width:0}
+.exp{display:grid;gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+@media (max-width:420px){.two{grid-template-columns:minmax(0,1fr)}}
+.ver{font:13px var(--f-mono);color:var(--muted)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+.legal{border-top:1px solid var(--line);padding-top:14px;font-size:13px;line-height:1.5;color:var(--muted)}
+.legal p{margin:0 0 4px;max-width:72ch}
+/* zoomable map and finger-sized controls */
+.mapzoom{position:relative;width:100%;aspect-ratio:1/1;background:inherit;touch-action:none}
+.mapbox.zoomed,.edbox.zoomed{overflow:auto;scrollbar-width:thin;overscroll-behavior:contain}
+.zoombar{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;max-width:640px}
+.zoombar .btn.small{min-width:38px;font-weight:700}
+.zoombar output{font:500 13px/1 var(--f-mono);min-width:6ch;text-align:center;color:var(--muted)}
+.zoomhint{font-size:13px;line-height:1.4;color:var(--muted);flex:1 1 220px;min-width:0;margin:0}
+html{-webkit-text-size-adjust:100%}
+button,label,select,a{touch-action:manipulation}
+@media (pointer:coarse){
+  .btn{min-height:44px}
+  .btn.small{min-height:40px}
+  .zoombar .btn.small{min-width:46px}
+  .seg button{min-height:42px;padding:6px 13px}
+  .chk{min-height:40px}
+  .chk input{width:22px;height:22px}
+  .swrow{gap:7px}
+  .sw{width:36px;height:36px}
+  .shade-row .sw{width:42px}
+  .pills button{width:40px;height:40px}
+  .chips button{min-height:40px;padding:6px 13px}
+  select{min-height:42px}
+}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <canvas id="logo" width="16" height="16" aria-hidden="true"></canvas>
+      <div>
+        <h1>Föremålsverkstaden</h1>
+        <p class="tagline">Rita egna föremål och rustningar och gör ett add-on till Minecraft Bedrock</p>
+      </div>
+    </div>
+    <div class="files">
+      <button class="btn" id="newBtn" type="button">Nytt föremål</button>
+      <button class="btn" id="newArmorBtn" type="button">Ny rustning</button>
+      <button class="btn" id="openBtn" type="button">Öppna PNG</button>
+      <input type="file" id="fileIn" accept="image/png" hidden>
+      <button class="btn" id="exampleBtn" type="button">Lägg till exempel</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <section class="bench" aria-label="Målarbänk">
+      <div class="tools" role="toolbar" aria-label="Verktyg" id="tools"></div>
+      <div class="edcol">
+        <div class="edbar armorbar" id="armorBar" hidden>
+          <div class="grp">
+            <span class="lbl" id="surfLbl">Måla</span>
+            <div class="seg" id="surfSeg" role="group" aria-labelledby="surfLbl">
+              <button type="button" data-surf="armor">Rustningsbild</button>
+              <button type="button" data-surf="icon">Ikon</button>
+            </div>
+          </div>
+          <div class="grp">
+            <span class="lbl" id="pieceLbl">Del</span>
+            <div class="seg" id="pieceSeg" role="group" aria-labelledby="pieceLbl"></div>
+          </div>
+          <button class="btn small warm" id="baseBtn" type="button" title="Fyller tomma rutor i setet med vald färg, med ljus och skugga">Grundmåla</button>
+        </div>
+        <div class="edbar">
+          <div class="grp" id="tplGrp">
+            <label class="lbl" for="tplSel">Mall</label>
+            <select id="tplSel"></select>
+          </div>
+          <div class="grp" id="shiftGrp">
+            <span class="lbl">Flytta</span>
+            <div class="arrows">
+              <button class="btn small" type="button" data-shift="-1,0" aria-label="Flytta vänster" title="Flytta vänster (Shift+pil)">&larr;</button>
+              <button class="btn small" type="button" data-shift="0,-1" aria-label="Flytta upp" title="Flytta upp (Shift+pil)">&uarr;</button>
+              <button class="btn small" type="button" data-shift="0,1" aria-label="Flytta ner" title="Flytta ner (Shift+pil)">&darr;</button>
+              <button class="btn small" type="button" data-shift="1,0" aria-label="Flytta höger" title="Flytta höger (Shift+pil)">&rarr;</button>
+            </div>
+          </div>
+          <div class="grp">
+            <label class="chk"><input type="checkbox" id="mirrorChk"> Spegla</label>
+            <label class="chk"><input type="checkbox" id="gridChk" checked> Rutnät</label>
+          </div>
+          <div class="grp">
+            <button class="btn small" id="undoBtn" type="button" title="Ångra (Ctrl+Z)">Ångra</button>
+            <button class="btn small" id="redoBtn" type="button" title="Gör om (Ctrl+Y)">Gör om</button>
+            <button class="btn small" id="clearBtn" type="button">Rensa</button>
+          </div>
+        </div>
+        <div class="edbox" id="edbox">
+          <div class="mapzoom" id="mapzoom">
+            <canvas id="paint" width="16" height="16"></canvas>
+            <canvas id="ov" role="img" aria-label="Rutnätet att måla på. Klicka och dra för att måla."></canvas>
+          </div>
+        </div>
+        <div class="zoombar" id="zoombar">
+          <button class="btn small" type="button" data-z="out" aria-label="Zooma ut" title="Zooma ut">&minus;</button>
+          <output aria-live="polite">100 %</output>
+          <button class="btn small" type="button" data-z="in" aria-label="Zooma in" title="Zooma in">+</button>
+          <button class="btn small" type="button" data-z="fit">Hela kartan</button>
+          <p class="zoomhint"></p>
+        </div>
+        <div class="status" id="status"></div>
+        <p class="msg" id="msg" role="status" aria-live="polite"></p>
+        <p class="hint" id="armHint" hidden>Överst är lager 1 med hjälm, bröstplåt och kängor. Underst är lager 2 med byxorna. Armar och ben målas en gång och speglas till andra sidan i spelet. Orange rutor visar var delen brukar täcka men ännu är tom.</p>
+        <section class="card colors" aria-label="Färger">
+          <div class="cur">
+            <span class="big" id="curSw" aria-hidden="true"></span>
+            <input type="color" id="colorIn" aria-label="Välj valfri färg">
+            <code id="hexOut">#000000</code>
+          </div>
+          <div class="crow"><span class="lbl">Nyanser</span><div class="swrow shade-row" id="shadeRow" aria-label="Nyanser av vald färg, mörkast till vänster"></div></div>
+          <div class="crow"><span class="lbl">Material</span><div class="swrow" id="palMat"></div></div>
+          <div class="crow"><span class="lbl">Mat</span><div class="swrow" id="palFood"></div></div>
+          <div class="crow"><span class="lbl">Övrigt</span><div class="swrow" id="palMisc"></div></div>
+          <div class="crow"><span class="lbl">Senaste</span><div class="swrow" id="palRecent"></div></div>
+        </section>
+      </div>
+    </section>
+
+    <aside class="side">
+      <section class="card" aria-label="Förhandsvisning">
+        <div class="card-head">
+          <h2>Förhandsvisning</h2>
+          <div class="seg" id="viewSeg" role="group" aria-label="Var föremålet visas">
+            <button type="button" data-view="ground">På marken</button>
+            <button type="button" data-view="hand">I handen</button>
+          </div>
+          <div class="seg" id="modeSeg" role="group" aria-label="Vad musen gör på figuren" hidden>
+            <button type="button" data-mode="rotate">Snurra</button>
+            <button type="button" data-mode="paint">Måla</button>
+          </div>
+        </div>
+        <div class="stage" id="stage"></div>
+        <div class="ingame">
+          <div class="slot"><canvas id="slotCv" width="16" height="16" aria-hidden="true"></canvas><span class="count" id="slotCount"></span></div>
+          <div class="tipbox" id="tipbox" aria-label="Så ser namnet ut i spelet"></div>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Guide">
+        <div class="card-head"><h2>Guide</h2><span class="lbl" id="stepCount">Steg 1 av 7</span></div>
+        <ol class="pills" id="pills"></ol>
+        <h3 id="stepTitle"></h3>
+        <p id="stepText"></p>
+        <p class="tip" id="stepTip"></p>
+        <div class="guide-actions">
+          <span class="spacer"></span>
+          <button class="btn" id="prevBtn" type="button">Förra</button>
+          <button class="btn primary" id="nextBtn" type="button">Nästa</button>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Egenskaper">
+        <h2>Egenskaper</h2>
+        <div class="form">
+          <div class="field">
+            <label for="itemName" id="nameLbl">Namn i spelet</label>
+            <input class="text" id="itemName" maxlength="40" autocomplete="off">
+            <span class="idline" id="idLine"></span>
+          </div>
+          <div class="field">
+            <span class="lbl" id="typeLbl">Typ</span>
+            <div class="seg" id="typeSeg" role="group" aria-labelledby="typeLbl">
+              <button type="button" data-type="item">Föremål</button>
+              <button type="button" data-type="food">Mat</button>
+              <button type="button" data-type="weapon">Vapen</button>
+              <button type="button" data-type="tool">Verktyg</button>
+              <button type="button" data-type="armor">Rustning</button>
+            </div>
+          </div>
+          <div class="sub" id="pStack">
+            <div class="field">
+              <span class="lbl" id="stackLbl">Antal per stack</span>
+              <div class="seg" id="stackSeg" role="group" aria-labelledby="stackLbl">
+                <button type="button" data-stack="1">1</button>
+                <button type="button" data-stack="16">16</button>
+                <button type="button" data-stack="64">64</button>
+              </div>
+            </div>
+          </div>
+          <div class="sub" id="pMat" hidden>
+            <label class="chk"><input type="checkbox" id="matChk"> Det här är ett material</label>
+            <div class="mfields" id="matFields">
+              <p class="help" id="matUse"></p>
+              <label class="chk"><input type="checkbox" id="craftChk"> Kan tillverkas på arbetsbänken</label>
+              <div class="mfields" id="craftFields">
+                <div class="field"><label for="ingSel">Ingrediens att lägga i rutorna</label><select id="ingSel"></select></div>
+                <div class="craft">
+                  <div class="grid3" id="craftGrid" role="group" aria-label="Arbetsbänkens rutor"></div>
+                  <span class="arrowx" aria-hidden="true">&rarr;</span>
+                  <div class="cell outcell" id="craftOut" aria-label="Det man får"><canvas width="16" height="16" aria-hidden="true"></canvas><span class="count" id="craftOutCount"></span></div>
+                </div>
+                <div class="field"><label for="craftCount">Antal man får</label><select id="craftCount"></select></div>
+                <span class="help">Klicka i en ruta för att lägga dit ingrediensen. Klicka igen för att ta bort den. Blanda gärna olika ingredienser, annars kan receptet krocka med något av Minecrafts egna.</span>
+              </div>
+              <label class="chk"><input type="checkbox" id="smeltChk"> Kan smältas i ugnen</label>
+              <div class="mfields" id="smeltFields">
+                <div class="field"><label for="smeltSel">Det här blir materialet i ugnen</label><select id="smeltSel"></select></div>
+              </div>
+            </div>
+          </div>
+          <div class="sub" id="pFood" hidden>
+            <div class="field">
+              <label for="nutr">Hur mätt man blir</label>
+              <div class="range"><input type="range" id="nutr" min="1" max="20" step="1"><output id="nutrOut" for="nutr"></output></div>
+            </div>
+            <div class="field">
+              <span class="lbl" id="animLbl">Man</span>
+              <div class="seg" id="animSeg" role="group" aria-labelledby="animLbl">
+                <button type="button" data-anim="eat">Äter</button>
+                <button type="button" data-anim="drink">Dricker</button>
+              </div>
+            </div>
+            <label class="chk"><input type="checkbox" id="alwaysChk"> Går att äta även när man är mätt</label>
+          </div>
+          <div class="sub" id="pWeapon" hidden>
+            <div class="field">
+              <label for="wDmg">Extra skada</label>
+              <div class="range"><input type="range" id="wDmg" min="1" max="20" step="1"><output id="wDmgOut" for="wDmg"></output></div>
+            </div>
+            <div class="field">
+              <label for="wDur">Hållbarhet</label>
+              <div class="range"><input type="range" id="wDur" min="10" max="3000" step="10"><output id="wDurOut" for="wDur"></output></div>
+            </div>
+            <div class="field"><label for="wMade">Tillverkas av</label><select id="wMade"></select><span class="help" id="wMadeInfo"></span></div>
+            <label class="chk"><input type="checkbox" id="wEnch"> Går att förtrolla</label>
+          </div>
+          <div class="sub" id="pTool" hidden>
+            <div class="field">
+              <span class="lbl" id="kindLbl">Sort</span>
+              <div class="seg" id="kindSeg" role="group" aria-labelledby="kindLbl">
+                <button type="button" data-kind="pickaxe">Hacka</button>
+                <button type="button" data-kind="axe">Yxa</button>
+                <button type="button" data-kind="shovel">Spade</button>
+              </div>
+            </div>
+            <div class="field">
+              <span class="lbl" id="tierLbl">Material</span>
+              <div class="seg" id="tierSeg" role="group" aria-labelledby="tierLbl"></div>
+            </div>
+            <div class="field">
+              <label for="tDur">Hållbarhet</label>
+              <div class="range"><input type="range" id="tDur" min="10" max="3000" step="1"><output id="tDurOut" for="tDur"></output></div>
+            </div>
+            <div class="field"><label for="tMade">Tillverkas av</label><select id="tMade"></select><span class="help" id="tMadeInfo"></span></div>
+            <label class="chk"><input type="checkbox" id="tEnch"> Går att förtrolla</label>
+            <span class="help" id="toolInfo"></span>
+          </div>
+          <div class="sub" id="pArmor" hidden>
+            <div class="field">
+              <span class="lbl" id="matLbl">Material</span>
+              <div class="seg" id="matSeg" role="group" aria-labelledby="matLbl"></div>
+            </div>
+            <div class="field"><label for="aMade">Tillverkas av</label><select id="aMade"></select><span class="help" id="aMadeInfo"></span></div>
+            <div class="field">
+              <span class="lbl">Delar, namn och skydd</span>
+              <div id="pieceRows"></div>
+            </div>
+            <div class="field">
+              <label for="aMul">Hållbarhet</label>
+              <div class="range"><input type="range" id="aMul" min="1" max="60" step="1"><output id="aMulOut" for="aMul"></output></div>
+              <span class="idline" id="aDurInfo"></span>
+            </div>
+            <div class="field">
+              <label for="repairSel">Lagas på städet med</label>
+              <select id="repairSel"></select>
+            </div>
+            <label class="chk"><input type="checkbox" id="aEnch"> Går att förtrolla</label>
+            <div class="bonus">
+              <label class="chk"><input type="checkbox" id="bonusChk"> Kraft när man har hela setet på sig</label>
+              <div class="two" id="bonusFields">
+                <select id="effectSel" aria-label="Vilken kraft"></select>
+                <div class="seg" id="lvlSeg" role="group" aria-label="Hur stark kraften är">
+                  <button type="button" data-lvl="1">Nivå 1</button>
+                  <button type="button" data-lvl="2">Nivå 2</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <span class="lbl" id="rarLbl">Sällsynthet</span>
+            <div class="seg" id="rarSeg" role="group" aria-labelledby="rarLbl">
+              <button type="button" data-rar="common">Vanlig</button>
+              <button type="button" data-rar="uncommon">Ovanlig</button>
+              <button type="button" data-rar="rare">Sällsynt</button>
+              <button type="button" data-rar="epic">Episk</button>
+            </div>
+          </div>
+          <label class="chk"><input type="checkbox" id="glintChk"> Förtrollad glans</label>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Samling och add-on">
+        <div class="card-head"><h2>Samling</h2><span class="lbl" id="collCount"></span></div>
+        <ul class="coll" id="collList"></ul>
+        <div class="exp">
+          <div class="two">
+            <div class="field"><label for="addonName">Add-onets namn</label><input class="text" id="addonName" maxlength="40" autocomplete="off"></div>
+            <div class="field"><label for="nsIn">Förled i ID</label><input class="text" id="nsIn" maxlength="20" autocomplete="off" spellcheck="false"></div>
+          </div>
+          <span class="ver" id="verLine"></span>
+          <button class="btn primary" id="exportBtn" type="button">Spara add-on (.zip)</button>
+          <p class="note" id="expNote" style="margin:0">Dubbelklicka sedan på Installera i Minecraft på skrivbordet, så öppnas add-onet i spelet. Guiden visar resten.</p>
+        </div>
+      </section>
+    </aside>
+  </div>
+  <footer class="legal">
+    <p>Ett fristående hobbyprojekt. Inte en officiell Minecraft-produkt. Inte godkänd av eller kopplad till Mojang eller Microsoft.</p>
+    <p lang="en">NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.</p>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>/*@@CORE@@*/</script>
+<script>
+(() => {
+'use strict';
+const C = window.FVCore;
+const KEY = 'foremalsverkstaden.v1';
+const N16 = 16 * 16 * 4, N64 = 64 * 64 * 4;
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const paint = $('#paint'); let pctx = paint.getContext('2d', { willReadFrequently:true });
+const ov = $('#ov'), octx = ov.getContext('2d');
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const T = {};
+const FONT_BODY = '"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif';
+const STANDALONE = !(window.claude && typeof window.claude.use === 'function');
+const TOUCH = matchMedia('(pointer: coarse)').matches;
+const OPEN_FILE = TOUCH ? 'Öppna .mcaddon-filen från Hämtade filer, på iPad i appen Filer, och välj Minecraft. Då importeras paketen.' : 'Dubbelklicka på .mcaddon-filen i Hämtade filer. Minecraft öppnas och importerar paketen.';
+const OPEN_SHORT = TOUCH ? 'Tryck på den och välj Minecraft. På iPad hittar du den i appen Filer.' : 'Dubbelklicka på den så öppnas den i Minecraft.';
+const EXPORT_LABEL = STANDALONE ? 'Spara add-on (.mcaddon)' : 'Spara add-on (.zip)';
+function saveLocal(name, blob) { const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = name; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000); }
+
+/* ---------- helpers ---------- */
+const toHex = c => '#' + c.slice(0, 3).map(v => v.toString(16).padStart(2, '0')).join('').toUpperCase();
+const fromHex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+function hexA(h, a) { if (!h || h[0] !== '#') return h; const c = fromHex(h); return `rgba(${c[0]},${c[1]},${c[2]},${a})`; }
+function rgbToHsl([r, g, b]) { r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b); let h = 0, s = 0; const l = (mx + mn) / 2;
+  if (mx !== mn) { const d = mx - mn; s = l > .5 ? d / (2 - mx - mn) : d / (mx + mn); h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h /= 6; } return [h, s, l]; }
+function hslToRgb([h, s, l]) { if (!s) { const v = Math.round(l * 255); return [v, v, v]; } const q = l < .5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+  const f = t => { if (t < 0) t += 1; if (t > 1) t -= 1; return t < 1/6 ? p + (q - p) * 6 * t : t < 1/2 ? q : t < 2/3 ? p + (q - p) * (2/3 - t) * 6 : p; };
+  return [f(h + 1/3), f(h), f(h - 1/3)].map(v => Math.round(v * 255)); }
+const lim = v => Math.min(.95, Math.max(.05, v));
+const b64e = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s); };
+const b64d = (s, n) => { const u = new Uint8ClampedArray(n); try { const bin = atob(s); for (let i = 0; i < Math.min(bin.length, n); i++) u[i] = bin.charCodeAt(i); } catch (e) {} return u; };
+function uuid() {
+  if (crypto.randomUUID) return crypto.randomUUID();
+  const b = crypto.getRandomValues(new Uint8Array(16)); b[6] = (b[6] & 15) | 64; b[8] = (b[8] & 63) | 128;
+  const h = [...b].map(x => x.toString(16).padStart(2, '0')).join('');
+  return `${h.slice(0,8)}-${h.slice(8,12)}-${h.slice(12,16)}-${h.slice(16,20)}-${h.slice(20)}`;
+}
+const clamp = (v, a, b, d) => { v = Number(v); return Number.isFinite(v) ? Math.min(b, Math.max(a, Math.round(v))) : d; };
+const isEmpty = u => { for (let i = 3; i < u.length; i += 4) if (u[i]) return false; return true; };
+const hash = (a, b, c) => { let h = Math.imul(a + 1, 73856093) ^ Math.imul(b + 1, 19349663) ^ Math.imul(c + 1, 83492791); h ^= h >>> 13; h = Math.imul(h, 1274126177); return ((h ^ (h >>> 16)) >>> 0) % 7; };
+function esc(s) { return String(s).replace(/[&<>"]/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[ch])); }
+
+/* ---------- armor map (64 wide, layer 1 on top, layer 2 below) ---------- */
+const FACE = ['topp', 'botten', 'höger sida', 'framsida', 'vänster sida', 'baksida'];
+const MIRROR_FACE = [0, 1, 4, 3, 2, 5];
+const AREG = [
+  { piece:'head',  name:'Hjälm',              short:'Hjälm', box:[0, 0, 8, 8, 8],   mirror:true },
+  { piece:'head',  name:'Hjälm, yttre lager', short:'Yttre', box:[32, 0, 8, 8, 8],  mirror:true, outer:true },
+  { piece:'chest', name:'Bröstplåt',          short:'Bröst', box:[16, 16, 8, 12, 4], mirror:true },
+  { piece:'chest', name:'Bröstplåt, ärm',     short:'Ärm',   box:[40, 16, 4, 12, 4], mirror:false },
+  { piece:'feet',  name:'Kängor',             short:'Känga', box:[0, 16, 4, 12, 4],  mirror:false },
+  { piece:'legs',  name:'Byxor, midja',       short:'Midja', box:[16, 48, 8, 12, 4], mirror:true },
+  { piece:'legs',  name:'Byxor, ben',         short:'Ben',   box:[0, 48, 4, 12, 4],  mirror:false }
+];
+function boxFaces(u, v, w, h, d) { return [[u+d, v, w, d], [u+d+w, v, w, d], [u, v+d, d, h], [u+d, v+d, w, h], [u+d+w, v+d, d, h], [u+2*d+w, v+d, w, h]]; }
+const AFACES = [], AMAP = new Int16Array(64 * 64).fill(-1);
+AREG.forEach((r, ri) => { r.faces = boxFaces(...r.box).map((q, fi) => {
+  const f = { ri, fi, region:r, x:q[0], y:q[1], w:q[2], h:q[3], idx:AFACES.length }; AFACES.push(f);
+  for (let y = f.y; y < f.y + f.h; y++) for (let x = f.x; x < f.x + f.w; x++) AMAP[y * 64 + x] = f.idx;
+  return f; }); });
+const armFaceAt = (x, y) => (x < 0 || y < 0 || x >= 64 || y >= 64 || AMAP[y * 64 + x] < 0) ? null : AFACES[AMAP[y * 64 + x]];
+function armMirror(x, y) {
+  const f = armFaceAt(x, y); if (!f || !f.region.mirror) return null;
+  const g = f.region.faces[MIRROR_FACE[f.fi]]; return [g.x + (g.w - 1 - (x - f.x)), g.y + (y - f.y)];
+}
+function patternOn(ri, fi, x, y, w) {
+  switch (ri) {
+    case 0: if (fi === 0) return true; if (fi === 1) return false; if (fi === 3) return y <= 1 || ((x === 0 || x === w - 1) && y <= 5); return y <= 6;
+    case 2: if (fi === 0) return true; if (fi === 1) return false; return y <= 10;
+    case 3: if (fi === 0) return true; if (fi === 1) return false; return y <= 4;
+    case 4: if (fi === 0) return false; if (fi === 1) return true; return y >= 8;
+    case 5: if (fi <= 1) return false; return y >= 8;
+    case 6: if (fi <= 1) return false; return y <= 8;
+  }
+  return false;
+}
+function armShade(base, f, x, y) {
+  const [hh, s, l] = rgbToHsl(base);
+  let d = f.fi === 0 ? .1 : f.fi === 1 ? -.16 : .07 - .18 * (y / Math.max(1, f.h - 1));
+  if (f.fi >= 2 && (x === 0 || x === f.w - 1)) d -= .06;
+  if (f.fi >= 2 && !(y + 1 < f.h && patternOn(f.ri, f.fi, x, y + 1, f.w))) d -= .08;
+  d += (hash(x + f.x, y + f.y, f.fi) - 3) * .012;
+  return hslToRgb([hh, s, lim(l + d)]);
+}
+function iconFromMask(m, base) {
+  const u = new Uint8ClampedArray(N16), [hh, s, l] = rgbToHsl(base);
+  for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
+    if (!m[y * 16 + x]) continue;
+    const edge = [[1,0],[-1,0],[0,1],[0,-1]].some(([dx, dy]) => { const a = x + dx, b = y + dy; return a < 0 || b < 0 || a > 15 || b > 15 || !m[b * 16 + a]; });
+    const d = edge ? -.3 : .1 - .22 * ((x + y) / 30) + (hash(x, y, 9) - 3) * .012;
+    const c = hslToRgb([hh, s, lim(l + d)]), i = (y * 16 + x) * 4; u[i] = c[0]; u[i+1] = c[1]; u[i+2] = c[2]; u[i+3] = 255;
+  }
+  return u;
+}
+
+/* ---------- project ---------- */
+const TYPE_LABEL = { item:'Föremål', food:'Mat', weapon:'Vapen', tool:'Verktyg', armor:'Rustning' };
+function newArmor() {
+  const mat = C.ARMOR_MAT.iron, pieces = {};
+  C.PIECES.forEach(p => { pieces[p.key] = { on:true, name:'', prot:mat.prot[p.key], px:b64e(new Uint8Array(N16)), tpl:p.tpl }; });
+  return { mat:'iron', mul:mat.mul, ench:true, repair:mat.repair, madeOf:'', pieces, tex:b64e(new Uint8Array(N64)), bonus:{ on:false, effect:'speed', level:1 } };
+}
+function normArmor(a) {
+  const d = newArmor(); if (!a || typeof a !== 'object') return d;
+  const o = Object.assign({}, d, a);
+  if (!C.ARMOR_MAT[o.mat]) o.mat = 'iron';
+  o.mul = clamp(o.mul, 1, 60, 15); o.ench = !!o.ench;
+  if (typeof o.repair !== 'string' || !(o.repair.startsWith('own:') || C.REPAIR.some(r => r[0] === o.repair))) o.repair = C.ARMOR_MAT[o.mat].repair;
+  o.madeOf = typeof o.madeOf === 'string' ? o.madeOf : '';
+  o.pieces = {};
+  C.PIECES.forEach(p => { const q = Object.assign({}, d.pieces[p.key], (a.pieces && a.pieces[p.key]) || {});
+    q.on = !!q.on; q.name = typeof q.name === 'string' ? q.name : ''; q.prot = clamp(q.prot, 1, 10, d.pieces[p.key].prot);
+    if (typeof q.px !== 'string') q.px = d.pieces[p.key].px; if (q.tpl !== 'none' && !C.TEMPLATES[q.tpl]) q.tpl = p.tpl; o.pieces[p.key] = q; });
+  if (!C.PIECES.some(p => o.pieces[p.key].on)) o.pieces.chest.on = true;
+  if (typeof o.tex !== 'string') o.tex = d.tex;
+  const b = Object.assign({}, d.bonus, a.bonus || {}); b.on = !!b.on; if (!C.EFFECTS.some(e => e[0] === b.effect)) b.effect = 'speed'; b.level = b.level === 2 ? 2 : 1; o.bonus = b;
+  return o;
+}
+function newItem(name) {
+  return { uid: uuid(), name, type:'item', stack:64, rarity:'common', glint:false, tpl:'sword',
+    food:{ nutrition:4, anim:'eat', always:false }, weapon:{ damage:7, durability:600, enchant:true, madeOf:'' },
+    tool:{ kind:'pickaxe', tier:'iron', durability:250, enchant:true, madeOf:'' }, armor:null, px: b64e(new Uint8Array(N16)),
+    mat:{ on:false, craft:{ on:true, grid:['', '', '', '', '', '', '', '', ''], count:1 }, smelt:{ on:false, input:'minecraft:prismarine_shard' } } };
+}
+function normItem(it) {
+  const d = newItem('Föremål'), src = it || {};
+  const o = Object.assign({}, d, src);
+  o.food = Object.assign({}, d.food, src.food || {}); o.weapon = Object.assign({}, d.weapon, src.weapon || {}); o.tool = Object.assign({}, d.tool, src.tool || {});
+  if (typeof o.name !== 'string') o.name = 'Föremål';
+  if (!TYPE_LABEL[o.type]) o.type = 'item';
+  o.stack = [1, 16, 64].includes(o.stack) ? o.stack : 64;
+  o.food.nutrition = clamp(o.food.nutrition, 1, 20, 4);
+  o.weapon.damage = clamp(o.weapon.damage, 1, 20, 7); o.weapon.durability = clamp(o.weapon.durability, 10, 3000, 600);
+  if (!C.TOOLKIND[o.tool.kind]) o.tool.kind = 'pickaxe'; if (!C.TIERS[o.tool.tier]) o.tool.tier = 'iron';
+  o.tool.durability = clamp(o.tool.durability, 10, 3000, 250);
+  if (!['common','uncommon','rare','epic'].includes(o.rarity)) o.rarity = 'common';
+  if (typeof o.px !== 'string') o.px = d.px;
+  o.armor = (o.type === 'armor' || src.armor) ? normArmor(src.armor) : null;
+  o.weapon.madeOf = typeof o.weapon.madeOf === 'string' ? o.weapon.madeOf : ''; o.tool.madeOf = typeof o.tool.madeOf === 'string' ? o.tool.madeOf : '';
+  const sm = src.mat || {}, dm = d.mat;
+  o.mat = { on:!!sm.on, craft:Object.assign({}, dm.craft, sm.craft || {}), smelt:Object.assign({}, dm.smelt, sm.smelt || {}) };
+  o.mat.craft.on = !!o.mat.craft.on; o.mat.craft.count = clamp(o.mat.craft.count, 1, 9, 1);
+  o.mat.craft.grid = Array.from({ length:9 }, (_, i) => { const g = Array.isArray(o.mat.craft.grid) ? o.mat.craft.grid[i] : ''; return typeof g === 'string' ? g : ''; });
+  o.mat.smelt.on = !!o.mat.smelt.on; if (typeof o.mat.smelt.input !== 'string' || !o.mat.smelt.input) o.mat.smelt.input = 'minecraft:prismarine_shard';
+  return o;
+}
+let project = null;
+try { project = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+let firstVisit = false;
+if (!project || !Array.isArray(project.items) || !project.items.length) {
+  firstVisit = true;
+  project = { name:'Våra föremål', ns:'verkstad', version:0, step:0, maxStep:0, recent:[], active:0, uuids:{}, items:[] };
+}
+project.items = project.items.map(normItem);
+project.version = clamp(project.version, 0, 100000, 0);
+project.uuids = project.uuids && typeof project.uuids === 'object' ? project.uuids : {};
+['bpH', 'bpM', 'rpH', 'rpM', 'bpS'].forEach(k => { if (typeof project.uuids[k] !== 'string') project.uuids[k] = uuid(); });
+project.recent = Array.isArray(project.recent) ? project.recent.filter(h => /^#[0-9A-F]{6}$/i.test(h)).slice(0, 12) : [];
+if (typeof project.name !== 'string') project.name = 'Våra föremål';
+if (typeof project.ns !== 'string') project.ns = 'verkstad';
+let saveT = null;
+function saveProject() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(project)); } catch (e) {} }, 250); }
+const active = () => project.items[project.active];
+const isArmor = () => active().type === 'armor';
+
+/* ---------- surfaces: icon (16x16) or armor map (64x64) ---------- */
+let surf = 'icon', piece = 'chest', W = 16, H = 16;
+let pix = new Uint8ClampedArray(N16), armCache = null;
+let dirty3d = true, overlayDirty = true, hover = null;
+const curImg = () => isArmor() ? active().armor.pieces[piece] : active();
+const undoS = [], redoS = [];
+function loadActive() {
+  const it = active();
+  if (it.type === 'armor') {
+    if (!it.armor.pieces[piece].on) { const f = C.includedPieces(it)[0]; if (f) piece = f.key; }
+    armCache = b64d(it.armor.tex, N64);
+  } else { armCache = null; surf = 'icon'; }
+  loadSurface(); updateModeUI();
+}
+function loadSurface() {
+  if (surf === 'armor') { W = H = 64; pix = new Uint8ClampedArray(armCache); }
+  else { W = H = 16; pix = b64d(curImg().px, N16); }
+  if (paint.width !== W) { paint.width = W; paint.height = H; pctx = paint.getContext('2d', { willReadFrequently:true }); }
+  $('#edbox').classList.toggle('big', surf === 'armor');
+  $('#zoombar').hidden = surf !== 'armor'; if (mapZoom && mapZoom.z !== 1) mapZoom.set(1);
+  undoS.length = 0; redoS.length = 0; hover = null;
+  liveCommit(); overlayDirty = true; updateStatus();
+}
+function storeSurface() {
+  if (surf === 'armor') { active().armor.tex = b64e(pix); armCache = pix; }
+  else curImg().px = b64e(pix);
+}
+function liveCommit() { pctx.putImageData(new ImageData(pix, W, H), 0, 0); if (surf === 'armor') armCache = pix; dirty3d = true; if (surf === 'icon') drawSmall(); }
+function commit() { liveCommit(); storeSurface(); overlayDirty = true; saveProject(); renderColl(); }
+function iconPix() { return surf === 'icon' ? pix : b64d(curImg().px, N16); }
+function thumbPix(it) {
+  const live = it === active() && surf === 'icon';
+  if (it.type !== 'armor') return live ? pix : b64d(it.px, N16);
+  for (const k of ['chest', 'head', 'legs', 'feet']) {
+    const pc = it.armor.pieces[k]; if (!pc.on) continue;
+    const d = live && piece === k ? pix : b64d(pc.px, N16); if (!isEmpty(d)) return d;
+  }
+  return new Uint8ClampedArray(N16);
+}
+function putSmall(cv, data) { const c = cv.getContext('2d'); c.clearRect(0, 0, 16, 16); c.putImageData(new ImageData(new Uint8ClampedArray(data), 16, 16), 0, 0); }
+function drawSmall() {
+  const d = iconPix(); putSmall($('#logo'), d); putSmall($('#slotCv'), d);
+  const th = document.querySelector(`.coll canvas[data-uid="${active().uid}"]`); if (th) putSmall(th, thumbPix(active()));
+  if (active().type === 'item' && active().mat.on) putSmall($('#craftOut canvas'), thumbPix(active()));
+}
+let msgT = null;
+function msg(t) { $('#msg').textContent = t; clearTimeout(msgT); msgT = setTimeout(() => { $('#msg').textContent = ''; }, 8000); }
+
+/* ---------- undo ---------- */
+let snap = null, changed = false, visited = null, drawing = false, lastPx = null;
+function pushUndo() { undoS.push(new Uint8ClampedArray(pix)); if (undoS.length > 80) undoS.shift(); redoS.length = 0; }
+function begin() { snap = new Uint8ClampedArray(pix); changed = false; visited = new Set(); }
+function end() { if (snap && changed) { undoS.push(snap); if (undoS.length > 80) undoS.shift(); redoS.length = 0; if (tool === 'pen' || tool === 'fill') addRecent(cur); commit(); } snap = null; drawing = false; lastPx = null; }
+function undo() { if (!undoS.length) { msg('Det finns inget att ångra.'); return; } redoS.push(new Uint8ClampedArray(pix)); pix = undoS.pop(); commit(); }
+function redo() { if (!redoS.length) { msg('Det finns inget att göra om.'); return; } undoS.push(new Uint8ClampedArray(pix)); pix = redoS.pop(); commit(); }
+
+/* ---------- tools ---------- */
+let tool = 'pen', prevTool = 'pen', mirror = false, showGrid = true;
+let cur = [143, 106, 69], base = cur.slice();
+const ICON = {
+  pen:'<path d="M4 16.5l.9-3.6L13.6 4.2a1.5 1.5 0 0 1 2.1 0l.1.1a1.5 1.5 0 0 1 0 2.1L7.1 15.1z"/><path d="M12 5.8l2.2 2.2"/>',
+  eraser:'<path d="M8.5 16.5L4 12l7.5-7.5a1.4 1.4 0 0 1 2 0l2.5 2.5a1.4 1.4 0 0 1 0 2L9 16.5z"/><path d="M7 9.5l4.5 4.5M9 16.5h8"/>',
+  fill:'<path d="M9.5 3.5l6 6-5.5 5.5a1.5 1.5 0 0 1-2.1 0L4 11.1a1.5 1.5 0 0 1 0-2.1z"/><path d="M4.5 10h11"/><path d="M16.5 12.5s1.5 1.7 1.5 2.7a1.5 1.5 0 0 1-3 0c0-1 1.5-2.7 1.5-2.7z"/>',
+  picker:'<path d="M10.5 6.5l3 3M11.8 7.8L5 14.6v2.4h2.4l6.8-6.8"/><path d="M12.5 5.5l2-2a1.4 1.4 0 0 1 2 2l-2 2"/>',
+  dark:'<circle cx="10" cy="10" r="6.5"/><path d="M10 3.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/>',
+  light:'<circle cx="10" cy="10" r="3.2"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4"/>',
+  outline:'<rect x="4" y="4" width="12" height="12" rx="1"/><rect x="7.5" y="7.5" width="5" height="5" fill="currentColor"/>'
+};
+const TOOLS = [
+  ['pen','Penna','B','Penna: måla en pixel i taget'], ['eraser','Sudd','E','Sudd: gör pixlar genomskinliga'],
+  ['fill','Hink','G','Hink: fyll en sammanhängande yta'], ['picker','Pipett','I','Pipett: hämta en färg från bilden'],
+  ['dark','Skugga','S','Skugga: gör pixlar lite mörkare'], ['light','Ljus','L','Ljus: gör pixlar lite ljusare']
+];
+const TOOL_NAME = Object.fromEntries(TOOLS.map(t => [t[0], t[1]]));
+function svg(id) { return `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[id]}</svg>`; }
+function buildTools() {
+  $('#tools').innerHTML = TOOLS.map(([id, name, key, tip]) => `<button type="button" class="tool" data-tool="${id}" title="${tip} (${key})" aria-pressed="false">${svg(id)}${name}<kbd>${key}</kbd></button>`).join('')
+    + `<button type="button" class="tool act" id="outlineBtn" title="Kontur: lägg en mörk kant runt formen (K)">${svg('outline')}Kontur<kbd>K</kbd></button>`;
+  $$('.tool[data-tool]').forEach(b => b.addEventListener('click', () => setTool(b.dataset.tool)));
+  $('#outlineBtn').addEventListener('click', outline);
+}
+function setTool(t) { if (t === 'picker' && tool !== 'picker') prevTool = tool; tool = t; $$('.tool[data-tool]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tool === t))); updateStatus(); }
+const get = (x, y) => { const i = (y * W + x) * 4; return [pix[i], pix[i+1], pix[i+2], pix[i+3]]; };
+function set(x, y, r, g, b, a = 255) { const i = (y * W + x) * 4; if (pix[i] === r && pix[i+1] === g && pix[i+2] === b && pix[i+3] === a) return false; pix[i] = r; pix[i+1] = g; pix[i+2] = b; pix[i+3] = a; return true; }
+function targets(x, y) {
+  const t = [[x, y]]; if (!mirror) return t;
+  if (surf === 'armor') { const m = armMirror(x, y); if (m && (m[0] !== x || m[1] !== y)) t.push(m); }
+  else if (15 - x !== x) t.push([15 - x, y]);
+  return t;
+}
+function dab(x, y) {
+  for (const [tx, ty] of targets(x, y)) {
+    if (tool === 'pen') { if (set(tx, ty, cur[0], cur[1], cur[2], 255)) changed = true; }
+    else if (tool === 'eraser') { if (set(tx, ty, 0, 0, 0, 0)) changed = true; }
+    else if (tool === 'dark' || tool === 'light') {
+      const k = ty * W + tx; if (visited.has(k)) continue; visited.add(k);
+      const c = get(tx, ty); if (!c[3]) continue;
+      const n = tool === 'dark' ? c.slice(0, 3).map(v => Math.round(v * .84)) : c.slice(0, 3).map(v => Math.round(v + (255 - v) * .18));
+      if (set(tx, ty, n[0], n[1], n[2], c[3])) changed = true;
+    }
+  }
+}
+function flood(x, y) {
+  const s = get(x, y); if (s[3] === 255 && s[0] === cur[0] && s[1] === cur[1] && s[2] === cur[2]) return false;
+  const f = surf === 'armor' ? armFaceAt(x, y) : null;
+  const bx = f ? f.x : 0, by = f ? f.y : 0, bw = f ? f.w : W, bh = f ? f.h : H;
+  const same = c => c[0] === s[0] && c[1] === s[1] && c[2] === s[2] && c[3] === s[3];
+  const st = [[x, y]], seen = new Set(); let ch = false;
+  while (st.length) { const [cx, cy] = st.pop(); if (cx < bx || cy < by || cx >= bx + bw || cy >= by + bh) continue; const k = cy * W + cx; if (seen.has(k)) continue; seen.add(k);
+    if (!same(get(cx, cy))) continue; if (set(cx, cy, cur[0], cur[1], cur[2], 255)) ch = true; st.push([cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]); }
+  return ch;
+}
+function line(x0, y0, x1, y1, fn) { const dx = Math.abs(x1 - x0), sx = x0 < x1 ? 1 : -1, dy = -Math.abs(y1 - y0), sy = y0 < y1 ? 1 : -1; let err = dx + dy;
+  for (;;) { fn(x0, y0); if (x0 === x1 && y0 === y1) break; const e2 = 2 * err; if (e2 >= dy) { err += dy; x0 += sx; } if (e2 <= dx) { err += dx; y0 += sy; } } }
+function dabSafe(x, y) { if (surf === 'armor') { const f = armFaceAt(x, y); if (!f || !active().armor.pieces[f.region.piece].on) return; } dab(x, y); }
+function down(x, y) {
+  if (surf === 'armor') {
+    const f = armFaceAt(x, y);
+    if (!f) { msg('Den rutan används inte av spelet, så där går det inte att måla.'); return false; }
+    if (!active().armor.pieces[f.region.piece].on) { msg(`${C.PIECE[f.region.piece].label} är inte med i setet. Kryssa i den under Egenskaper för att måla där.`); return false; }
+    if (f.region.piece !== piece) setPiece(f.region.piece);
+  }
+  if (tool === 'picker') { const c = get(x, y); if (!c[3]) { msg('Pixeln är genomskinlig, så det finns ingen färg att hämta.'); return false; } setColor(c); setTool(prevTool === 'picker' ? 'pen' : prevTool); return false; }
+  if (tool === 'fill') { begin(); for (const [tx, ty] of targets(x, y)) if (flood(tx, ty)) changed = true; end(); return false; }
+  begin(); drawing = true; dab(x, y); lastPx = [x, y]; liveCommit(); return true;
+}
+function outline() {
+  if (surf === 'armor') { msg('Kontur fungerar på ikonerna. Välj Ikon ovanför rutnätet.'); return; }
+  if (isEmpty(pix)) { msg('Måla en form först, sedan lägger Kontur en kant runt den.'); return; }
+  begin(); const src = new Uint8ClampedArray(pix); let edge = false;
+  for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
+    const i = (y * 16 + x) * 4; if (src[i + 3]) continue;
+    const ns = [[1,0],[-1,0],[0,1],[0,-1]].map(([dx, dy]) => [x + dx, y + dy]).filter(([a, b]) => a >= 0 && b >= 0 && a < 16 && b < 16 && src[(b * 16 + a) * 4 + 3]);
+    if (!ns.length) continue;
+    const avg = [0, 1, 2].map(k => ns.reduce((s, [a, b]) => s + src[(b * 16 + a) * 4 + k], 0) / ns.length);
+    if (set(x, y, ...avg.map(v => Math.round(v * .38)), 255)) changed = true;
+  }
+  for (let k = 0; k < 16; k++) if (src[k * 4 + 3] || src[(15 * 16 + k) * 4 + 3] || src[(k * 16) * 4 + 3] || src[(k * 16 + 15) * 4 + 3]) edge = true;
+  end();
+  msg(changed ? (edge ? 'Kontur tillagd. Formen når kanten, så där fick den ingen kant. Flytta den med pilarna och ångra om ni vill göra om.' : 'Kontur tillagd. Ångra med Ctrl+Z om ni inte gillar den.') : 'Formen har redan en kant runt om.');
+}
+function shiftImg(dx, dy) {
+  if (surf === 'armor') return;
+  begin(); const src = new Uint8ClampedArray(pix); pix.fill(0);
+  for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= 16 || ny >= 16) continue; const a = (y * 16 + x) * 4, b = (ny * 16 + nx) * 4; for (let k = 0; k < 4; k++) pix[b + k] = src[a + k]; }
+  changed = !src.every((v, i) => v === pix[i]); end();
+}
+function clearSurface() {
+  if (surf === 'icon') { if (isEmpty(pix)) return; pushUndo(); pix.fill(0); commit(); msg('Ikonen är tömd. Ångra med Ctrl+Z om det var fel.'); return; }
+  pushUndo(); let ch = false;
+  AFACES.forEach(f => { if (f.region.piece !== piece) return; for (let y = f.y; y < f.y + f.h; y++) for (let x = f.x; x < f.x + f.w; x++) if (set(x, y, 0, 0, 0, 0)) ch = true; });
+  if (!ch) { undoS.pop(); return; }
+  commit(); msg(`Rustningsbilden för ${C.PIECE[piece].label.toLowerCase()} är tömd. Ångra med Ctrl+Z om det var fel.`);
+}
+function grundmala() {
+  const it = active(); if (it.type !== 'armor') return;
+  const inc = C.includedPieces(it).map(p => p.key);
+  if (surf === 'armor') pushUndo();
+  const tex = surf === 'armor' ? pix : new Uint8ClampedArray(armCache);
+  let mapCh = 0, icons = 0;
+  AFACES.forEach(f => { if (!inc.includes(f.region.piece)) return;
+    for (let y = 0; y < f.h; y++) for (let x = 0; x < f.w; x++) {
+      if (!patternOn(f.ri, f.fi, x, y, f.w)) continue;
+      const i = ((f.y + y) * 64 + f.x + x) * 4; if (tex[i + 3]) continue;
+      const c = armShade(cur, f, x, y); tex[i] = c[0]; tex[i+1] = c[1]; tex[i+2] = c[2]; tex[i+3] = 255; mapCh++;
+    } });
+  inc.forEach(k => {
+    const pc = it.armor.pieces[k], live = surf === 'icon' && piece === k, d = live ? pix : b64d(pc.px, N16);
+    if (!isEmpty(d)) return;
+    const u = iconFromMask(C.TEMPLATES[C.PIECE[k].tpl].m, cur);
+    if (live) { pushUndo(); pix.set(u); } else pc.px = b64e(u);
+    icons++;
+  });
+  if (surf !== 'armor') { it.armor.tex = b64e(tex); armCache = tex; }
+  if (!mapCh && !icons) { if (surf === 'armor') undoS.pop(); msg('Allt är redan målat. Tryck Rensa först om ni vill grundmåla en del igen.'); return; }
+  addRecent(cur); commit(); dirty3d = true;
+  msg('Setet har fått en grundfärg med ljus och skugga. Måla nu egna detaljer ovanpå.');
+}
+
+/* ---------- colors ---------- */
+const PAL_MAT = ['#6B4A2B','#8F6A45','#B08657','#5F5F5F','#8A8A8A','#B5B5B5','#D8D8D8','#F2F2F2','#C9971F','#F4D148','#2EB6B2','#7FE6E1','#2C9E4B','#5DE07C','#B3261E','#2A47A8','#8C4FD1','#3B3437'];
+const PAL_FOOD = ['#C9302C','#E8604A','#7BAE3A','#C9883E','#E7B567','#F3D27A','#6B3A1F','#F4ECD8','#7A2E6E','#E7A3C2','#F5F0E6','#5A8F2E'];
+const PAL_MISC = ['#FFFFFF','#000000','#1F1F24','#FFD84A','#FF7A1A','#FF4FB2','#53C7FF','#9DFF6A'];
+let recent = project.recent;
+function swatch(rgb, newBase) { const b = document.createElement('button'); b.type = 'button'; b.className = 'sw'; b.style.background = toHex(rgb); b.dataset.hex = toHex(rgb); b.title = toHex(rgb); b.setAttribute('aria-label', toHex(rgb)); b.addEventListener('click', () => setColor(rgb, newBase)); return b; }
+function fillRow(el, list, nb = true) { el.replaceChildren(...list.map(c => swatch(c, nb))); }
+function renderShades() { const [h, s, l] = rgbToHsl(base); fillRow($('#shadeRow'), [-.27, -.18, -.09, 0, .09, .18, .27].map(o => o === 0 ? base.slice() : hslToRgb([h, s, Math.min(.97, Math.max(.04, l + o))])), false); }
+function renderRecent() { const el = $('#palRecent'); if (!recent.length) { el.innerHTML = '<span class="empty">Färger ni målar med hamnar här.</span>'; return; } fillRow(el, recent.map(fromHex)); }
+function markSw() { const h = toHex(cur); $$('.sw').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.hex === h))); }
+function setColor(rgb, newBase = true) { cur = rgb.slice(0, 3); if (newBase) { base = cur.slice(); renderShades(); } $('#curSw').style.background = toHex(cur); $('#hexOut').textContent = toHex(cur); $('#colorIn').value = toHex(cur).toLowerCase(); if (tool === 'eraser' || tool === 'picker') setTool('pen'); markSw(); }
+function addRecent(c) { const h = toHex(c); recent = [h, ...recent.filter(x => x !== h)].slice(0, 12); project.recent = recent; renderRecent(); markSw(); }
+
+/* ---------- editor overlay ---------- */
+let hatch = null;
+function readTokens() {
+  const cs = getComputedStyle(document.documentElement);
+  ['ink','panel','panel-2','bg','warm','grid','accent','line-strong','unused','muted','p-head','p-chest','p-legs','p-feet'].forEach(k => T[k] = cs.getPropertyValue('--' + k).trim());
+  makeHatch(); overlayDirty = true;
+}
+function makeHatch() {
+  const dpr = ov.clientWidth ? ov.width / ov.clientWidth : 1, k = Math.max(4, Math.round(6 * dpr)), c = document.createElement('canvas');
+  c.width = c.height = k; const x = c.getContext('2d'); x.strokeStyle = T.unused || '#999'; x.lineWidth = Math.max(1, dpr);
+  x.beginPath(); x.moveTo(0, k); x.lineTo(k, 0); x.moveTo(-1, 1); x.lineTo(1, -1); x.moveTo(k - 1, k + 1); x.lineTo(k + 1, k - 1); x.stroke();
+  hatch = octx.createPattern(c, 'repeat');
+}
+function sizeOverlay() { const w = ov.clientWidth; if (!w) return; const px = Math.min(matchMedia('(pointer: coarse)').matches ? 3200 : 4096, Math.round(w * Math.min(3, window.devicePixelRatio || 1))); if (ov.width !== px) { ov.width = ov.height = px; makeHatch(); } overlayDirty = true; }
+function drawOverlay() { if (!ov.width) return; if (surf === 'armor') drawArmorOverlay(); else drawIconOverlay(); }
+function drawIconOverlay() {
+  const Wc = ov.width, c = octx, s = Wc / 16, dpr = Wc / (ov.clientWidth || Wc), X = i => Math.round(i * s);
+  c.clearRect(0, 0, Wc, Wc);
+  const tpl = curImg().tpl, t = C.TEMPLATES[tpl], itemGuide = !isArmor();
+  if (t) {
+    c.fillStyle = hexA(T.warm, itemGuide && step === 0 ? .2 : .1);
+    for (let i = 0; i < 256; i++) if (t.m[i]) { const x = i % 16, y = (i / 16) | 0; c.fillRect(X(x), X(y), X(x + 1) - X(x), X(y + 1) - X(y)); }
+    c.beginPath();
+    for (let i = 0; i < 256; i++) if (t.m[i]) { const x = i % 16, y = (i / 16) | 0, on = (a, b) => a >= 0 && b >= 0 && a < 16 && b < 16 && t.m[b * 16 + a];
+      if (!on(x, y - 1)) { c.moveTo(X(x), X(y)); c.lineTo(X(x + 1), X(y)); } if (!on(x, y + 1)) { c.moveTo(X(x), X(y + 1)); c.lineTo(X(x + 1), X(y + 1)); }
+      if (!on(x - 1, y)) { c.moveTo(X(x), X(y)); c.lineTo(X(x), X(y + 1)); } if (!on(x + 1, y)) { c.moveTo(X(x + 1), X(y)); c.lineTo(X(x + 1), X(y + 1)); } }
+    c.setLineDash([4 * dpr, 3 * dpr]); c.lineWidth = 2 * dpr; c.strokeStyle = T.warm; c.stroke(); c.setLineDash([]);
+  }
+  if (showGrid) { c.beginPath(); for (let i = 1; i < 16; i++) { const p = X(i) + .5; c.moveTo(p, 0); c.lineTo(p, Wc); c.moveTo(0, p); c.lineTo(Wc, p); } c.strokeStyle = T.grid; c.lineWidth = 1; c.stroke();
+    c.beginPath(); const m = X(8) + .5; c.moveTo(m, 0); c.lineTo(m, Wc); c.moveTo(0, m); c.lineTo(Wc, m); c.lineWidth = 2 * dpr; c.stroke(); }
+  if (itemGuide && step === 3) {
+    c.strokeStyle = T.warm; c.fillStyle = T.warm; c.lineWidth = 3 * dpr;
+    c.beginPath(); c.arc(X(1.2), X(1.2), s * .55, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.moveTo(X(2.1), X(2.1)); c.lineTo(X(4.6), X(4.6)); c.stroke();
+    c.beginPath(); c.moveTo(X(4.9), X(4.9)); c.lineTo(X(4.9) - s * .7, X(4.9) - s * .1); c.lineTo(X(4.9) - s * .1, X(4.9) - s * .7); c.closePath(); c.fill();
+  }
+  if (hover && hover.surf === 'icon') {
+    const draw = (x, y, dash) => { c.setLineDash(dash ? [3 * dpr, 3 * dpr] : []); c.lineWidth = 2 * dpr; c.strokeStyle = T.ink; c.strokeRect(X(x) + dpr, X(y) + dpr, X(x + 1) - X(x) - 2 * dpr, X(y + 1) - X(y) - 2 * dpr);
+      if (!dash) { c.lineWidth = dpr; c.strokeStyle = T.panel; c.strokeRect(X(x) + 3 * dpr, X(y) + 3 * dpr, X(x + 1) - X(x) - 6 * dpr, X(y + 1) - X(y) - 6 * dpr); } c.setLineDash([]); };
+    draw(hover.x, hover.y, false); if (mirror && 15 - hover.x !== hover.x) draw(15 - hover.x, hover.y, true);
+  }
+}
+function drawArmorOverlay() {
+  const Wc = ov.width, c = octx, s = Wc / 64, dpr = Wc / (ov.clientWidth || Wc), X = i => Math.round(i * s);
+  const rect = (x, y, w, h) => [X(x), X(y), X(x + w) - X(x), X(y + h) - X(y)];
+  const it = active(), on = k => it.armor.pieces[k].on;
+  c.clearRect(0, 0, Wc, Wc);
+  for (let y = 0; y < 64; y++) { let x = 0; while (x < 64) { if (AMAP[y * 64 + x] < 0) { let x2 = x; while (x2 < 64 && AMAP[y * 64 + x2] < 0) x2++;
+    const r = rect(x, y, x2 - x, 1); c.fillStyle = T['panel-2']; c.fillRect(...r); c.fillStyle = hatch || T.unused; c.fillRect(...r); x = x2; } else x++; } }
+  c.fillStyle = hexA(T.warm, .26);
+  AFACES.forEach(f => { if (f.region.piece !== piece || !on(piece)) return;
+    for (let y = 0; y < f.h; y++) for (let x = 0; x < f.w; x++) if (patternOn(f.ri, f.fi, x, y, f.w) && !pix[((f.y + y) * 64 + f.x + x) * 4 + 3]) c.fillRect(...rect(f.x + x, f.y + y, 1, 1)); });
+  c.fillStyle = hexA(T.panel, .84); AFACES.forEach(f => { if (!on(f.region.piece)) c.fillRect(...rect(f.x, f.y, f.w, f.h)); });
+  if (showGrid && s / dpr >= 5) {
+    c.beginPath(); for (let i = 1; i < 64; i++) { const p = X(i) + .5; c.moveTo(p, 0); c.lineTo(p, Wc); c.moveTo(0, p); c.lineTo(Wc, p); }
+    c.strokeStyle = T.grid; c.lineWidth = 1; c.stroke();
+  }
+  const lw = Math.max(1, Math.round(dpr * 1.25));
+  AFACES.forEach(f => {
+    const act = f.region.piece === piece; c.lineWidth = act ? lw * 2 : lw;
+    c.strokeStyle = T['p-' + f.region.piece]; c.setLineDash(f.region.outer ? [4 * dpr, 3 * dpr] : []);
+    const [rx, ry, rw, rh] = rect(f.x, f.y, f.w, f.h); c.strokeRect(rx + c.lineWidth / 2, ry + c.lineWidth / 2, rw - c.lineWidth, rh - c.lineWidth);
+  });
+  c.setLineDash([]);
+  c.lineWidth = 3 * dpr; c.strokeStyle = T['line-strong']; c.beginPath(); c.moveTo(0, X(32)); c.lineTo(Wc, X(32)); c.stroke();
+  const fs = Math.round(Math.min(13, s / dpr * 1.6)) * dpr;
+  c.font = `700 ${fs}px ${FONT_BODY}`; c.textBaseline = 'middle';
+  c.textAlign = 'left'; const l2 = 'Lager 2: byxor', tw = c.measureText(l2).width;
+  c.fillStyle = T.panel; c.fillRect(X(1), X(36) - fs * .75, tw + X(1), fs * 1.5);
+  c.fillStyle = T.muted; c.fillText(l2, X(1.5), X(36));
+  if (s / dpr >= 5) {
+    c.textAlign = 'center';
+    AREG.forEach(r => { const f = r.faces[3]; const [rx, ry, rw, rh] = rect(f.x, f.y, f.w, f.h);
+      const tw = Math.min(c.measureText(r.short).width, rw - 2 * dpr), pad = 3 * dpr;
+      c.fillStyle = hexA(T.panel, .88); c.fillRect(rx + rw / 2 - tw / 2 - pad, ry + rh / 2 - fs * .7, tw + pad * 2, fs * 1.4);
+      c.fillStyle = on(r.piece) ? T['p-' + r.piece] : T.muted; c.fillText(r.short, rx + rw / 2, ry + rh / 2, rw - 2 * dpr); });
+  }
+  if (hover && hover.surf === 'armor') {
+    const f = armFaceAt(hover.x, hover.y);
+    if (f) { c.lineWidth = 2 * dpr; c.strokeStyle = T.warm; const [rx, ry, rw, rh] = rect(f.x, f.y, f.w, f.h); c.strokeRect(rx + dpr, ry + dpr, rw - 2 * dpr, rh - 2 * dpr); }
+    const pr = rect(hover.x, hover.y, 1, 1);
+    c.lineWidth = 2 * dpr; c.strokeStyle = T.ink; c.strokeRect(pr[0] + dpr / 2, pr[1] + dpr / 2, pr[2] - dpr, pr[3] - dpr);
+    if (mirror) { const m = armMirror(hover.x, hover.y); if (m && (m[0] !== hover.x || m[1] !== hover.y)) { const mr = rect(m[0], m[1], 1, 1); c.setLineDash([2 * dpr, 2 * dpr]); c.lineWidth = 1.5 * dpr; c.strokeRect(mr[0], mr[1], mr[2], mr[3]); c.setLineDash([]); } }
+  }
+}
+function updateStatus() {
+  const el = $('#status');
+  if (!hover || hover.surf !== surf) {
+    el.innerHTML = surf === 'armor'
+      ? `<span>Verktyg: <b>${TOOL_NAME[tool]}</b></span><span>Peka på kartan eller figuren för att se vilken del det är.</span>`
+      : `<span>Verktyg: <b>${TOOL_NAME[tool]}</b></span><span>Klicka och dra för att måla. Mitten är markerad med tjockare linjer.</span>`;
+    return;
+  }
+  const c = get(hover.x, hover.y), col = c[3] ? `<span class="chip" style="background:${toHex(c)}"></span>${toHex(c)}` : 'genomskinlig';
+  if (surf === 'armor') { const f = armFaceAt(hover.x, hover.y); el.innerHTML = `<span><b>${f.region.name}</b> · ${FACE[f.fi]} · lager ${hover.y < 32 ? 1 : 2}</span><span>x ${hover.x} · y ${hover.y}</span><span>${col}</span>`; }
+  else el.innerHTML = `<span>x ${hover.x} · y ${hover.y}</span><span>${col}</span><span>Verktyg: <b>${TOOL_NAME[tool]}</b></span>`;
+}
+function setHover(h) {
+  if ((h && hover && h.x === hover.x && h.y === hover.y && h.src === hover.src && h.surf === hover.surf) || (!h && !hover)) return;
+  hover = h; overlayDirty = true; if ((h && h.surf === 'armor') || isArmor()) dirty3d = true; updateStatus();
+}
+function pxAt(e) { const r = ov.getBoundingClientRect(); const x = Math.floor((e.clientX - r.left) / r.width * W), y = Math.floor((e.clientY - r.top) / r.height * H); return x < 0 || y < 0 || x >= W || y >= H ? null : { x, y }; }
+function mapHover(p) { if (!p) return null; if (surf === 'armor' && !armFaceAt(p.x, p.y)) return null; return { x:p.x, y:p.y, src:'map', surf }; }
+ov.addEventListener('pointerdown', e => { if (e.pointerType === 'mouse' && e.button !== 0) return; const p = pxAt(e); if (!p) return; e.preventDefault(); try { ov.setPointerCapture(e.pointerId); } catch (er) {} down(p.x, p.y); setHover(mapHover(p)); });
+ov.addEventListener('pointermove', e => { const p = pxAt(e); setHover(mapHover(p)); if (drawing && p) { const [lx, ly] = lastPx || [p.x, p.y]; line(lx, ly, p.x, p.y, dabSafe); lastPx = [p.x, p.y]; liveCommit(); } });
+['pointerup', 'pointercancel'].forEach(t => ov.addEventListener(t, () => { if (drawing) end(); }));
+ov.addEventListener('pointerleave', () => { if (!drawing) setHover(null); });
+/* ---------- zoom and two-finger gestures (shared by the workshops) ---------- */
+/* One finger paints as before. A second finger turns the touch into a gesture: the stroke the first
+   finger just started is taken back, and the two fingers pinch to zoom and drag to pan. */
+function twoFinger(el, h) {
+  const pts = new Map(); let g = null, mark = null;
+  const pair = () => { const a = [...pts.values()]; if (a.length < 2) return { x:a[0].x, y:a[0].y, d:0 };
+    return { x:(a[0].x + a[1].x) / 2, y:(a[0].y + a[1].y) / 2, d:Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y) }; };
+  el.addEventListener('pointerdown', e => {
+    if (e.pointerType !== 'touch') return;
+    pts.set(e.pointerId, { x:e.clientX, y:e.clientY });
+    if (pts.size === 1) { mark = h.mark ? h.mark() : null; return; }
+    e.stopPropagation(); e.preventDefault();
+    if (!g && h.cancel) h.cancel(mark && performance.now() - mark.t < 700 ? mark : null);
+    g = pair();
+  }, true);
+  el.addEventListener('pointermove', e => {
+    const p = pts.get(e.pointerId); if (!p) return;
+    p.x = e.clientX; p.y = e.clientY;
+    if (!g) return;
+    e.stopPropagation(); e.preventDefault();
+    const n = pair(); h.move(g.d && n.d ? n.d / g.d : 1, n.x - g.x, n.y - g.y, g); g = n;
+  }, true);
+  const up = e => { if (!pts.delete(e.pointerId)) return; if (g) { if (pts.size) g = pair(); else { g = null; if (h.end) h.end(); } } if (!pts.size) mark = null; };
+  el.addEventListener('pointerup', up, true); el.addEventListener('pointercancel', up, true);
+}
+function setupMapZoom(o) {
+  const box = o.box, inner = o.inner, bar = o.bar; let z = 1, settle = 0;
+  const maxZ = () => (typeof o.max === 'function' ? o.max() : o.max) || 6;
+  const q = s => bar && bar.querySelector(s);
+  function set(nz, cx, cy, quick) {
+    nz = Math.max(1, Math.min(maxZ(), nz)); if (Math.abs(nz - 1) < .02) nz = 1;
+    const r = box.getBoundingClientRect();
+    const px = cx == null ? box.clientWidth / 2 : cx - r.left - box.clientLeft, py = cy == null ? box.clientHeight / 2 : cy - r.top - box.clientTop;
+    const ux = (box.scrollLeft + px) / z, uy = (box.scrollTop + py) / z;
+    z = nz; inner.style.width = z === 1 ? '' : (z * 100).toFixed(2) + '%'; box.classList.toggle('zoomed', z > 1);
+    box.scrollLeft = ux * z - px; box.scrollTop = uy * z - py;
+    if (bar) { q('[data-z="out"]').disabled = z <= 1; q('[data-z="in"]').disabled = z >= maxZ() - .01; q('[data-z="fit"]').disabled = z <= 1; q('output').textContent = Math.round(z * 100) + ' %'; }
+    clearTimeout(settle); settle = setTimeout(() => o.onZoomed(z), quick ? 150 : 0);
+  }
+  twoFinger(box, { mark:o.mark, cancel:o.cancel, move:(s, dx, dy, prev) => { set(z * s, prev.x, prev.y, true); box.scrollLeft -= dx; box.scrollTop -= dy; }, end:() => set(z) });
+  box.addEventListener('wheel', e => {
+    if (!(e.ctrlKey || e.metaKey)) return; e.preventDefault();
+    set(z * Math.exp(-Math.max(-60, Math.min(60, e.deltaY)) * .012), e.clientX, e.clientY, true);
+  }, { passive:false });
+  if (bar) {
+    bar.addEventListener('click', e => { const b = e.target.closest('[data-z]'); if (!b) return;
+      set(b.dataset.z === 'in' ? z * 1.5 : b.dataset.z === 'out' ? z / 1.5 : 1); });
+    const hint = q('.zoomhint');
+    if (hint) hint.textContent = matchMedia('(pointer: coarse)').matches
+      ? 'Nyp med två fingrar för att zooma. Dra med två fingrar för att flytta kartan.'
+      : 'Håll Ctrl och rulla med musen för att zooma. Rulla för att flytta kartan när du har zoomat in.';
+  }
+  if (bar) { q('[data-z="out"]').disabled = q('[data-z="fit"]').disabled = true; }
+  return { set, get z() { return z; } };
+}
+const strokeGuard = { mark:() => ({ t:performance.now(), u:undoS.length, s:surf, p:new Uint8ClampedArray(pix) }),
+  cancel:m => { if (!m) { if (drawing) end(); return; } if (drawing && snap) pix = snap; else if (undoS.length > m.u && m.s === surf && m.p.length === pix.length) { pix = m.p; undoS.length = m.u; } snap = null; drawing = false; lastPx = null; commit(); } };
+var mapZoom = setupMapZoom({ box:$('#edbox'), inner:$('#mapzoom'), bar:$('#zoombar'), max:() => surf === 'armor' ? 6 : 2, ...strokeGuard, onZoomed:() => sizeOverlay() });
+window.__verkstan = { get zoom() { return mapZoom.z; }, get pix() { return pix; }, get undo() { return undoS.length; }, get view() { return { dist:R.dist, zoom:R.zoom }; } }; /* read-only peek used by tests */
+
+/* ---------- 3D preview ---------- */
+const R = { view:'ground', yaw:0, pitch:0, fyaw:-.5, fpitch:.12, mode:'rotate' };
+const FIG = [
+  { piece:'head',  ri:0, pos:[0, 28, 0],    inf:1.0 },
+  { piece:'head',  ri:1, pos:[0, 28, 0],    inf:1.5, outer:true },
+  { piece:'chest', ri:2, pos:[0, 18, 0],    inf:1.01 },
+  { piece:'chest', ri:3, pos:[-6, 18, 0],   inf:1.0 },
+  { piece:'chest', ri:3, pos:[6, 18, 0],    inf:1.0, mirror:true },
+  { piece:'feet',  ri:4, pos:[-1.9, 6, 0],  inf:1.0 },
+  { piece:'feet',  ri:4, pos:[1.9, 6, 0],   inf:1.0, mirror:true },
+  { piece:'legs',  ri:5, pos:[0, 18, 0],    inf:0.5 },
+  { piece:'legs',  ri:6, pos:[-1.9, 6, 0],  inf:0.49 },
+  { piece:'legs',  ri:6, pos:[1.9, 6, 0],   inf:0.49, mirror:true }
+];
+function setUVs(geo, u, v, w, h, d, mirrored) {
+  const rr = { top:[u+d, v, w, d], bottom:[u+d+w, v, w, d], rside:[u, v+d, d, h], front:[u+d, v+d, w, h], lside:[u+d+w, v+d, d, h], back:[u+2*d+w, v+d, w, h] };
+  const quad = r => { let x1 = r[0], x2 = r[0] + r[2]; if (mirrored) [x1, x2] = [x2, x1]; const y1 = r[1], y2 = r[1] + r[3];
+    return [[x1 / 64, 1 - y2 / 64], [x2 / 64, 1 - y2 / 64], [x2 / 64, 1 - y1 / 64], [x1 / 64, 1 - y1 / 64]]; };
+  const faces = [mirrored ? rr.rside : rr.lside, mirrored ? rr.lside : rr.rside, rr.top, rr.bottom, rr.front, rr.back];
+  const uv = geo.attributes.uv; let i = 0;
+  faces.forEach((r, fi) => { const q = quad(r); (fi === 3 ? [q[0], q[1], q[3], q[2]] : [q[3], q[2], q[0], q[1]]).forEach(p => uv.setXY(i++, p[0], p[1])); });
+  uv.needsUpdate = true; return faces;
+}
+function init3d() {
+  const stage = $('#stage');
+  if (!window.THREE) { stage.innerHTML = '<p class="no3d">3D-förhandsvisningen kunde inte laddas. Allt annat fungerar som vanligt.</p>'; return; }
+  try { R.renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true }); } catch (e) { stage.innerHTML = '<p class="no3d">Den här webbläsaren kan inte visa 3D. Allt annat fungerar som vanligt.</p>'; return; }
+  R.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); stage.appendChild(R.renderer.domElement);
+  R.hint = document.createElement('p'); R.hint.className = 'hint3d'; stage.appendChild(R.hint);
+  R.scene = new THREE.Scene(); R.camera = new THREE.PerspectiveCamera(35, 1, 1, 400);
+  R.scene.add(new THREE.AmbientLight(0xffffff, .68)); const dl = new THREE.DirectionalLight(0xffffff, .5); dl.position.set(-6, 10, 9); R.scene.add(dl);
+  R.mat = new THREE.MeshLambertMaterial({ color:0xffffff });
+  R.mesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), R.mat, 256); R.mesh.setColorAt(0, new THREE.Color(1, 1, 1)); R.mesh.count = 0;
+  R.holder = new THREE.Group(); R.holder.add(R.mesh); R.scene.add(R.holder);
+  R.ground = new THREE.Mesh(new THREE.CircleGeometry(7, 40), new THREE.MeshBasicMaterial({ color:0x000000, transparent:true, opacity:.14 }));
+  R.ground.rotation.x = -Math.PI / 2; R.ground.position.y = -11; R.scene.add(R.ground);
+  R.arm = new THREE.Mesh(new THREE.BoxGeometry(5, 18, 5), new THREE.MeshLambertMaterial({ color:0xD9A07A }));
+  R.arm.position.set(10, -13, 3); R.arm.rotation.set(-.35, .2, .45); R.scene.add(R.arm);
+  R.fig = new THREE.Group(); R.scene.add(R.fig);
+  [[[8, 8, 8], [0, 28, 0], 0xC9C9C9], [[8, 12, 4], [0, 18, 0], 0xADADAD], [[4, 12, 4], [-6, 18, 0], 0xBDBDBD], [[4, 12, 4], [6, 18, 0], 0xBDBDBD], [[4, 12, 4], [-1.95, 6, 0], 0x949494], [[4, 12, 4], [1.95, 6, 0], 0x8C8C8C]]
+    .forEach(([sz, p, col]) => { const m = new THREE.Mesh(new THREE.BoxGeometry(...sz), new THREE.MeshLambertMaterial({ color:col })); m.position.set(p[0], p[1] - 16, p[2]); R.fig.add(m); });
+  R.comp = document.createElement('canvas'); R.comp.width = R.comp.height = 64; R.cctx = R.comp.getContext('2d');
+  R.armTex = new THREE.CanvasTexture(R.comp); R.armTex.magFilter = THREE.NearestFilter; R.armTex.minFilter = THREE.NearestFilter; R.armTex.generateMipmaps = false;
+  R.armMat = new THREE.MeshLambertMaterial({ map:R.armTex, alphaTest:.5 });
+  R.armMeshes = FIG.map(d => {
+    const [u, v, w, h, dd] = AREG[d.ri].box, i = d.inf, g = new THREE.BoxGeometry(w + 2 * i, h + 2 * i, dd + 2 * i);
+    const rects = setUVs(g, u, v, w, h, dd, !!d.mirror), m = new THREE.Mesh(g, R.armMat);
+    m.position.set(d.pos[0], d.pos[1] - 16, d.pos[2]); m.userData = { d, rects }; R.fig.add(m); return m;
+  });
+  R.figGround = new THREE.Mesh(new THREE.CircleGeometry(11, 48), new THREE.MeshBasicMaterial({ color:0x000000, transparent:true, opacity:.14 }));
+  R.figGround.rotation.x = -Math.PI / 2; R.figGround.position.y = -17.1; R.fig.add(R.figGround);
+  R.ray = new THREE.Raycaster(); R.ndc = new THREE.Vector2();
+  const resize = () => { const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; R.renderer.setSize(w, h, false); R.camera.aspect = w / h; R.camera.updateProjectionMatrix(); dirty3d = true; };
+  new ResizeObserver(resize).observe(stage); resize();
+  const cv = R.renderer.domElement; let drag = null;
+  cv.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    try { cv.setPointerCapture(e.pointerId); } catch (er) {}
+    if (isArmor() && R.mode === 'paint') {
+      const hit = hit3d(e, false);
+      if (hit) { if (surf !== 'armor') setSurf('armor'); drag = { type:'paint' }; if (!down(hit.x, hit.y)) drag = null; return; }
+    }
+    drag = { type:'rot', x:e.clientX, y:e.clientY }; cv.style.cursor = 'grabbing';
+  });
+  cv.addEventListener('pointermove', e => {
+    if (drag && drag.type === 'rot') {
+      const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (isArmor()) { R.fyaw += dx * .01; R.fpitch = Math.max(-.7, Math.min(.7, R.fpitch + dy * .008)); }
+      else { R.yaw += dx * .012; R.pitch = Math.max(-.8, Math.min(.8, R.pitch + dy * .01)); }
+      drag.x = e.clientX; drag.y = e.clientY; dirty3d = true; return;
+    }
+    if (!isArmor()) return;
+    const hit = hit3d(e, R.mode !== 'paint');
+    setHover(hit ? { x:hit.x, y:hit.y, src:'3d', surf:'armor' } : null);
+    if (drag && drag.type === 'paint' && drawing && hit) { dabSafe(hit.x, hit.y); liveCommit(); }
+  });
+  const up = () => { if (drawing) end(); drag = null; cv.style.cursor = ''; };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+  cv.addEventListener('pointerleave', () => { if (!drag && hover && hover.src === '3d') setHover(null); });
+  cv.addEventListener('wheel', e => { if (!isArmor()) return; e.preventDefault(); R.dist = Math.max(40, Math.min(110, (R.dist || 66) + e.deltaY * .05)); dirty3d = true; }, { passive:false });
+  twoFinger(stage, { ...strokeGuard, move:s => { if (s !== 1) (s => { if (!isArmor()) return; R.dist = Math.max(40, Math.min(110, (R.dist || 66) / s)); dirty3d = true; })(s); } });
+  applyView();
+}
+function hit3d(e, any) {
+  if (!R.renderer || !isArmor() || !armCache) return null;
+  const r = R.renderer.domElement.getBoundingClientRect();
+  R.ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  placeCamera(); R.fig.updateMatrixWorld(true); R.camera.updateMatrixWorld(true);
+  R.ray.setFromCamera(R.ndc, R.camera);
+  const cands = R.armMeshes.filter(m => m.visible && (any || m.userData.d.piece === piece));
+  for (const h of R.ray.intersectObjects(cands, false)) {
+    if (!h.uv || !h.face) continue;
+    const q = h.object.userData.rects[h.face.materialIndex];
+    const x = Math.min(q[0] + q[2] - 1, Math.max(q[0], Math.floor(h.uv.x * 64))), y = Math.min(q[1] + q[3] - 1, Math.max(q[1], Math.floor((1 - h.uv.y) * 64)));
+    if ((any || h.object.userData.d.outer) && !armCache[(y * 64 + x) * 4 + 3]) continue;
+    return { x, y };
+  }
+  return null;
+}
+function rebuild3d() {
+  if (!R.renderer) return;
+  if (isArmor()) {
+    const c = R.cctx; c.clearRect(0, 0, 64, 64); if (armCache) c.putImageData(new ImageData(armCache, 64, 64), 0, 0);
+    if (hover && hover.surf === 'armor') {
+      const f = armFaceAt(hover.x, hover.y);
+      if (f && !(hover.src === '3d' && R.mode === 'paint')) { c.fillStyle = 'rgba(255,176,46,.6)'; c.fillRect(f.x, f.y, f.w, f.h); }
+      c.fillStyle = 'rgba(255,255,255,.9)'; c.fillRect(hover.x, hover.y, 1, 1);
+      if (mirror) { const m = armMirror(hover.x, hover.y); if (m) { c.fillStyle = 'rgba(255,255,255,.6)'; c.fillRect(m[0], m[1], 1, 1); } }
+    }
+    R.armTex.needsUpdate = true;
+    const it = active(); R.armMeshes.forEach(m => { m.visible = it.armor.pieces[m.userData.d.piece].on; });
+    R.hint.hidden = !!armCache && !isEmpty(armCache);
+    R.hint.textContent = 'Tryck Grundmåla eller måla på kartan, så syns rustningen här.';
+    return;
+  }
+  const d = iconPix(); let n = 0; const m = new THREE.Matrix4(), col = new THREE.Color();
+  for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) { const i = (y * 16 + x) * 4; if (d[i + 3] < 128) continue;
+    m.makeTranslation(x - 7.5, 7.5 - y, 0); R.mesh.setMatrixAt(n, m); col.setRGB(d[i] / 255, d[i + 1] / 255, d[i + 2] / 255); R.mesh.setColorAt(n, col); n++; }
+  R.mesh.count = n; R.mesh.instanceMatrix.needsUpdate = true; if (R.mesh.instanceColor) R.mesh.instanceColor.needsUpdate = true;
+  R.hint.hidden = n > 0; R.hint.textContent = 'Måla en pixel så dyker föremålet upp här.';
+}
+function applyView() { R.yaw = 0; R.pitch = 0; dirty3d = true; }
+function placeCamera() {
+  if (isArmor()) { R.fig.rotation.set(R.fpitch, R.fyaw, 0); R.camera.position.set(0, 1, R.dist || 66); R.camera.lookAt(0, 0, 0); }
+  else if (R.view === 'ground') { R.camera.position.set(0, 3, 34); R.camera.lookAt(0, -1, 0); }
+  else { R.camera.position.set(0, 0, 40); R.camera.lookAt(0, 0, 0); }
+}
+function render3d(t) {
+  if (!R.renderer) return;
+  const it = active(), armor = it.type === 'armor';
+  R.fig.visible = armor; R.holder.visible = !armor; R.ground.visible = !armor && R.view === 'ground'; R.arm.visible = !armor && R.view === 'hand';
+  if (!armor) {
+    if (R.view === 'ground') { const spin = reduceMotion ? 0 : t / 1400; R.holder.position.set(0, reduceMotion ? 0 : Math.sin(t / 600) * .8, 0); R.holder.rotation.set(R.pitch, spin + R.yaw, 0); }
+    else { R.holder.position.set(-2, 3, -1); R.holder.rotation.set(-.15 + R.pitch, Math.PI - .5 + R.yaw, -.1); }
+  }
+  placeCamera();
+  const g = it.glint && !reduceMotion ? .1 + .08 * Math.sin(t / 300) : it.glint ? .12 : 0;
+  (armor ? R.armMat : R.mat).emissive.setRGB(g * .9, g * .35, g * 1.4);
+  R.renderer.render(R.scene, R.camera);
+}
+
+/* ---------- preview in game ---------- */
+const RAR_VAR = { common:'--r-common', uncommon:'--r-uncommon', rare:'--r-rare', epic:'--r-epic' };
+const ROMAN = ['', 'I', 'II'];
+function idsNow() { return C.allIds(project.items); }
+function currentId() {
+  const { ids, pieceIds } = idsNow(), i = project.active;
+  return isArmor() ? (pieceIds[i] && pieceIds[i][piece]) || ids[i] : ids[i];
+}
+function renderTip() {
+  const it = active(), ns = C.slug(project.ns, 'verkstad'), lines = [];
+  let name = it.name.trim() || 'Föremål';
+  if (it.type === 'item' && it.mat.on) lines.push('<div class="ln">Material</div>');
+  if (it.type === 'food') lines.push(`<div class="ln">Mättar ${it.food.nutrition}</div>`);
+  if (it.type === 'weapon') lines.push(`<div class="ln blue">+${it.weapon.damage} attackskada</div>`, `<div class="ln">Hållbarhet ${it.weapon.durability}</div>`);
+  if (it.type === 'tool') lines.push(`<div class="ln">${C.TOOLKIND[it.tool.kind].label} av ${C.TIERS[it.tool.tier].label.toLowerCase()}</div>`, `<div class="ln blue">+${C.toolDamage(it)} attackskada</div>`);
+  if (it.type === 'armor') {
+    const p = C.PIECE[piece]; name = C.pieceName(it, p);
+    lines.push('<div class="ln">När den sitter på kroppen:</div>', `<div class="ln blue">+${it.armor.pieces[piece].prot} rustning</div>`, `<div class="ln">Hållbarhet ${C.armorDur(it, piece)}</div>`);
+    if (it.armor.bonus.on) lines.push(`<div class="ln gold">Hela setet: ${C.EFFECTS.find(e => e[0] === it.armor.bonus.effect)[1]} ${ROMAN[it.armor.bonus.level]}</div>`);
+  }
+  $('#tipbox').innerHTML = `<div class="nm" style="color:var(${RAR_VAR[it.rarity]})">${esc(name)}</div>${lines.join('')}<div class="id">${esc(ns)}:${esc(currentId())}</div>`;
+  const st = it.type === 'weapon' || it.type === 'tool' || it.type === 'armor' ? 1 : it.stack;
+  $('#slotCount').textContent = st > 1 ? st : '';
+}
+function renderIdLine() {
+  const ns = C.slug(project.ns, 'verkstad');
+  $('#idLine').textContent = isArmor() ? `ID för ${C.PIECE[piece].label.toLowerCase()}: ${ns}:${currentId()}` : `ID i spelet: ${ns}:${currentId()}`;
+}
+
+/* ---------- materials ---------- */
+let ing = 'minecraft:iron_ingot';
+const byUid = uid => project.items.find(x => x.uid === uid);
+const ownLabel = x => x.name.trim() || TYPE_LABEL[x.type];
+const materials = () => project.items.filter(x => x.type === 'item' && x.mat.on);
+function setOptions(sel, html) { if (sel.dataset.html !== html) { sel.innerHTML = html; sel.dataset.html = html; } }
+const opt = (v, l) => `<option value="${esc(v)}">${esc(l)}</option>`;
+function madeOfOptions() { const ms = materials(); return ms.length ? opt('', 'Inget recept') + ms.map(m => opt(m.uid, ownLabel(m))).join('') : opt('', 'Inga material ännu'); }
+function ownGroup(exclude, label) { const xs = project.items.filter(x => x.type !== 'armor' && x.uid !== exclude); return xs.length ? `<optgroup label="${label}">${xs.map(x => opt('own:' + x.uid, ownLabel(x))).join('')}</optgroup>` : ''; }
+const vanillaGroup = list => `<optgroup label="Minecraft">${list.map(([v, l]) => opt(v, l)).join('')}</optgroup>`;
+function repairOptions() { const ms = materials(); return opt('none', 'Inget') + (ms.length ? `<optgroup label="Era material">${ms.map(m => opt('own:' + m.uid, ownLabel(m))).join('')}</optgroup>` : '') + vanillaGroup(C.REPAIR.filter(r => r[0] !== 'none')); }
+function refName(ref) { if (!ref) return ''; if (ref.startsWith('own:')) { const x = byUid(ref.slice(4)); return x ? ownLabel(x) : ''; } return C.VANILLA_NAME[ref] || ref; }
+function fillCell(b, ref) {
+  b.textContent = ''; b.title = refName(ref) || 'Tom ruta'; if (!ref) return;
+  const x = ref.startsWith('own:') ? byUid(ref.slice(4)) : null;
+  if (x) { const cv = document.createElement('canvas'); cv.width = cv.height = 16; cv.setAttribute('aria-hidden', 'true'); putSmall(cv, thumbPix(x)); b.append(cv); }
+  else b.textContent = refName(ref);
+}
+function renderCraft() {
+  const it = active(); if (it.type !== 'item') return;
+  const el = $('#craftGrid'); el.innerHTML = '';
+  it.mat.craft.grid.forEach((ref, i) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'cell'; fillCell(b, ref);
+    b.setAttribute('aria-label', `Ruta ${i + 1}: ${refName(ref) || 'tom'}`);
+    b.addEventListener('click', () => { const g = active().mat.craft.grid; g[i] = g[i] === ing ? '' : ing; saveProject(); renderCraft(); });
+    el.append(b);
+  });
+  putSmall($('#craftOut canvas'), thumbPix(it)); $('#craftOutCount').textContent = it.mat.craft.count > 1 ? it.mat.craft.count : '';
+}
+function usedBy(m) {
+  const xs = project.items.filter(x => (x.type === 'weapon' && x.weapon.madeOf === m.uid) || (x.type === 'tool' && x.tool.madeOf === m.uid) || (x.type === 'armor' && x.armor.madeOf === m.uid));
+  return xs.length ? `Tillverkar: ${xs.map(ownLabel).join(', ')}.` : 'Välj materialet under Tillverkas av på en rustning, ett vapen eller ett verktyg, så får de recept av det.';
+}
+const GEAR_INFO = { armor:'Recept: 5 för hjälmen, 8 för bröstplåten, 7 för byxorna och 4 för kängorna. Lagas också med materialet.',
+  sword:'Recept: 2 material och 1 pinne. Lagas också med materialet.', pickaxe:'Recept: 3 material och 2 pinnar. Lagas också med materialet.',
+  axe:'Recept: 3 material och 2 pinnar. Lagas också med materialet.', shovel:'Recept: 1 material och 2 pinnar. Lagas också med materialet.' };
+function madeInfo(uid, kind) { return !materials().length ? 'Gör ett föremål till material först, så kan det väljas här.' : uid ? GEAR_INFO[kind] : 'Utan material får den inget recept och finns bara i kreativt läge.'; }
+function clearMaterialRefs(uid) {
+  project.items.forEach(x => {
+    if (x.weapon.madeOf === uid) x.weapon.madeOf = ''; if (x.tool.madeOf === uid) x.tool.madeOf = '';
+    if (x.armor) { if (x.armor.madeOf === uid) x.armor.madeOf = ''; if (x.armor.repair === 'own:' + uid) x.armor.repair = C.ARMOR_MAT[x.armor.mat].repair; }
+  });
+}
+function clearAllRefs(uid) {
+  clearMaterialRefs(uid);
+  project.items.forEach(x => { x.mat.craft.grid = x.mat.craft.grid.map(g => g === 'own:' + uid ? '' : g); if (x.mat.smelt.input === 'own:' + uid) x.mat.smelt.input = 'minecraft:prismarine_shard'; });
+  if (ing === 'own:' + uid) ing = 'minecraft:iron_ingot';
+}
+
+/* ---------- properties ---------- */
+const markSeg = (sel, attr, val) => $$(sel + ' button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset[attr] === String(val))));
+function renderProps() {
+  const it = active(), armor = it.type === 'armor';
+  $('#nameLbl').textContent = armor ? 'Namn på setet' : 'Namn i spelet';
+  $('#itemName').value = it.name; renderIdLine();
+  markSeg('#typeSeg', 'type', it.type);
+  $('#pStack').hidden = !(it.type === 'item' || it.type === 'food'); markSeg('#stackSeg', 'stack', it.stack);
+  $('#pFood').hidden = it.type !== 'food'; $('#pWeapon').hidden = it.type !== 'weapon'; $('#pTool').hidden = it.type !== 'tool'; $('#pArmor').hidden = !armor;
+  $('#pMat').hidden = it.type !== 'item';
+  if (it.type === 'item') {
+    const m = it.mat; $('#matChk').checked = m.on; $('#matFields').hidden = !m.on;
+    $('#craftChk').checked = m.craft.on; $('#craftFields').hidden = !m.craft.on; $('#smeltChk').checked = m.smelt.on; $('#smeltFields').hidden = !m.smelt.on;
+    setOptions($('#ingSel'), ownGroup(it.uid, 'Era föremål') + vanillaGroup(C.VANILLA));
+    $('#ingSel').value = ing; if ($('#ingSel').value !== ing) { ing = 'minecraft:iron_ingot'; $('#ingSel').value = ing; }
+    setOptions($('#smeltSel'), ownGroup(it.uid, 'Era föremål') + vanillaGroup(C.SMELTABLE)); $('#smeltSel').value = m.smelt.input;
+    setOptions($('#craftCount'), [1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => opt(String(n), String(n))).join('')); $('#craftCount').value = String(m.craft.count);
+    $('#matUse').textContent = usedBy(it);
+    if (m.on) renderCraft();
+  }
+  setOptions($('#wMade'), madeOfOptions()); $('#wMade').value = it.weapon.madeOf; $('#wMadeInfo').textContent = madeInfo(it.weapon.madeOf, 'sword');
+  setOptions($('#tMade'), madeOfOptions()); $('#tMade').value = it.tool.madeOf; $('#tMadeInfo').textContent = madeInfo(it.tool.madeOf, it.tool.kind);
+  $('#nutr').value = it.food.nutrition; $('#nutrOut').textContent = `${it.food.nutrition} / 20`; markSeg('#animSeg', 'anim', it.food.anim); $('#alwaysChk').checked = it.food.always;
+  $('#wDmg').value = it.weapon.damage; $('#wDmgOut').textContent = '+' + it.weapon.damage; $('#wDur').value = it.weapon.durability; $('#wDurOut').textContent = it.weapon.durability; $('#wEnch').checked = it.weapon.enchant;
+  markSeg('#kindSeg', 'kind', it.tool.kind); markSeg('#tierSeg', 'tier', it.tool.tier); $('#tDur').value = it.tool.durability; $('#tDurOut').textContent = it.tool.durability; $('#tEnch').checked = it.tool.enchant;
+  const tr = C.TIERS[it.tool.tier];
+  $('#toolInfo').textContent = `Bryter block i fart ${tr.speed} och gör +${C.toolDamage(it)} i skada. Vanlig hållbarhet för ${tr.label.toLowerCase()} är ${tr.dur}.`;
+  if (armor) {
+    const a = it.armor;
+    markSeg('#matSeg', 'mat', a.mat);
+    C.PIECES.forEach(p => { const pc = a.pieces[p.key];
+      $(`#pOn_${p.key}`).checked = pc.on; const nm = $(`#pName_${p.key}`); if (document.activeElement !== nm) nm.value = pc.name; nm.placeholder = `${p.label} (${it.name.trim() || 'Rustning'})`;
+      $(`#pProt_${p.key}`).value = pc.prot; $(`#pProtOut_${p.key}`).textContent = `Skydd ${pc.prot}`; $(`#prow_${p.key}`).classList.toggle('dim', !pc.on); });
+    $('#aMul').value = a.mul; $('#aMulOut').textContent = `×${a.mul}`;
+    $('#aDurInfo').textContent = C.PIECES.filter(p => a.pieces[p.key].on).map(p => `${p.label} ${C.armorDur(it, p.key)}`).join(' · ');
+    setOptions($('#repairSel'), repairOptions()); $('#repairSel').value = a.repair;
+    setOptions($('#aMade'), madeOfOptions()); $('#aMade').value = a.madeOf; $('#aMadeInfo').textContent = madeInfo(a.madeOf, 'armor');
+    $('#aEnch').checked = a.ench;
+    $('#bonusChk').checked = a.bonus.on; $('#bonusFields').hidden = !a.bonus.on; $('#effectSel').value = a.bonus.effect; markSeg('#lvlSeg', 'lvl', a.bonus.level);
+  }
+  markSeg('#rarSeg', 'rar', it.rarity); $('#glintChk').checked = it.glint;
+  $('#tplSel').value = curImg().tpl || 'none';
+  renderTip(); dirty3d = true;
+}
+function change(fn) { fn(active()); saveProject(); renderProps(); renderColl(); }
+function updateModeUI() {
+  const armor = isArmor();
+  $('#armorBar').hidden = !armor;
+  $('#tplGrp').hidden = surf === 'armor'; $('#shiftGrp').hidden = surf === 'armor'; $('#outlineBtn').hidden = surf === 'armor';
+  $('#armHint').hidden = surf !== 'armor';
+  $('#viewSeg').hidden = armor; $('#modeSeg').hidden = !armor;
+  $('#stage').classList.toggle('painting', armor && R.mode === 'paint');
+  markSeg('#surfSeg', 'surf', surf); markSeg('#pieceSeg', 'piece', piece);
+  if (armor) $$('#pieceSeg button').forEach(b => { const off = !active().armor.pieces[b.dataset.piece].on; b.classList.toggle('off', off); b.title = off ? 'Inte med i setet' : ''; });
+  overlayDirty = dirty3d = true;
+}
+function setSurf(s) { if (s === surf || !isArmor()) return; storeSurface(); surf = s; loadSurface(); updateModeUI(); renderStep(); }
+function setPiece(k) {
+  if (k === piece) return;
+  if (!active().armor.pieces[k].on) { msg(`${C.PIECE[k].label} är inte med i setet. Kryssa i den under Egenskaper först.`); return; }
+  if (surf === 'icon') storeSurface();
+  piece = k;
+  if (surf === 'icon') loadSurface();
+  updateModeUI(); renderTip(); renderIdLine(); $('#tplSel').value = curImg().tpl || 'none'; drawSmall();
+}
+
+/* ---------- collection ---------- */
+let confirmDel = null, confirmT = null;
+function renderColl() {
+  const { ids } = idsNow();
+  $('#collCount').textContent = `${project.items.length} st`;
+  const ul = $('#collList'); ul.innerHTML = '';
+  project.items.forEach((it, i) => {
+    const li = document.createElement('li');
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'pick'; b.setAttribute('aria-current', String(i === project.active));
+    const cv = document.createElement('canvas'); cv.width = cv.height = 16; cv.dataset.uid = it.uid; cv.setAttribute('aria-hidden', 'true');
+    putSmall(cv, thumbPix(it));
+    const meta = document.createElement('span'); meta.className = 'meta';
+    const ty = it.type === 'armor' ? `Rustning · ${C.includedPieces(it).length} delar` : it.type === 'item' && it.mat.on ? 'Material' : TYPE_LABEL[it.type];
+    meta.innerHTML = `<span class="nm">${esc(it.name.trim() || TYPE_LABEL[it.type])}</span><span class="ty">${ty} · ${ids[i]}</span>`;
+    b.append(cv, meta); b.addEventListener('click', () => selectItem(i));
+    const del = document.createElement('button'); del.type = 'button'; del.className = 'btn small' + (confirmDel === it.uid ? ' danger' : '');
+    del.textContent = confirmDel === it.uid ? 'Säker?' : 'Ta bort'; del.setAttribute('aria-label', `Ta bort ${it.name || 'föremål'}`);
+    del.addEventListener('click', () => removeItem(it.uid));
+    li.append(b, del); ul.append(li);
+  });
+  $('#addonName').value = project.name; $('#nsIn').value = project.ns;
+  $('#verLine').textContent = `Nästa version: 1.0.${project.version + 1}`;
+}
+function selectItem(i) { if (i === project.active) return; storeSurface(); project.active = i; surf = isArmor() ? 'armor' : 'icon'; loadActive(); saveProject(); commitView(); }
+function commitView() { liveCommit(); overlayDirty = true; renderProps(); renderColl(); renderStep(); drawSmall(); updateModeUI(); }
+function addItem(it, asSurf) { storeSurface(); project.items.push(it); project.active = project.items.length - 1; surf = asSurf || 'icon'; piece = 'chest'; loadActive(); saveProject(); commitView(); }
+function removeItem(uid) {
+  if (confirmDel !== uid) { confirmDel = uid; clearTimeout(confirmT); confirmT = setTimeout(() => { confirmDel = null; renderColl(); }, 4000); renderColl(); return; }
+  confirmDel = null; const i = project.items.findIndex(x => x.uid === uid); if (i < 0) return;
+  storeSurface();
+  const name = project.items[i].name; clearAllRefs(uid); project.items.splice(i, 1);
+  if (!project.items.length) project.items.push(newItem('Mitt föremål'));
+  if (i < project.active) project.active--;
+  project.active = Math.max(0, Math.min(project.active, project.items.length - 1));
+  surf = isArmor() ? 'armor' : 'icon'; loadActive(); saveProject(); commitView(); msg(`${name || 'Föremålet'} är borttaget.`);
+}
+function exampleItem() {
+  const it = newItem('Månsten'); it.rarity = 'rare'; it.tpl = 'gem';
+  const u = new Uint8ClampedArray(N16), m = C.TEMPLATES.gem.m, baseC = rgbToHsl([93, 183, 224]);
+  for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) { if (!m[y * 16 + x]) continue;
+    const inner = [[1,0],[-1,0],[0,1],[0,-1]].every(([dx, dy]) => m[(y + dy) * 16 + x + dx]);
+    const l = inner ? baseC[2] + (8 - (x + y) / 2) * .035 : baseC[2] - .28;
+    const c = hslToRgb([baseC[0], baseC[1], Math.min(.92, Math.max(.12, l))]); const i = (y * 16 + x) * 4; u[i] = c[0]; u[i+1] = c[1]; u[i+2] = c[2]; u[i+3] = 255; }
+  [[6,5],[7,5],[6,6]].forEach(([x, y]) => { const i = (y * 16 + x) * 4; u[i] = u[i+1] = u[i+2] = 250; });
+  it.px = b64e(u); return it;
+}
+
+/* ---------- guide ---------- */
+const SAVE_STEP = { t:'Spara', x:'Vill ni göra fler föremål eller rustningar? Tryck Nytt föremål eller Ny rustning, så hamnar de i samma samling. När samlingen är klar trycker ni Spara add-on under Samling.',
+  tip:'Versionsnumret höjs varje gång ni sparar. Då förstår spelet och Realmen att det är en ny version.' };
+const INSTALL_STEP = { t:'Installera', x:(STANDALONE ? OPEN_FILE : 'Dubbelklicka på Installera i Minecraft på skrivbordet. Den hittar den senaste filen från Föremålsverkstaden i Hämtade filer och öppnar den i Minecraft.') + ' Öppna sedan en värld, gå till Inställningar och Beteendepaket, och aktivera ert paket. Resurspaketet följer med automatiskt. Ladda sist upp världen till er Realm.', tip:'' };
+const ITEM_STEPS = [
+  { t:'Form', x:'Välj en mall under Mall, eller rita fritt. Måla först hela formen i en enda färg, som en skugga av föremålet. Lämna en tom ruta runt om, så att konturen får plats.',
+    tip:'Ett föremål i Minecraft är 16 × 16 pixlar. Det är litet, så tydliga och enkla former syns bäst.' },
+  { t:'Kontur', x:'Tryck på Kontur. Då får formen en mörk kant runt om, precis som spelets egna föremål har.',
+    tip:'Når formen kanten? Flytta den med pilarna först. Ångra med Ctrl+Z om ni inte gillar resultatet.' },
+  { t:'Färger', x:'Måla i de riktiga färgerna. Använd tre eller fyra nyanser per material, till exempel trä i handtaget och metall i bladet.',
+    tip:'Under Nyanser finns ljusare och mörkare varianter av färgen ni valt. Med Spegla blir vänster och höger sida likadana.' },
+  { t:'Ljus och skugga', x:'Ljuset kommer uppifrån till vänster, som pilen visar. Gör de övre vänstra kanterna ljusare med Ljus och de nedre högra mörkare med Skugga.',
+    tip:'En eller två vita pixlar i övre vänstra hörnet får metall och ädelstenar att glänsa.' },
+  { t:'Egenskaper', x:'Ge föremålet ett namn och välj vad det är: vanligt föremål, mat, vapen, verktyg eller rustning. Ställ sedan in hur mätt man blir, hur mycket skada vapnet gör eller vilket material verktyget har.',
+    tip:'Kryssa i Det här är ett material så kan rustningar, vapen och verktyg tillverkas och lagas av det. Materialet kan i sin tur få ett recept på arbetsbänken eller smältas fram i ugnen.' },
+  SAVE_STEP, INSTALL_STEP
+];
+const ARMOR_STEPS = [
+  { t:'Material och färg', x:'Välj material under Egenskaper. Välj sedan en färg och tryck Grundmåla. Då får alla delar i setet en grundfärg med ljus och skugga, både på figuren och i ikonerna.',
+    tip:'Grundmåla fyller bara rutor som är tomma. Vill ni börja om på en del väljer ni den under Del och trycker Rensa.' },
+  { t:'Rustningsbilden', x:'Välj Rustningsbild ovanför rutnätet. Kartan visar var varje del sitter. Lager 1 överst har hjälm, bröstplåt och kängor. Lager 2 underst har byxorna. Peka på kartan så lyser samma ställe upp på figuren.',
+    tip:'Orange rutor visar var delen brukar täcka men ännu är tom. Kängorna täcker bara de nedersta raderna av benen.' },
+  { t:'Detaljer', x:'Måla mönster, nitar och kanter. Välj Måla ovanför figuren för att måla direkt på den. Med Spegla blir vänster och höger sida lika.',
+    tip:'Armar och ben målas bara en gång. Spelet speglar dem till andra sidan. Hjälmens yttre lager kan användas till horn, fjädrar eller visir.' },
+  { t:'Ikoner', x:'Välj Ikon ovanför rutnätet. Varje del behöver en egen ikon på 16 × 16 pixlar. Byt del under Del och måla efter mallen.',
+    tip:'Kontur ger ikonen en mörk kant, precis som spelets egna föremål.' },
+  { t:'Egenskaper', x:'Ge setet ett namn och välj vilka delar som ska vara med. Ställ in skydd och hållbarhet, och välj under Tillverkas av vilket av era material den görs av på arbetsbänken. Vill ni ha en kraft när hela setet sitter på väljer ni den längst ner.',
+    tip:'Kraften kommer från ett litet skript i add-onet. Det följer med automatiskt och fungerar även på Realmen.' },
+  SAVE_STEP, INSTALL_STEP
+];
+const steps = () => isArmor() ? ARMOR_STEPS : ITEM_STEPS;
+let step = clamp(project.step, 0, 6, 0), maxStep = clamp(project.maxStep, 0, 6, 0);
+function buildPills() { $('#pills').innerHTML = ITEM_STEPS.map((s, i) => `<li><button type="button" data-step="${i}">${i + 1}</button></li>`).join(''); $$('#pills button').forEach(b => b.addEventListener('click', () => goStep(+b.dataset.step))); }
+function goStep(i) { step = Math.max(0, Math.min(6, i)); maxStep = Math.max(maxStep, step); project.step = step; project.maxStep = maxStep; saveProject(); renderStep(); }
+function renderStep() {
+  const list = steps(), s = list[step];
+  $('#stepCount').textContent = `Steg ${step + 1} av ${list.length}`; $('#stepTitle').textContent = s.t; $('#stepText').textContent = s.x;
+  const tipEl = $('#stepTip');
+  if (step === list.length - 1) {
+    const ns = C.slug(project.ns, 'verkstad');
+    tipEl.innerHTML = `${STANDALONE ? 'Hittar ni inte filen? Webbläsarens lista över nedladdningar visar var den hamnade.' : 'Sparade ni filen någon annanstans? Dra den och släpp den på Installera i Minecraft. På en annan dator går det att döpa om filen till .mcaddon och dubbelklicka.'} Föremålen finns i det kreativa inventariet, eller så skriver ni <code>/give @s ${esc(ns)}:${esc(currentId())}</code> i chatten om fusk är påslaget.`;
+  } else tipEl.textContent = s.tip;
+  $('#prevBtn').style.visibility = step === 0 ? 'hidden' : 'visible';
+  $('#nextBtn').style.visibility = step === list.length - 1 ? 'hidden' : 'visible';
+  $$('#pills button').forEach((b, i) => { b.setAttribute('aria-label', `Steg ${i + 1}: ${list[i].t}`); b.title = list[i].t; b.classList.toggle('done', i !== step && i <= maxStep); if (i === step) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+  overlayDirty = true;
+}
+
+/* ---------- export ---------- */
+const downloadsP = STANDALONE ? Promise.resolve(null) : window.claude.use('downloads').catch(() => null);
+function canvasBytes(cv) { return new Promise((res, rej) => cv.toBlob(b => b ? b.arrayBuffer().then(a => res(new Uint8Array(a)), rej) : rej(new Error('png')), 'image/png')); }
+function pngBytes(u, w, h) { const cv = document.createElement('canvas'); cv.width = w; cv.height = h; cv.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(u), w, h), 0, 0); return canvasBytes(cv); }
+async function itemAssets(it) {
+  if (it.type !== 'armor') return pngBytes(b64d(it.px, N16), 16, 16);
+  const icons = {}; for (const p of C.includedPieces(it)) icons[p.key] = await pngBytes(b64d(it.armor.pieces[p.key].px, N16), 16, 16);
+  const tex = b64d(it.armor.tex, N64);
+  return { icons, layer1: await pngBytes(tex.slice(0, N64 / 2), 64, 32), layer2: await pngBytes(tex.slice(N64 / 2), 64, 32) };
+}
+function packIcon(it) {
+  const src = document.createElement('canvas'); src.width = src.height = 16; putSmall(src, thumbPix(it));
+  const cv = document.createElement('canvas'); cv.width = cv.height = 64; const c = cv.getContext('2d');
+  c.fillStyle = '#3A4654'; c.fillRect(0, 0, 64, 64); c.fillStyle = '#4C5A6A'; c.fillRect(4, 4, 56, 56);
+  c.imageSmoothingEnabled = false; c.drawImage(src, 8, 8, 48, 48); return canvasBytes(cv);
+}
+function problemsFor(it) {
+  const nm = it.name.trim() || TYPE_LABEL[it.type];
+  if (it.type !== 'armor') {
+    const out = isEmpty(b64d(it.px, N16)) ? [`${nm} är tomt.`] : [];
+    if (it.type === 'item' && it.mat.on && it.mat.craft.on && it.mat.craft.grid.every(g => !g)) out.push(`${nm} har ett tomt recept. Lägg ingredienser i rutorna eller kryssa ur Kan tillverkas på arbetsbänken.`);
+    return out;
+  }
+  const out = [], inc = C.includedPieces(it);
+  if (!inc.length) out.push(`${nm} har inga delar valda.`);
+  const noIcon = inc.filter(p => isEmpty(b64d(it.armor.pieces[p.key].px, N16))).map(p => p.label.toLowerCase());
+  if (noIcon.length) out.push(`${nm} saknar ikon för ${noIcon.join(', ')}.`);
+  if (isEmpty(b64d(it.armor.tex, N64))) out.push(`${nm} har ingen rustningsbild ännu.`);
+  return out;
+}
+async function exportAddon() {
+  storeSurface();
+  const probs = project.items.flatMap(problemsFor);
+  if (probs.length) { msg(`${probs[0]}${probs.length > 1 ? ` Det finns ${probs.length - 1} saker till att fixa.` : ''} Måla klart eller ta bort det från samlingen först.`); return; }
+  const ns = C.slug(project.ns, 'verkstad');
+  if (ns === 'minecraft') { msg('Förledet kan inte vara minecraft. Välj ett eget, till exempel verkstad.'); return; }
+  const btn = $('#exportBtn'); btn.textContent = 'Packar…';
+  try {
+    const version = project.version + 1;
+    const assets = []; for (const it of project.items) assets.push(await itemAssets(it));
+    const icon = await packIcon(project.items[0]);
+    const { files, base } = C.buildAddon(project, version, assets, icon);
+    const zip = C.zipStore(files);
+    const dl = await downloadsP;
+    if (!dl) {
+      if (STANDALONE) {
+        saveLocal(`${base}.mcaddon`, new Blob([zip], { type:'application/octet-stream' }));
+        project.version = version; saveProject(); renderColl();
+        msg(`${base}.mcaddon är sparad i Hämtade filer som version 1.0.${version}. ${OPEN_SHORT}`); goStep(6); return;
+      }
+      msg('Spara fungerar inte i den här vyn. Öppna sidan i claude.ai i en webbläsare och försök igen.'); return;
+    }
+    try {
+      await dl.save({ filename: `${base}.zip`, data: new Blob([zip], { type:'application/zip' }) });
+      project.version = version; saveProject(); renderColl();
+      msg(`${base}.zip är sparad som version 1.0.${version}. Dubbelklicka på Installera i Minecraft på skrivbordet.`); goStep(6);
+    } catch (err) {
+      const code = err && err.code;
+      msg(code === 'declined' ? 'Ingen fil sparades.' : code === 'rate_limited' ? 'Vänta en liten stund och försök igen.' : code === 'extension_not_enabled' ? 'Zip-filer går inte att spara i den här vyn.' : 'Det gick inte att spara filen här.');
+    }
+  } catch (e) { msg('Något gick fel när add-onet packades. Försök igen.'); }
+  finally { btn.textContent = EXPORT_LABEL; }
+}
+
+/* ---------- wiring ---------- */
+function bindSeg(sel, attr, fn) { $$(sel + ' button').forEach(b => b.addEventListener('click', () => fn(b.dataset[attr]))); }
+function setType(v) {
+  const it = active(), was = it.type; if (v === was) return;
+  storeSurface();
+  if (was === 'item' && it.mat.on) { clearMaterialRefs(it.uid); it.mat.on = false; }
+  if (v === 'armor') clearAllRefs(it.uid);
+  it.type = v;
+  if (v === 'tool' && it.tpl === 'sword') it.tpl = 'pickaxe';
+  if (v === 'food' && (it.tpl === 'sword' || it.tpl === 'pickaxe')) it.tpl = 'apple';
+  if (v === 'food' && it.stack === 1) it.stack = 64;
+  if (v === 'weapon' && it.tpl !== 'none') it.tpl = 'sword';
+  if (v === 'armor') { if (!it.armor) it.armor = newArmor(); surf = 'armor'; piece = 'chest'; if (!it.name.trim() || it.name.startsWith('Föremål')) it.name = 'Min rustning'; }
+  else surf = 'icon';
+  loadActive(); saveProject(); commitView();
+  if (v === 'armor' && was !== 'armor') msg('Nu är det en rustning. Välj en färg och tryck Grundmåla för att komma igång.');
+}
+function wire() {
+  $('#tplSel').innerHTML = '<option value="none">Ingen mall</option>' + Object.entries(C.TEMPLATES).map(([k, t]) => `<option value="${k}">${t.label}</option>`).join('');
+  $('#tplSel').addEventListener('change', e => { curImg().tpl = e.target.value; saveProject(); overlayDirty = true; });
+  $('#tierSeg').innerHTML = Object.entries(C.TIERS).map(([k, t]) => `<button type="button" data-tier="${k}">${t.label}</button>`).join('');
+  $('#matSeg').innerHTML = Object.entries(C.ARMOR_MAT).map(([k, m]) => `<button type="button" data-mat="${k}">${m.label}</button>`).join('');
+  $('#pieceSeg').innerHTML = C.PIECES.map(p => `<button type="button" data-piece="${p.key}">${p.label}</button>`).join('');
+  $('#effectSel').innerHTML = C.EFFECTS.map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
+  $('#pieceRows').innerHTML = C.PIECES.map(p => `
+    <div class="prow" id="prow_${p.key}">
+      <label class="chk"><input type="checkbox" id="pOn_${p.key}"> ${p.label}</label>
+      <input class="text" id="pName_${p.key}" maxlength="40" autocomplete="off" aria-label="Namn på ${p.label.toLowerCase()}">
+      <div class="range"><input type="range" id="pProt_${p.key}" min="1" max="10" step="1" aria-label="Skydd för ${p.label.toLowerCase()}"><output id="pProtOut_${p.key}" for="pProt_${p.key}"></output></div>
+    </div>`).join('');
+  C.PIECES.forEach(p => {
+    $(`#pOn_${p.key}`).addEventListener('change', e => {
+      const a = active().armor;
+      if (!e.target.checked && C.includedPieces(active()).length <= 1) { e.target.checked = true; msg('Ett set behöver minst en del.'); return; }
+      a.pieces[p.key].on = e.target.checked;
+      if (!e.target.checked && piece === p.key) { if (surf === 'icon') storeSurface(); piece = C.includedPieces(active())[0].key; if (surf === 'icon') loadSurface(); }
+      saveProject(); renderProps(); renderColl(); updateModeUI(); drawSmall();
+    });
+    $(`#pName_${p.key}`).addEventListener('input', e => { active().armor.pieces[p.key].name = e.target.value; saveProject(); renderTip(); });
+    $(`#pProt_${p.key}`).addEventListener('input', e => { active().armor.pieces[p.key].prot = clamp(e.target.value, 1, 10, 2); $(`#pProtOut_${p.key}`).textContent = `Skydd ${active().armor.pieces[p.key].prot}`; saveProject(); renderTip(); });
+  });
+  bindSeg('#matSeg', 'mat', v => change(it => { const m = C.ARMOR_MAT[v]; it.armor.mat = v; it.armor.mul = m.mul; it.armor.repair = m.repair; C.PIECES.forEach(p => { it.armor.pieces[p.key].prot = m.prot[p.key]; }); }));
+  $('#aMul').addEventListener('input', e => change(it => { it.armor.mul = clamp(e.target.value, 1, 60, 15); }));
+  $('#repairSel').addEventListener('change', e => change(it => { it.armor.repair = e.target.value; }));
+  $('#aMade').addEventListener('change', e => change(it => { it.armor.madeOf = e.target.value; if (e.target.value) it.armor.repair = 'own:' + e.target.value; }));
+  $('#wMade').addEventListener('change', e => change(it => { it.weapon.madeOf = e.target.value; }));
+  $('#tMade').addEventListener('change', e => change(it => { it.tool.madeOf = e.target.value; }));
+  $('#matChk').addEventListener('change', e => { const it = active(); it.mat.on = e.target.checked; if (!it.mat.on) clearMaterialRefs(it.uid); saveProject(); renderProps(); renderColl();
+    if (it.mat.on) msg(`${ownLabel(it)} är nu ett material. Välj det under Tillverkas av på en rustning, ett vapen eller ett verktyg.`); });
+  $('#craftChk').addEventListener('change', e => change(it => { it.mat.craft.on = e.target.checked; }));
+  $('#smeltChk').addEventListener('change', e => change(it => { it.mat.smelt.on = e.target.checked; }));
+  $('#ingSel').addEventListener('change', e => { ing = e.target.value; });
+  $('#craftCount').addEventListener('change', e => change(it => { it.mat.craft.count = clamp(e.target.value, 1, 9, 1); }));
+  $('#smeltSel').addEventListener('change', e => change(it => { it.mat.smelt.input = e.target.value; }));
+  $('#aEnch').addEventListener('change', e => change(it => { it.armor.ench = e.target.checked; }));
+  $('#bonusChk').addEventListener('change', e => change(it => { it.armor.bonus.on = e.target.checked; }));
+  $('#effectSel').addEventListener('change', e => change(it => { it.armor.bonus.effect = e.target.value; }));
+  bindSeg('#lvlSeg', 'lvl', v => change(it => { it.armor.bonus.level = Number(v) === 2 ? 2 : 1; }));
+  bindSeg('#surfSeg', 'surf', v => setSurf(v));
+  bindSeg('#pieceSeg', 'piece', v => setPiece(v));
+  bindSeg('#modeSeg', 'mode', v => { R.mode = v; markSeg('#modeSeg', 'mode', v); updateModeUI(); });
+  $('#baseBtn').addEventListener('click', grundmala);
+  $$('[data-shift]').forEach(b => b.addEventListener('click', () => { const [dx, dy] = b.dataset.shift.split(',').map(Number); shiftImg(dx, dy); }));
+  $('#mirrorChk').addEventListener('change', e => { mirror = e.target.checked; overlayDirty = dirty3d = true; });
+  $('#gridChk').addEventListener('change', e => { showGrid = e.target.checked; overlayDirty = true; });
+  $('#undoBtn').addEventListener('click', undo); $('#redoBtn').addEventListener('click', redo);
+  $('#clearBtn').addEventListener('click', clearSurface);
+  $('#colorIn').addEventListener('input', e => setColor(fromHex(e.target.value)));
+  bindSeg('#viewSeg', 'view', v => { R.view = v; markSeg('#viewSeg', 'view', v); applyView(); });
+  $('#itemName').addEventListener('input', e => { active().name = e.target.value; saveProject(); renderTip(); renderIdLine(); renderColl();
+    if (isArmor()) C.PIECES.forEach(p => { $(`#pName_${p.key}`).placeholder = `${p.label} (${e.target.value.trim() || 'Rustning'})`; }); });
+  bindSeg('#typeSeg', 'type', setType);
+  bindSeg('#stackSeg', 'stack', v => change(it => { it.stack = Number(v); }));
+  $('#nutr').addEventListener('input', e => change(it => { it.food.nutrition = clamp(e.target.value, 1, 20, 4); }));
+  bindSeg('#animSeg', 'anim', v => change(it => { it.food.anim = v; }));
+  $('#alwaysChk').addEventListener('change', e => change(it => { it.food.always = e.target.checked; }));
+  $('#wDmg').addEventListener('input', e => change(it => { it.weapon.damage = clamp(e.target.value, 1, 20, 7); }));
+  $('#wDur').addEventListener('input', e => change(it => { it.weapon.durability = clamp(e.target.value, 10, 3000, 600); }));
+  $('#wEnch').addEventListener('change', e => change(it => { it.weapon.enchant = e.target.checked; }));
+  bindSeg('#kindSeg', 'kind', v => change(it => { it.tool.kind = v; if (C.TEMPLATES[v]) it.tpl = v; overlayDirty = true; }));
+  bindSeg('#tierSeg', 'tier', v => change(it => { it.tool.tier = v; it.tool.durability = C.TIERS[v].dur; }));
+  $('#tDur').addEventListener('input', e => change(it => { it.tool.durability = clamp(e.target.value, 10, 3000, 250); }));
+  $('#tEnch').addEventListener('change', e => change(it => { it.tool.enchant = e.target.checked; }));
+  bindSeg('#rarSeg', 'rar', v => change(it => { it.rarity = v; }));
+  $('#glintChk').addEventListener('change', e => change(it => { it.glint = e.target.checked; }));
+  $('#addonName').addEventListener('input', e => { project.name = e.target.value; saveProject(); });
+  $('#nsIn').addEventListener('input', e => { project.ns = e.target.value; saveProject(); renderTip(); renderIdLine(); if (step === 6) renderStep(); });
+  $('#nsIn').addEventListener('blur', () => { project.ns = C.slug(project.ns, 'verkstad'); saveProject(); renderColl(); renderProps(); });
+  $('#exportBtn').addEventListener('click', exportAddon);
+  $('#prevBtn').addEventListener('click', () => goStep(step - 1)); $('#nextBtn').addEventListener('click', () => goStep(step + 1));
+  $('#newBtn').addEventListener('click', () => { const it = newItem(`Föremål ${project.items.length + 1}`); it.tpl = isArmor() ? 'sword' : active().tpl; addItem(it, 'icon'); goStep(0); msg('Ett nytt föremål är tillagt i samlingen.'); $('#itemName').focus(); $('#itemName').select(); });
+  $('#newArmorBtn').addEventListener('click', () => { const it = newItem('Min rustning'); it.type = 'armor'; it.armor = newArmor(); addItem(it, 'armor'); goStep(0); msg('En ny rustning är tillagd. Välj en färg och tryck Grundmåla för att komma igång.'); });
+  $('#exampleBtn').addEventListener('click', () => { addItem(exampleItem(), 'icon'); msg('Månsten är tillagd som exempel. Ta bort den innan ni sparar add-onet om ni inte vill ha med den.'); });
+  $('#openBtn').addEventListener('click', () => $('#fileIn').click());
+  $('#fileIn').addEventListener('change', e => {
+    const f = e.target.files && e.target.files[0]; if (!f) return; const fr = new FileReader();
+    fr.onload = () => { const im = new Image(); im.onload = () => {
+      const wantW = W, okSize = surf === 'armor' ? im.naturalWidth === 64 && (im.naturalHeight === 32 || im.naturalHeight === 64) : im.naturalWidth === 16 && im.naturalHeight === 16;
+      if (!okSize) { msg(`Bilden är ${im.naturalWidth} × ${im.naturalHeight} pixlar. ${surf === 'armor' ? 'En rustningsbild ska vara 64 × 32 pixlar.' : 'Föremål ska vara 16 × 16 pixlar.'}`); return; }
+      const c = document.createElement('canvas'); c.width = wantW; c.height = im.naturalHeight; const x = c.getContext('2d', { willReadFrequently:true }); x.drawImage(im, 0, 0);
+      const data = x.getImageData(0, 0, wantW, im.naturalHeight).data;
+      pushUndo();
+      if (surf === 'armor' && im.naturalHeight === 32) {
+        const half = pix.length / 2, layer = hover && hover.surf === 'armor' && hover.y >= 32 ? 2 : (piece === 'legs' ? 2 : 1);
+        pix.set(data, layer === 2 ? half : 0);
+        msg(`Bilden är inläst som lager ${layer}. Ångra med Ctrl+Z om det var fel lager.`);
+      } else { pix.set(data); msg('Bilden är inläst. Ångra med Ctrl+Z om det var fel.'); }
+      commit(); dirty3d = true; };
+      im.onerror = () => msg('Filen gick inte att läsa som en PNG-bild.'); im.src = fr.result; };
+    fr.readAsDataURL(f); e.target.value = '';
+  });
+  document.addEventListener('keydown', e => {
+    if (e.target.closest && e.target.closest('input, textarea, select')) return;
+    const k = e.key.toLowerCase(), mod = e.ctrlKey || e.metaKey;
+    if (mod && k === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); return; }
+    if (mod && k === 'y') { e.preventDefault(); redo(); return; }
+    if (mod || e.altKey) return;
+    if (e.shiftKey && e.key.startsWith('Arrow')) { e.preventDefault(); const d = { ArrowLeft:[-1,0], ArrowRight:[1,0], ArrowUp:[0,-1], ArrowDown:[0,1] }[e.key]; shiftImg(d[0], d[1]); return; }
+    const map = { b:'pen', e:'eraser', g:'fill', i:'picker', s:'dark', l:'light' };
+    if (map[k]) setTool(map[k]); else if (k === 'k') outline(); else if (k === 'm') { mirror = !mirror; $('#mirrorChk').checked = mirror; overlayDirty = dirty3d = true; }
+  });
+  new ResizeObserver(sizeOverlay).observe($('#edbox'));
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readTokens);
+  new MutationObserver(readTokens).observe(document.documentElement, { attributes:true, attributeFilter:['data-theme'] });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { overlayDirty = true; });
+}
+function frame(t) {
+  requestAnimationFrame(frame);
+  if (overlayDirty) { overlayDirty = false; drawOverlay(); }
+  if (dirty3d) { dirty3d = false; rebuild3d(); }
+  render3d(t);
+}
+
+/* ---------- start ---------- */
+if (firstVisit) { project.items.push(exampleItem()); project.items.push(newItem('Mitt första föremål')); project.active = 0; }
+project.active = clamp(project.active, 0, project.items.length - 1, 0);
+surf = isArmor() ? 'armor' : 'icon';
+readTokens(); buildTools(); buildPills(); wire();
+$('#exportBtn').textContent = EXPORT_LABEL;
+if (STANDALONE) $('#expNote').textContent = 'Filen hamnar i Hämtade filer. ' + OPEN_SHORT + ' Guiden visar resten.';
+fillRow($('#palMat'), PAL_MAT.map(fromHex)); fillRow($('#palFood'), PAL_FOOD.map(fromHex)); fillRow($('#palMisc'), PAL_MISC.map(fromHex));
+renderRecent(); setColor(cur); setTool('pen'); markSeg('#viewSeg', 'view', R.view); markSeg('#modeSeg', 'mode', R.mode);
+init3d(); loadActive(); commitView(); sizeOverlay(); updateStatus();
+if (firstVisit) msg('Månsten är ett exempel. Välj Mitt första föremål i samlingen för att börja måla ert eget, eller tryck Ny rustning.');
+saveProject();
+requestAnimationFrame(frame);
+})();
+</script>

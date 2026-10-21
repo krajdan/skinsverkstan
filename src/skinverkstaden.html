@@ -1,0 +1,1063 @@
+<title>Skinverkstaden</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500&family=Pixelify+Sans:wght@500;600&display=swap">
+<style>
+/* Layout: a painter's bench on the left (tools, the unfolded 64x64 map, colors); the figure, the guide and saving on the right */
+:root{
+  --bg:#E4E9EE; --panel:#F8FAFB; --panel-2:#EDF1F5; --ink:#16202A; --muted:#55626F; --line:#C8D1D9; --line-strong:#95A2AE;
+  --accent:#2D63CC; --accent-ink:#FFFFFF; --accent-soft:#DBE5F8;
+  --warm:#D7841C; --warm-soft:#F7E5C6; --danger:#C0392F; --ok:#2C8A55;
+  --check-a:#FFFFFF; --check-b:#DCE2E8; --unused:#B5BFC9; --grid:rgba(22,32,42,.14);
+  --p-head:#7457D4; --p-body:#1C977A; --p-arm:#CF5B2A; --p-leg:#BF4279;
+  --f-display:"Pixelify Sans", ui-monospace, "Courier New", monospace;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F141A; --panel:#171F28; --panel-2:#1E2731; --ink:#E4E9EE; --muted:#93A0AC; --line:#2A3541; --line-strong:#4B5967;
+    --accent:#6E9DFF; --accent-ink:#0A1222; --accent-soft:#1D2F52;
+    --warm:#F0AD4C; --warm-soft:#3A2A12; --danger:#F07367; --ok:#5DC78E;
+    --check-a:#2A333D; --check-b:#212932; --unused:#3B4754; --grid:rgba(228,233,238,.11);
+    --p-head:#A28DF2; --p-body:#4BC6A0; --p-arm:#F28A5B; --p-leg:#EC79A7;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F141A; --panel:#171F28; --panel-2:#1E2731; --ink:#E4E9EE; --muted:#93A0AC; --line:#2A3541; --line-strong:#4B5967;
+  --accent:#6E9DFF; --accent-ink:#0A1222; --accent-soft:#1D2F52;
+  --warm:#F0AD4C; --warm-soft:#3A2A12; --danger:#F07367; --ok:#5DC78E;
+  --check-a:#2A333D; --check-b:#212932; --unused:#3B4754; --grid:rgba(228,233,238,.11);
+  --p-head:#A28DF2; --p-body:#4BC6A0; --p-arm:#F28A5B; --p-leg:#EC79A7;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--f-body)}
+.app{max-width:1340px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:18px}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px}
+.brand{display:flex;align-items:center;gap:14px}
+#logo{width:48px;height:48px;image-rendering:pixelated;border-radius:4px;background:var(--panel-2);box-shadow:0 0 0 1px var(--line-strong)}
+h1{font:600 30px/1.05 var(--f-display);margin:0;letter-spacing:.01em}
+.tagline{margin:3px 0 0;color:var(--muted);font-size:15px}
+.files{margin-left:auto;display:flex;flex-wrap:wrap;gap:8px}
+
+.btn{border:1px solid var(--line-strong);background:var(--panel);border-radius:var(--r);padding:7px 13px;cursor:pointer;min-height:38px;font-size:15px;line-height:1.2}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.small{min-height:32px;padding:5px 10px;font-size:14px}
+.seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:var(--r);overflow:hidden;background:var(--panel)}
+.seg button{border:0;border-right:1px solid var(--line);background:transparent;font-size:14px;padding:6px 11px;cursor:pointer;min-height:34px}
+.seg button:last-child{border-right:0}
+.seg button:hover{background:var(--panel-2)}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);font-weight:700}
+.chk{display:inline-flex;align-items:center;gap:7px;font-size:14px;cursor:pointer;user-select:none}
+.chk input{width:17px;height:17px;accent-color:var(--accent);margin:0}
+.lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-weight:700}
+
+.layout{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1000px){.layout{grid-template-columns:minmax(0,1fr) 384px;align-items:start}}
+@media (max-width:999px){.side{order:-1}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.card h2{font:600 19px/1.2 var(--f-display);margin:0}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+
+.bench{display:grid;grid-template-columns:76px minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:640px){.bench{grid-template-columns:minmax(0,1fr)}}
+.tools{display:flex;flex-direction:column;gap:6px;position:sticky;top:max(12px,env(safe-area-inset-top,0px))}
+@media (max-width:640px){.tools{flex-direction:row;flex-wrap:wrap;position:static}}
+.tool{display:grid;justify-items:center;gap:3px;padding:8px 4px 6px;border:1px solid var(--line);background:var(--panel);border-radius:var(--r);font-size:13px;line-height:1.1;cursor:pointer;min-width:66px}
+.tool:hover{border-color:var(--line-strong)}
+.tool svg{width:24px;height:24px}
+.tool kbd{font:500 10px/1 var(--f-mono);color:var(--muted)}
+.tool[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tool[aria-pressed="true"] kbd{color:var(--accent-ink)}
+
+.mapcol{display:grid;gap:10px;min-width:0}
+.mapbar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.mapbar .grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mapbar .push{margin-left:auto;display:flex;gap:6px}
+.iconbtn{display:inline-flex;align-items:center;gap:6px}
+.iconbtn svg{width:18px;height:18px}
+.mapbox{position:relative;width:100%;max-width:640px;aspect-ratio:1/1;border:1px solid var(--line-strong);border-radius:4px;overflow:hidden;
+  background:repeating-conic-gradient(var(--check-a) 0 25%, var(--check-b) 0 50%) 0 0/3.125% 3.125%;touch-action:none;user-select:none}
+#paint,#ov{position:absolute;inset:0;width:100%;height:100%;display:block}
+#paint{image-rendering:pixelated;image-rendering:crisp-edges}
+#ov{cursor:crosshair}
+.status{font:13px/1.45 var(--f-mono);color:var(--muted);min-height:1.45em;display:flex;gap:4px 14px;flex-wrap:wrap;max-width:640px}
+.status b{color:var(--ink);font-weight:500}
+.status .chip{display:inline-block;width:11px;height:11px;border-radius:2px;border:1px solid var(--line-strong);vertical-align:-1px;margin-right:5px}
+.msg{margin:0;font-size:15px;min-height:1.5em;max-width:640px}
+.msg.show{color:var(--ink)}
+.hint{font-size:14px;color:var(--muted);margin:0;max-width:640px}
+
+.colors{display:grid;gap:12px;max-width:640px}
+.cur{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.cur .big{width:44px;height:44px;border-radius:6px;border:1px solid var(--line-strong)}
+.cur input[type=color]{width:44px;height:38px;border:1px solid var(--line-strong);border-radius:var(--r);padding:2px;background:var(--panel);cursor:pointer}
+.cur code{font:500 15px var(--f-mono)}
+.crow{display:grid;grid-template-columns:78px minmax(0,1fr);gap:10px;align-items:center}
+@media (max-width:420px){.crow{grid-template-columns:minmax(0,1fr)}}
+.swrow{display:flex;flex-wrap:wrap;gap:5px}
+.sw{width:28px;height:28px;border-radius:4px;border:1px solid var(--line-strong);cursor:pointer;padding:0}
+.sw[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:2px}
+.shade-row .sw{width:34px}
+.empty{font-size:13px;color:var(--muted)}
+
+.side{display:grid;gap:16px}
+.stage{height:350px;position:relative;border-radius:6px;background:var(--panel-2);touch-action:none;margin:12px 0 10px;overflow:hidden}
+@media (max-width:640px){.stage{height:290px}}
+.stage canvas{display:block;width:100%;height:100%;cursor:grab}
+.stage.painting canvas{cursor:crosshair}
+.stage .no3d{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;margin:0;color:var(--muted);font-size:14px}
+.viewrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.note{font-size:14px;color:var(--muted);margin:10px 0 0}
+
+.pills{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:12px 0 10px;padding:0}
+.pills button{width:34px;height:34px;border:1px solid var(--line);background:var(--panel);border-radius:4px;font:600 16px/1 var(--f-display);cursor:pointer}
+.pills button.done{background:var(--accent-soft);border-color:var(--accent-soft)}
+.pills button[aria-current="step"]{background:var(--warm-soft);border-color:var(--warm);box-shadow:inset 0 0 0 1px var(--warm)}
+#stepTitle{font:600 22px/1.15 var(--f-display);margin:2px 0 6px;text-wrap:balance}
+#stepText{margin:0 0 10px;max-width:60ch}
+.tip{font-size:14px;color:var(--muted);border-left:3px solid var(--warm);border-radius:0;padding:2px 0 2px 10px;margin:0 0 12px}
+.guide-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.guide-actions .spacer{flex:1}
+.check{display:grid;gap:10px;margin:0 0 14px}
+.check ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.check li{display:grid;grid-template-columns:12px minmax(0,1fr);gap:9px;font-size:14px;align-items:start}
+.dot{width:10px;height:10px;border-radius:50%;margin-top:5px;background:var(--muted)}
+.dot.ok{background:var(--ok)} .dot.warn{background:var(--warm)} .dot.fail{background:var(--danger)} .dot.info{background:var(--accent)}
+
+.saverow{display:flex;gap:14px;align-items:flex-start;margin-top:12px;flex-wrap:wrap}
+#preview{width:96px;height:96px;image-rendering:pixelated;border:1px solid var(--line-strong);border-radius:4px;
+  background:repeating-conic-gradient(var(--check-a) 0 25%, var(--check-b) 0 50%) 0 0/12.5% 12.5%;flex:none}
+.savefields{display:grid;gap:8px;flex:1;min-width:180px}
+.savefields label{font-size:13px;color:var(--muted)}
+.namerow{display:flex;align-items:center;border:1px solid var(--line-strong);border-radius:var(--r);background:var(--panel);overflow:hidden}
+.namerow input{border:0;background:transparent;padding:7px 10px;min-width:0;flex:1;font-size:15px}
+.namerow input:focus-visible{outline:none}
+.namerow:focus-within{outline:2px solid var(--accent);outline-offset:1px}
+.namerow .ext{padding:0 10px;font:14px var(--f-mono);color:var(--muted)}
+.upload{font-size:14px;margin:12px 0 0;padding-top:12px;border-top:1px solid var(--line)}
+.upload p{margin:0 0 6px}
+.upload b{font-weight:700}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+.legal{border-top:1px solid var(--line);padding-top:14px;font-size:13px;line-height:1.5;color:var(--muted)}
+.legal p{margin:0 0 4px;max-width:72ch}
+/* zoomable map and finger-sized controls */
+.mapzoom{position:relative;width:100%;aspect-ratio:1/1;background:inherit;touch-action:none}
+.mapbox.zoomed,.edbox.zoomed{overflow:auto;scrollbar-width:thin;overscroll-behavior:contain}
+.zoombar{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;max-width:640px}
+.zoombar .btn.small{min-width:38px;font-weight:700}
+.zoombar output{font:500 13px/1 var(--f-mono);min-width:6ch;text-align:center;color:var(--muted)}
+.zoomhint{font-size:13px;line-height:1.4;color:var(--muted);flex:1 1 220px;min-width:0;margin:0}
+html{-webkit-text-size-adjust:100%}
+button,label,select,a{touch-action:manipulation}
+@media (pointer:coarse){
+  .btn{min-height:44px}
+  .btn.small{min-height:40px}
+  .zoombar .btn.small{min-width:46px}
+  .seg button{min-height:42px;padding:6px 13px}
+  .chk{min-height:40px}
+  .chk input{width:22px;height:22px}
+  .swrow{gap:7px}
+  .sw{width:36px;height:36px}
+  .shade-row .sw{width:42px}
+  .pills button{width:40px;height:40px}
+  .chips button{min-height:40px;padding:6px 13px}
+  select{min-height:42px}
+}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <canvas id="logo" width="8" height="8" aria-hidden="true"></canvas>
+      <div>
+        <h1>Skinverkstaden</h1>
+        <p class="tagline">Måla er egen Minecraft-skin, pixel för pixel</p>
+      </div>
+    </div>
+    <div class="files">
+      <button class="btn" id="newBtn" type="button">Ny skin</button>
+      <button class="btn" id="openBtn" type="button">Öppna PNG</button>
+      <input type="file" id="fileIn" accept="image/png" hidden>
+      <button class="btn" id="exampleBtn" type="button">Visa exempel</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <section class="bench" aria-label="Målarbänk">
+      <div class="tools" role="toolbar" aria-label="Verktyg" id="tools"></div>
+
+      <div class="mapcol">
+        <div class="mapbar">
+          <div class="grp">
+            <span class="lbl" id="fillLbl">Hinken fyller</span>
+            <div class="seg" id="fillSeg" role="group" aria-labelledby="fillLbl">
+              <button type="button" data-fill="area">En yta</button>
+              <button type="button" data-fill="part">Hel del</button>
+            </div>
+          </div>
+          <div class="grp">
+            <span class="lbl" id="viewLbl">Visa</span>
+            <div class="seg" id="viewSeg" role="group" aria-labelledby="viewLbl">
+              <button type="button" data-view="both">Båda lagren</button>
+              <button type="button" data-view="1">Lager 1</button>
+              <button type="button" data-view="2">Lager 2</button>
+            </div>
+          </div>
+          <div class="grp">
+            <label class="chk"><input type="checkbox" id="mirrorChk"> Spegla <span class="lbl" style="letter-spacing:0">M</span></label>
+            <label class="chk"><input type="checkbox" id="gridChk" checked> Rutnät</label>
+            <label class="chk"><input type="checkbox" id="guideChk" checked> Hjälplinjer</label>
+          </div>
+          <div class="push">
+            <button class="btn small iconbtn" id="undoBtn" type="button" title="Ångra (Ctrl+Z)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4.5L3.5 8 7 11.5"/><path d="M3.5 8h8.5a4.5 4.5 0 0 1 0 9H9"/></svg>Ångra</button>
+            <button class="btn small iconbtn" id="redoBtn" type="button" title="Gör om (Ctrl+Y)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 4.5L16.5 8 13 11.5"/><path d="M16.5 8H8a4.5 4.5 0 0 0 0 9h3"/></svg>Gör om</button>
+          </div>
+        </div>
+
+        <div class="mapbox" id="mapbox">
+          <div class="mapzoom" id="mapzoom">
+            <canvas id="paint" width="64" height="64"></canvas>
+            <canvas id="ov" role="img" aria-label="Skinnets karta, 64 gånger 64 pixlar. Klicka och dra för att måla."></canvas>
+          </div>
+        </div>
+        <div class="zoombar" id="zoombar">
+          <button class="btn small" type="button" data-z="out" aria-label="Zooma ut" title="Zooma ut">&minus;</button>
+          <output aria-live="polite">100 %</output>
+          <button class="btn small" type="button" data-z="in" aria-label="Zooma in" title="Zooma in">+</button>
+          <button class="btn small" type="button" data-z="fit">Hela kartan</button>
+          <p class="zoomhint"></p>
+        </div>
+        <div class="status" id="status"></div>
+        <p class="msg" id="msg" role="status" aria-live="polite"></p>
+        <p class="hint">Heldragna ramar är lager 1, streckade ramar är lager 2. Rutor med snedstreck används inte av spelet.</p>
+
+        <section class="card colors" aria-label="Färger">
+          <div class="cur">
+            <span class="big" id="curSw" aria-hidden="true"></span>
+            <input type="color" id="colorIn" aria-label="Välj valfri färg">
+            <code id="hexOut">#D9542C</code>
+          </div>
+          <div class="crow"><span class="lbl">Nyanser</span><div class="swrow shade-row" id="shadeRow" aria-label="Nyanser av vald färg, mörkast till vänster"></div></div>
+          <div class="crow"><span class="lbl">Hud</span><div class="swrow" id="palSkin"></div></div>
+          <div class="crow"><span class="lbl">Hår</span><div class="swrow" id="palHair"></div></div>
+          <div class="crow"><span class="lbl">Kläder</span><div class="swrow" id="palCloth"></div></div>
+          <div class="crow"><span class="lbl">Senaste</span><div class="swrow" id="palRecent"></div></div>
+        </section>
+      </div>
+    </section>
+
+    <aside class="side">
+      <section class="card" aria-label="3D-figuren">
+        <div class="card-head">
+          <h2>Figuren</h2>
+          <div class="seg" id="modeSeg" role="group" aria-label="Vad musen gör på figuren">
+            <button type="button" data-mode="rotate">Snurra</button>
+            <button type="button" data-mode="paint">Måla</button>
+          </div>
+        </div>
+        <div class="stage" id="stage"></div>
+        <div class="viewrow">
+          <div class="seg" id="modelSeg" role="group" aria-label="Armbredd">
+            <button type="button" data-model="classic">Classic 4 px</button>
+            <button type="button" data-model="slim">Slim 3 px</button>
+          </div>
+          <button class="btn small" id="turnBtn" type="button">Vänd</button>
+          <button class="btn small" id="resetBtn" type="button">Vrid tillbaka</button>
+        </div>
+        <p class="note">Peka på kartan så lyser samma ruta upp på figuren. Dra för att snurra och scrolla för att zooma. Med Måla kan ni måla direkt på figuren.</p>
+      </section>
+
+      <section class="card" aria-label="Guide">
+        <div class="card-head"><h2>Guide</h2><span class="lbl" id="stepCount">Steg 1 av 9</span></div>
+        <ol class="pills" id="pills"></ol>
+        <h3 id="stepTitle">Hud</h3>
+        <p id="stepText"></p>
+        <p class="tip" id="stepTip"></p>
+        <div class="check" id="checkArea" hidden>
+          <div><button class="btn" id="checkBtn" type="button">Kolla skinnet</button></div>
+          <ul id="checkList"></ul>
+        </div>
+        <div class="guide-actions">
+          <button class="btn" id="spotBtn" type="button" aria-pressed="false">Visa var</button>
+          <span class="spacer"></span>
+          <button class="btn" id="prevBtn" type="button">Förra</button>
+          <button class="btn primary" id="nextBtn" type="button">Nästa</button>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Spara">
+        <h2>Spara</h2>
+        <div class="saverow">
+          <img id="preview" alt="Skinnet som PNG-bild, 64 gånger 64 pixlar" width="64" height="64">
+          <div class="savefields">
+            <label for="skinName">Filnamn</label>
+            <div class="namerow"><input id="skinName" value="min-skin" maxlength="40" autocomplete="off" spellcheck="false"><span class="ext">.png</span></div>
+            <button class="btn primary" id="saveBtn" type="button">Spara PNG</button>
+          </div>
+        </div>
+        <p class="note">Utkastet sparas automatiskt i den här webbläsaren. Om Spara inte fungerar: högerklicka på bilden och välj Spara bild som.</p>
+        <div class="upload">
+          <p><b>Java:</b> Minecraft Launcher, fliken Skins, New Skin.</p>
+          <p><b>Bedrock:</b> Dressing Room, Classic Skin, Owned, Import.</p>
+          <p>Välj samma armbredd som här: <span id="modelNote">Classic</span>.</p>
+        </div>
+      </section>
+    </aside>
+  </div>
+  <footer class="legal">
+    <p>Ett fristående hobbyprojekt. Inte en officiell Minecraft-produkt. Inte godkänd av eller kopplad till Mojang eller Microsoft.</p>
+    <p lang="en">NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.</p>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(() => {
+'use strict';
+const N = 64, KEY = 'skinverkstaden.v1';
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const paint = $('#paint'), pctx = paint.getContext('2d', { willReadFrequently: true });
+const ov = $('#ov'), octx = ov.getContext('2d');
+const logo = $('#logo'), lctx = logo.getContext('2d');
+const FONT_BODY = '"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif';
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let pix = pctx.createImageData(N, N);
+let slim = false, tool = 'pen', prevTool = 'pen', fillMode = 'area', mirror = false;
+let showGrid = true, showGuides = true, view = 'both', mode3d = 'rotate';
+let cur = [217, 84, 44], base = cur.slice(), recent = [];
+let hover = null, spotlight = false, step = 0, problems = null, maxStep = 0;
+let overlayDirty = true, dirty3d = true, drawing = false, lastPx = null;
+const T = {};
+let hatch = null;
+
+/* ---------- geometry of the 64x64 skin ---------- */
+const FACE = ['topp', 'botten', 'höger sida', 'framsida', 'vänster sida', 'baksida'];
+const MIRROR_FACE = [0, 1, 4, 3, 2, 5];
+const MAT2FACE = [4, 2, 0, 1, 3, 5]; // three.js box faces +x,-x,+y,-y,+z,-z
+function boxFaces(u, v, w, h, d) {
+  return [[u+d, v, w, d], [u+d+w, v, w, d], [u, v+d, d, h], [u+d, v+d, w, h], [u+d+w, v+d, d, h], [u+2*d+w, v+d, w, h]];
+}
+function makeParts(isSlim) {
+  const a = isSlim ? 3 : 4, ax = 4 + a / 2;
+  const P = [
+    { id:'head', name:'Huvud', short:'Huvud', layer:1, kind:'head', u:0, v:0, w:8, h:8, d:8, mirror:'head', pos:[0,28,0] },
+    { id:'body', name:'Kropp', short:'Kropp', layer:1, kind:'body', u:16, v:16, w:8, h:12, d:4, mirror:'body', pos:[0,18,0] },
+    { id:'rarm', name:'Höger arm', short:'H arm', layer:1, kind:'arm', u:40, v:16, w:a, h:12, d:4, mirror:'larm', pos:[-ax,18,0] },
+    { id:'larm', name:'Vänster arm', short:'V arm', layer:1, kind:'arm', u:32, v:48, w:a, h:12, d:4, mirror:'rarm', pos:[ax,18,0] },
+    { id:'rleg', name:'Höger ben', short:'H ben', layer:1, kind:'leg', u:0, v:16, w:4, h:12, d:4, mirror:'lleg', pos:[-2,6,0] },
+    { id:'lleg', name:'Vänster ben', short:'V ben', layer:1, kind:'leg', u:16, v:48, w:4, h:12, d:4, mirror:'rleg', pos:[2,6,0] },
+    { id:'hat', name:'Hatt', short:'Hatt', layer:2, kind:'head', u:32, v:0, w:8, h:8, d:8, mirror:'hat', pos:[0,28,0], inf:.5 },
+    { id:'jacket', name:'Jacka', short:'Jacka', layer:2, kind:'body', u:16, v:32, w:8, h:12, d:4, mirror:'jacket', pos:[0,18,0], inf:.25 },
+    { id:'rarm2', name:'Höger ärm', short:'H arm', layer:2, kind:'arm', u:40, v:32, w:a, h:12, d:4, mirror:'larm2', pos:[-ax,18,0], inf:.25 },
+    { id:'larm2', name:'Vänster ärm', short:'V arm', layer:2, kind:'arm', u:48, v:48, w:a, h:12, d:4, mirror:'rarm2', pos:[ax,18,0], inf:.25 },
+    { id:'rleg2', name:'Höger byxben', short:'H ben', layer:2, kind:'leg', u:0, v:32, w:4, h:12, d:4, mirror:'lleg2', pos:[-2,6,0], inf:.25 },
+    { id:'lleg2', name:'Vänster byxben', short:'V ben', layer:2, kind:'leg', u:0, v:48, w:4, h:12, d:4, mirror:'rleg2', pos:[2,6,0], inf:.25 }
+  ];
+  P.forEach(p => { p.faces = boxFaces(p.u, p.v, p.w, p.h, p.d).map((r, fi) => ({ part:p, fi, x:r[0], y:r[1], w:r[2], h:r[3] })); });
+  return P;
+}
+let parts, byId, faceMap, faceList;
+function buildGeometry() {
+  parts = makeParts(slim); byId = {}; parts.forEach(p => byId[p.id] = p);
+  faceMap = new Int16Array(N * N).fill(-1); faceList = [];
+  parts.forEach(p => p.faces.forEach(f => {
+    f.idx = faceList.length; faceList.push(f);
+    for (let y = f.y; y < f.y + f.h; y++) for (let x = f.x; x < f.x + f.w; x++) faceMap[y * N + x] = f.idx;
+  }));
+}
+const faceAt = (x, y) => (x < 0 || y < 0 || x >= N || y >= N || faceMap[y * N + x] < 0) ? null : faceList[faceMap[y * N + x]];
+function mirrorOf(x, y) {
+  const f = faceAt(x, y); if (!f) return null;
+  const g = byId[f.part.mirror].faces[MIRROR_FACE[f.fi]];
+  return [g.x + (g.w - 1 - (x - f.x)), g.y + (y - f.y)];
+}
+
+/* ---------- pixels ---------- */
+const get = (x, y) => { const i = (y * N + x) * 4, d = pix.data; return [d[i], d[i+1], d[i+2], d[i+3]]; };
+function set(x, y, r, g, b, a = 255) {
+  const i = (y * N + x) * 4, d = pix.data;
+  if (d[i] === r && d[i+1] === g && d[i+2] === b && d[i+3] === a) return false;
+  d[i] = r; d[i+1] = g; d[i+2] = b; d[i+3] = a; return true;
+}
+const DOLL = [[210,210,210],[140,140,140],[169,169,169],[190,190,190],[169,169,169],[154,154,154]];
+const isDollC = (c, fi) => c[3] === 255 && c[0] === DOLL[fi][0] && c[1] === DOLL[fi][1] && c[2] === DOLL[fi][2];
+function fillFace(f, c, a = 255) { let ch = false; for (let y = f.y; y < f.y + f.h; y++) for (let x = f.x; x < f.x + f.w; x++) if (set(x, y, c[0], c[1], c[2], a)) ch = true; return ch; }
+function makeDoll() {
+  pix = pctx.createImageData(N, N);
+  parts.filter(p => p.layer === 1).forEach(p => p.faces.forEach(f => fillFace(f, DOLL[f.fi])));
+}
+
+/* ---------- colors ---------- */
+const toHex = c => '#' + c.slice(0, 3).map(v => v.toString(16).padStart(2, '0')).join('').toUpperCase();
+const fromHex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+function hexA(h, a) { if (!h || h[0] !== '#') return h; const c = fromHex(h.length === 4 ? '#' + h[1]+h[1]+h[2]+h[2]+h[3]+h[3] : h); return `rgba(${c[0]},${c[1]},${c[2]},${a})`; }
+function rgbToHsl([r, g, b]) {
+  r /= 255; g /= 255; b /= 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b); let h = 0, s = 0; const l = (mx + mn) / 2;
+  if (mx !== mn) { const d = mx - mn; s = l > .5 ? d / (2 - mx - mn) : d / (mx + mn);
+    h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h /= 6; }
+  return [h, s, l];
+}
+function hslToRgb([h, s, l]) {
+  if (!s) { const v = Math.round(l * 255); return [v, v, v]; }
+  const q = l < .5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+  const f = t => { if (t < 0) t += 1; if (t > 1) t -= 1; return t < 1/6 ? p + (q - p) * 6 * t : t < 1/2 ? q : t < 2/3 ? p + (q - p) * (2/3 - t) * 6 : p; };
+  return [f(h + 1/3), f(h), f(h - 1/3)].map(v => Math.round(v * 255));
+}
+const PAL_SKIN = ['#F6D7C3','#EDBB99','#E0A77F','#C68863','#A86B4A','#8A5236','#6B3E28','#4A2A1C'];
+const PAL_HAIR = ['#F3E0A1','#D8A84E','#A0622D','#6B4226','#3B2A20','#1E1A18','#B8BABD','#C2462E'];
+const PAL_CLOTH = ['#F2F2EE','#2B2D31','#D23C3C','#E0782F','#F2C14E','#5BAA4A','#2E7D5B','#2EA3B8','#3466C7','#25386E','#7A4FC4','#C24F8E','#8A5A3B','#5C6B46','#7D8590','#4B5560'];
+
+/* ---------- tokens ---------- */
+function readTokens() {
+  const cs = getComputedStyle(document.documentElement);
+  ['ink','panel','panel-2','bg','line','line-strong','warm','danger','unused','grid','accent','p-head','p-body','p-arm','p-leg'].forEach(k => T[k] = cs.getPropertyValue('--' + k).trim());
+  makeHatch();
+  if (R.ground) R.ground.material.color.set(T['line-strong']);
+  overlayDirty = dirty3d = true;
+}
+function makeHatch() {
+  const dpr = ov.clientWidth ? ov.width / ov.clientWidth : 1;
+  const k = Math.max(4, Math.round(6 * dpr)), c = document.createElement('canvas');
+  c.width = c.height = k; const x = c.getContext('2d');
+  x.strokeStyle = T.unused || '#999'; x.lineWidth = Math.max(1, dpr);
+  x.beginPath(); x.moveTo(0, k); x.lineTo(k, 0); x.moveTo(-1, 1); x.lineTo(1, -1); x.moveTo(k - 1, k + 1); x.lineTo(k + 1, k - 1); x.stroke();
+  hatch = octx.createPattern(c, 'repeat');
+}
+
+/* ---------- commit, save, undo ---------- */
+let saveTimer = null, msgTimer = null;
+function liveCommit() { pctx.putImageData(pix, 0, 0); drawLogo(); dirty3d = true; }
+function commit(save = true) { liveCommit(); overlayDirty = true; if (save) scheduleSave(); }
+function drawLogo() { lctx.clearRect(0, 0, 8, 8); lctx.drawImage(paint, 8, 8, 8, 8, 0, 0, 8, 8); lctx.drawImage(paint, 40, 8, 8, 8, 0, 0, 8, 8); }
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    const url = paint.toDataURL('image/png'); $('#preview').src = url;
+    try { localStorage.setItem(KEY, JSON.stringify({ png:url, slim, step, maxStep, recent })); } catch (e) {}
+  }, 300);
+}
+function msg(t) { const m = $('#msg'); m.textContent = t; m.classList.add('show'); clearTimeout(msgTimer); msgTimer = setTimeout(() => { m.textContent = ''; }, 7000); }
+const undoS = [], redoS = [];
+let strokeSnap = null, strokeChanged = false, strokeVisited = null;
+function pushUndo() { undoS.push(new Uint8ClampedArray(pix.data)); if (undoS.length > 80) undoS.shift(); redoS.length = 0; updateUndo(); }
+function beginStroke() { strokeSnap = new Uint8ClampedArray(pix.data); strokeChanged = false; strokeVisited = new Set(); }
+function endStroke() {
+  if (strokeSnap && strokeChanged) {
+    undoS.push(strokeSnap); if (undoS.length > 80) undoS.shift(); redoS.length = 0; updateUndo();
+    if (tool === 'pen' || tool === 'fill') addRecent(cur);
+    commit(); if (problems) runCheck(true);
+  }
+  strokeSnap = null; drawing = false; lastPx = null;
+}
+function undo() { if (!undoS.length) { msg('Det finns inget att ångra.'); return; } redoS.push(new Uint8ClampedArray(pix.data)); pix.data.set(undoS.pop()); commit(); updateUndo(); if (problems) runCheck(true); }
+function redo() { if (!redoS.length) { msg('Det finns inget att göra om.'); return; } undoS.push(new Uint8ClampedArray(pix.data)); pix.data.set(redoS.pop()); commit(); updateUndo(); if (problems) runCheck(true); }
+function updateUndo() { $('#undoBtn').setAttribute('aria-label', `Ångra (${undoS.length} steg)`); }
+
+/* ---------- painting ---------- */
+const layerAllowed = f => view === 'both' || String(f.part.layer) === view;
+function targetsFor(x, y) {
+  const t = [[x, y]];
+  if (mirror) { const m = mirrorOf(x, y); if (m && (m[0] !== x || m[1] !== y)) t.push(m); }
+  return t;
+}
+function dab(x, y) {
+  const f = faceAt(x, y); if (!f || !layerAllowed(f)) return;
+  for (const [tx, ty] of targetsFor(x, y)) {
+    const g = faceAt(tx, ty); if (!g) continue;
+    if (tool === 'pen') { if (set(tx, ty, cur[0], cur[1], cur[2], 255)) strokeChanged = true; }
+    else if (tool === 'eraser') {
+      const ok = g.part.layer === 1 ? set(tx, ty, ...DOLL[g.fi], 255) : set(tx, ty, 0, 0, 0, 0);
+      if (ok) strokeChanged = true;
+    } else if (tool === 'dark' || tool === 'light') {
+      const k = ty * N + tx; if (strokeVisited.has(k)) continue; strokeVisited.add(k);
+      const c = get(tx, ty); if (c[3] === 0) continue;
+      const n = tool === 'dark' ? c.slice(0, 3).map(v => Math.round(v * .85)) : c.slice(0, 3).map(v => Math.round(v + (255 - v) * .17));
+      if (set(tx, ty, n[0], n[1], n[2], c[3])) strokeChanged = true;
+    }
+  }
+}
+function line(x0, y0, x1, y1, fn) {
+  const dx = Math.abs(x1 - x0), sx = x0 < x1 ? 1 : -1, dy = -Math.abs(y1 - y0), sy = y0 < y1 ? 1 : -1; let err = dx + dy;
+  for (;;) { fn(x0, y0); if (x0 === x1 && y0 === y1) break; const e2 = 2 * err; if (e2 >= dy) { err += dy; x0 += sx; } if (e2 <= dx) { err += dx; y0 += sy; } }
+}
+function floodFace(x, y) {
+  const f = faceAt(x, y); if (!f) return false;
+  const s = get(x, y);
+  if (s[3] === 255 && s[0] === cur[0] && s[1] === cur[1] && s[2] === cur[2]) return false;
+  const same = c => c[0] === s[0] && c[1] === s[1] && c[2] === s[2] && c[3] === s[3];
+  const st = [[x, y]], seen = new Set(); let ch = false;
+  while (st.length) {
+    const [cx, cy] = st.pop(), k = cy * N + cx;
+    if (seen.has(k)) continue; seen.add(k);
+    if (cx < f.x || cy < f.y || cx >= f.x + f.w || cy >= f.y + f.h) continue;
+    if (!same(get(cx, cy))) continue;
+    if (set(cx, cy, cur[0], cur[1], cur[2], 255)) ch = true;
+    st.push([cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]);
+  }
+  return ch;
+}
+function handleDown(x, y) {
+  const f = faceAt(x, y);
+  if (!f) { msg('Den rutan används inte av spelet, så där går det inte att måla.'); return; }
+  if (!layerAllowed(f)) { msg(`Ni visar bara lager ${view}. Välj Båda lagren under Visa för att måla här.`); return; }
+  if (tool === 'picker') {
+    const c = get(x, y);
+    if (c[3] === 0) { msg('Pixeln är genomskinlig, så det finns ingen färg att hämta.'); return; }
+    setColor(c.slice(0, 3)); setTool(prevTool === 'picker' ? 'pen' : prevTool); return;
+  }
+  if (tool === 'fill') {
+    beginStroke();
+    for (const [tx, ty] of targetsFor(x, y)) {
+      const g = faceAt(tx, ty); if (!g) continue;
+      if (fillMode === 'area' ? floodFace(tx, ty) : g.part.faces.reduce((a, ff) => fillFace(ff, cur) || a, false)) strokeChanged = true;
+    }
+    endStroke(); return;
+  }
+  beginStroke(); drawing = true; dab(x, y); lastPx = [x, y]; liveCommit();
+}
+
+/* ---------- tools & color UI ---------- */
+const ICON = {
+  pen:'<path d="M4 16.5l.9-3.6L13.6 4.2a1.5 1.5 0 0 1 2.1 0l.1.1a1.5 1.5 0 0 1 0 2.1L7.1 15.1z"/><path d="M12 5.8l2.2 2.2"/>',
+  eraser:'<path d="M8.5 16.5L4 12l7.5-7.5a1.4 1.4 0 0 1 2 0l2.5 2.5a1.4 1.4 0 0 1 0 2L9 16.5z"/><path d="M7 9.5l4.5 4.5M9 16.5h8"/>',
+  fill:'<path d="M9.5 3.5l6 6-5.5 5.5a1.5 1.5 0 0 1-2.1 0L4 11.1a1.5 1.5 0 0 1 0-2.1z"/><path d="M4.5 10h11"/><path d="M16.5 12.5s1.5 1.7 1.5 2.7a1.5 1.5 0 0 1-3 0c0-1 1.5-2.7 1.5-2.7z"/>',
+  picker:'<path d="M10.5 6.5l3 3M11.8 7.8L5 14.6v2.4h2.4l6.8-6.8"/><path d="M12.5 5.5l2-2a1.4 1.4 0 0 1 2 2l-2 2"/>',
+  dark:'<circle cx="10" cy="10" r="6.5"/><path d="M10 3.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/>',
+  light:'<circle cx="10" cy="10" r="3.2"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4"/>'
+};
+const TOOLS = [
+  ['pen','Penna','B','Penna: måla en pixel i taget'],
+  ['eraser','Sudd','E','Sudd: lager 1 blir dockgrått igen, lager 2 blir genomskinligt'],
+  ['fill','Hink','G','Hink: fyll en yta eller en hel kroppsdel'],
+  ['picker','Pipett','I','Pipett: hämta en färg från skinnet'],
+  ['dark','Skugga','S','Skugga: gör pixlar lite mörkare'],
+  ['light','Ljus','L','Ljus: gör pixlar lite ljusare']
+];
+const TOOL_NAME = Object.fromEntries(TOOLS.map(t => [t[0], t[1]]));
+function buildTools() {
+  $('#tools').innerHTML = TOOLS.map(([id, name, key, tip]) =>
+    `<button type="button" class="tool" data-tool="${id}" title="${tip} (${key})" aria-pressed="false"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[id]}</svg>${name}<kbd>${key}</kbd></button>`).join('');
+  $$('.tool').forEach(b => b.addEventListener('click', () => setTool(b.dataset.tool)));
+}
+function setTool(t) {
+  if (t === 'picker' && tool !== 'picker') prevTool = tool;
+  tool = t;
+  $$('.tool').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tool === t)));
+  updateStatus();
+}
+function swatchBtn(rgb, kind) {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'sw'; b.style.background = toHex(rgb); b.dataset.hex = toHex(rgb);
+  b.setAttribute('aria-label', toHex(rgb)); b.title = toHex(rgb);
+  b.addEventListener('click', () => setColor(rgb, kind !== 'shade'));
+  return b;
+}
+function fillRow(el, list, kind) { el.replaceChildren(...list.map(c => swatchBtn(c, kind))); }
+function renderShades() {
+  const [h, s, l] = rgbToHsl(base);
+  const list = [-.27, -.18, -.09, 0, .09, .18, .27].map(o => o === 0 ? base.slice() : hslToRgb([h + (o < 0 ? .012 : -.008) * Math.abs(o) * 10 % 1, s, Math.min(.97, Math.max(.04, l + o))]));
+  fillRow($('#shadeRow'), list, 'shade');
+}
+function renderRecent() {
+  const el = $('#palRecent');
+  if (!recent.length) { el.innerHTML = '<span class="empty">Färger ni målar med hamnar här.</span>'; return; }
+  fillRow(el, recent.map(fromHex), 'recent');
+}
+function markSwatches() { const h = toHex(cur); $$('.sw').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.hex === h))); }
+function setColor(rgb, newBase = true) {
+  cur = rgb.slice(0, 3); if (newBase) { base = cur.slice(); renderShades(); }
+  $('#curSw').style.background = toHex(cur); $('#hexOut').textContent = toHex(cur); $('#colorIn').value = toHex(cur).toLowerCase();
+  if (tool === 'eraser' || tool === 'picker') setTool('pen');
+  markSwatches();
+}
+function addRecent(c) { const h = toHex(c); recent = [h, ...recent.filter(x => x !== h)].slice(0, 12); renderRecent(); markSwatches(); }
+
+/* ---------- guide ---------- */
+const rows = (ids, fis, fromEnd, count) => ids.flatMap(id => fis.map(i => { const f = byId[id].faces[i]; return [f.x, fromEnd ? f.y + f.h - count : f.y, f.w, count]; }));
+const STEPS = [
+  { t:'Hud', tg:[['head','all']],
+    x:'Välj en hudfärg under Färger. Ta Hinken, välj Hel del och klicka på huvudet. Då fylls alla sex sidorna på en gång.',
+    tip:'Peka på kartan och se vilken ruta som lyser upp på figuren. Så lär ni er hur kartan viks ihop.', hints:() => [] },
+  { t:'Ögon', tg:[['head',[3]]],
+    x:'Ansiktet är framsidan av huvudet, 8 × 8 pixlar. Ögonen brukar sitta på femte raden uppifrån. Prova ett vitt öga och en färgad pupill på varje sida.',
+    tip:'De streckade rutorna är bara ett förslag. Slå på Spegla så blir båda ögonen lika. Munnen kan vara två lite mörkare pixlar längre ner.',
+    hints:() => [[9,12,2,1],[13,12,2,1],[11,14,2,1]] },
+  { t:'Hår', tg:[['head',[0,2,4,5]]],
+    x:'Måla toppen, baksidan och båda sidorna av huvudet i en hårfärg. Lägg en rad hår högst upp i ansiktet som lugg.',
+    tip:'Hinken med En yta fyller bara den sida ni klickar på. Långt hår? Låt det gå längre ner på sidorna och baksidan.',
+    hints:() => [[8,8,8,1]] },
+  { t:'Tröja', tg:[['body','all'],['rarm','all'],['larm','all']],
+    x:'Fyll kroppen och båda armarna med tröjans färg. Kortärmat? Måla då bara armarnas översta fyra rader i tröjfärg och resten i hudfärg.',
+    tip:'Med Spegla påslaget blir vänster arm en spegelbild av höger arm.', hints:() => rows(['rarm','larm'],[2,3,4,5],false,4) },
+  { t:'Byxor', tg:[['rleg','all'],['lleg','all']],
+    x:'Fyll båda benen med byxfärgen.',
+    tip:'En mörkare rad längst ner på kroppen blir ett bälte som binder ihop tröja och byxor.', hints:() => rows(['body'],[2,3,4,5],true,1) },
+  { t:'Skor', tg:[['rleg',[1,2,3,4,5]],['lleg',[1,2,3,4,5]]],
+    x:'Måla benens två eller tre nedersta rader och undersidan i en skofärg.',
+    tip:'Undersidan syns när figuren hoppar, så glöm den inte.', hints:() => rows(['rleg','lleg'],[2,3,4,5],true,3) },
+  { t:'Skugga', tg:'l1',
+    x:'Ljuset kommer uppifrån. Välj Skugga och dra över nederkanter: under håret, längst ner på tröjan och på insidan av armarna. Välj Ljus för toppar och kanter.',
+    tip:'Några pixlar i en lite annan nyans gör att tyg och hår ser levande ut. Nyanserna under Färger går från mörk till ljus.', hints:() => [] },
+  { t:'Lager 2', tg:'l2',
+    x:'Lager 2 är ett tunt skal utanpå figuren. Här passar hatt, glasögon, luva och jacka. Allt ni inte målar förblir genomskinligt.',
+    tip:'Välj Visa: Lager 2 för att bara måla på skalet. Då kan ni också måla direkt på 3D-figuren med Måla.', hints:() => [] },
+  { t:'Klart', tg:null, check:true,
+    x:'Tryck på Kolla skinnet. När lager 1 är helt täckt kan ni spara PNG-filen under Spara.',
+    tip:'Java: Minecraft Launcher, fliken Skins, New Skin. Bedrock: Dressing Room, Classic Skin, Owned, Import.', hints:() => [] }
+];
+function stepTargets() {
+  const s = STEPS[step]; if (!s.tg) return [];
+  if (s.tg === 'l1') return faceList.filter(f => f.part.layer === 1);
+  if (s.tg === 'l2') return faceList.filter(f => f.part.layer === 2);
+  return s.tg.flatMap(([id, fs]) => { const p = byId[id]; return fs === 'all' ? p.faces : fs.map(i => p.faces[i]); });
+}
+function buildPills() {
+  $('#pills').innerHTML = STEPS.map((s, i) => `<li><button type="button" data-step="${i}" aria-label="Steg ${i + 1}: ${s.t}" title="${s.t}">${i + 1}</button></li>`).join('');
+  $$('#pills button').forEach(b => b.addEventListener('click', () => goStep(+b.dataset.step)));
+}
+function goStep(i) { step = Math.max(0, Math.min(STEPS.length - 1, i)); maxStep = Math.max(maxStep, step); renderStep(); scheduleSave(); }
+function renderStep() {
+  const s = STEPS[step];
+  $('#stepCount').textContent = `Steg ${step + 1} av ${STEPS.length}`;
+  $('#stepTitle').textContent = s.t; $('#stepText').textContent = s.x; $('#stepTip').textContent = s.tip;
+  $('#checkArea').hidden = !s.check;
+  $('#spotBtn').hidden = !s.tg; if (!s.tg) setSpot(false);
+  $('#prevBtn').style.visibility = step === 0 ? 'hidden' : 'visible';
+  $('#nextBtn').style.visibility = step === STEPS.length - 1 ? 'hidden' : 'visible';
+  $$('#pills button').forEach((b, i) => { b.classList.toggle('done', i < step || (i <= maxStep && i !== step)); if (i === step) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+  overlayDirty = dirty3d = true;
+}
+function setSpot(on) { spotlight = on; const b = $('#spotBtn'); b.setAttribute('aria-pressed', String(on)); b.textContent = on ? 'Dölj markering' : 'Visa var'; overlayDirty = dirty3d = true; }
+
+function runCheck(silent) {
+  const holes = new Set(), dolls = new Set(); let semi = 0;
+  faceList.forEach(f => { for (let y = f.y; y < f.y + f.h; y++) for (let x = f.x; x < f.x + f.w; x++) {
+    const c = get(x, y);
+    if (f.part.layer === 1) { if (c[3] < 255) holes.add(y * N + x); else if (isDollC(c, f.fi)) dolls.add(y * N + x); }
+    else if (c[3] > 0 && c[3] < 255) semi++;
+  }});
+  const items = [];
+  items.push(holes.size ? { s:'fail', t:`${holes.size} pixlar på lager 1 är genomskinliga. De kan bli svarta i spelet. De har röd ram på kartan.` } : { s:'ok', t:'Lager 1 är helt täckt.' });
+  items.push(dolls.size ? { s:'warn', t:`${dolls.size} pixlar har fortfarande dockans grå färg. Det går att spara ändå, men de blir grå i spelet. De har orange ram på kartan.` } : { s:'ok', t:'Inga grå dockpixlar kvar.' });
+  if (semi) items.push({ s:'warn', t:`${semi} pixlar på lager 2 är halvgenomskinliga. Java och Bedrock visar dem olika.` });
+  items.push({ s:'info', t:`Armarna är ${slim ? 'Slim, 3 pixlar breda' : 'Classic, 4 pixlar breda'}. Välj samma när ni laddar upp.` });
+  problems = { holes, dolls }; overlayDirty = true;
+  $('#checkList').innerHTML = items.map(i => `<li><span class="dot ${i.s}" aria-hidden="true"></span><span>${i.t}</span></li>`).join('');
+  if (!silent) msg(!holes.size && !dolls.size ? 'Skinnet ser klart ut. Spara det under Spara.' : 'Kolla listan i guiden.');
+}
+
+/* ---------- map overlay ---------- */
+function sizeOverlay() {
+  const w = ov.clientWidth; if (!w) return;
+  const dpr = Math.min(3, window.devicePixelRatio || 1), px = Math.min(matchMedia('(pointer: coarse)').matches ? 3200 : 4096, Math.max(64, Math.round(w * dpr)));
+  if (ov.width !== px) { ov.width = ov.height = px; makeHatch(); }
+  overlayDirty = true;
+}
+function drawOverlay() {
+  const W = ov.width; if (!W || !faceList) return;
+  const c = octx, s = W / N, dpr = W / (ov.clientWidth || W), X = i => Math.round(i * s);
+  const rect = (x, y, w, h) => [X(x), X(y), X(x + w) - X(x), X(y + h) - X(y)];
+  c.clearRect(0, 0, W, W);
+  for (let y = 0; y < N; y++) { let x = 0; while (x < N) { if (faceMap[y * N + x] < 0) { let x2 = x; while (x2 < N && faceMap[y * N + x2] < 0) x2++;
+    const r = rect(x, y, x2 - x, 1); c.fillStyle = T['panel-2']; c.fillRect(...r); c.fillStyle = hatch || T.unused; c.fillRect(...r); x = x2; } else x++; } }
+  if (view !== 'both') { c.fillStyle = hexA(T.panel, .82); faceList.forEach(f => { if (String(f.part.layer) !== view) c.fillRect(...rect(f.x, f.y, f.w, f.h)); }); }
+  if (showGrid && s / dpr >= 5) {
+    c.beginPath(); for (let i = 1; i < N; i++) { const p = X(i) + .5; c.moveTo(p, 0); c.lineTo(p, W); c.moveTo(0, p); c.lineTo(W, p); }
+    c.strokeStyle = T.grid; c.lineWidth = 1; c.stroke();
+  }
+  if (showGuides) {
+    const lw = Math.max(1, Math.round(dpr * 1.25)); c.lineWidth = lw;
+    faceList.forEach(f => {
+      c.strokeStyle = T['p-' + f.part.kind]; c.setLineDash(f.part.layer === 2 ? [4 * dpr, 3 * dpr] : []);
+      const [rx, ry, rw, rh] = rect(f.x, f.y, f.w, f.h); c.strokeRect(rx + lw / 2, ry + lw / 2, rw - lw, rh - lw);
+    });
+    c.setLineDash([]);
+    if (s / dpr >= 6.5) {
+      const fs = Math.round(Math.min(12, s / dpr * 1.25)) * dpr;
+      c.font = `700 ${fs}px ${FONT_BODY}`; c.textAlign = 'center'; c.textBaseline = 'middle';
+      parts.forEach(p => { const [rx, ry, rw, rh] = rect(p.u, p.v, p.d, p.d); c.fillStyle = T['p-' + p.kind]; c.fillText(p.short, rx + rw / 2, ry + rh / 2, rw - 3 * dpr); });
+    }
+  }
+  if (spotlight) {
+    const tg = stepTargets();
+    if (tg.length) {
+      c.beginPath(); c.rect(0, 0, W, W); tg.forEach(f => c.rect(...rect(f.x, f.y, f.w, f.h)));
+      c.fillStyle = hexA(T.bg, .74); c.fill('evenodd');
+      c.lineWidth = 2 * dpr; c.strokeStyle = T.warm; tg.forEach(f => { const [rx, ry, rw, rh] = rect(f.x, f.y, f.w, f.h); c.strokeRect(rx + dpr, ry + dpr, rw - 2 * dpr, rh - 2 * dpr); });
+    }
+  }
+  if (showGuides) {
+    const hs = STEPS[step].hints();
+    if (hs.length) {
+      c.setLineDash([3 * dpr, 2 * dpr]); c.lineWidth = 2 * dpr; c.strokeStyle = T.warm; c.fillStyle = hexA(T.warm, .18);
+      hs.forEach(h => { const [rx, ry, rw, rh] = rect(...h); c.fillRect(rx, ry, rw, rh); c.strokeRect(rx + dpr, ry + dpr, rw - 2 * dpr, rh - 2 * dpr); });
+      c.setLineDash([]);
+    }
+  }
+  if (problems) {
+    c.lineWidth = Math.max(1.5, 1.5 * dpr);
+    const draw = (set_, col) => { c.strokeStyle = col; set_.forEach(k => { const [rx, ry, rw, rh] = rect(k % N, (k / N) | 0, 1, 1); c.strokeRect(rx + dpr, ry + dpr, rw - 2 * dpr, rh - 2 * dpr); }); };
+    draw(problems.dolls, T.warm); draw(problems.holes, T.danger);
+  }
+  if (hover) {
+    const f = faceAt(hover.x, hover.y);
+    if (f) { c.lineWidth = 2 * dpr; c.strokeStyle = T.warm; const [rx, ry, rw, rh] = rect(f.x, f.y, f.w, f.h); c.strokeRect(rx + dpr, ry + dpr, rw - 2 * dpr, rh - 2 * dpr); }
+    const pr = rect(hover.x, hover.y, 1, 1);
+    c.lineWidth = 2 * dpr; c.strokeStyle = T.ink; c.strokeRect(pr[0] + dpr, pr[1] + dpr, pr[2] - 2 * dpr, pr[3] - 2 * dpr);
+    if (pr[2] > 8 * dpr) { c.lineWidth = dpr; c.strokeStyle = T.panel; c.strokeRect(pr[0] + 2.5 * dpr, pr[1] + 2.5 * dpr, pr[2] - 5 * dpr, pr[3] - 5 * dpr); }
+    if (mirror) { const m = mirrorOf(hover.x, hover.y);
+      if (m && (m[0] !== hover.x || m[1] !== hover.y)) { const mr = rect(m[0], m[1], 1, 1); c.setLineDash([2 * dpr, 2 * dpr]); c.lineWidth = 1.5 * dpr; c.strokeStyle = T.ink; c.strokeRect(mr[0] + dpr, mr[1] + dpr, mr[2] - 2 * dpr, mr[3] - 2 * dpr); c.setLineDash([]); } }
+  }
+}
+function setHover(h) {
+  if (h && hover && h.x === hover.x && h.y === hover.y && h.src === hover.src) return;
+  if (!h && !hover) return;
+  hover = h; overlayDirty = dirty3d = true; updateStatus();
+}
+function updateStatus() {
+  const el = $('#status');
+  if (!hover) { el.innerHTML = `<span>Verktyg: <b>${TOOL_NAME[tool]}</b></span><span>Peka på kartan eller figuren för att se vad en ruta är.</span>`; return; }
+  const f = faceAt(hover.x, hover.y), c = get(hover.x, hover.y);
+  const col = c[3] === 0 ? 'genomskinlig' : `<span class="chip" style="background:${toHex(c)}"></span>${toHex(c)}`;
+  el.innerHTML = `<span><b>${f.part.name}</b> · ${FACE[f.fi]} · lager ${f.part.layer}</span><span>x ${hover.x} · y ${hover.y}</span><span>${col}</span>`;
+}
+function mapPx(e) {
+  const r = ov.getBoundingClientRect();
+  const x = Math.floor((e.clientX - r.left) / r.width * N), y = Math.floor((e.clientY - r.top) / r.height * N);
+  return (x < 0 || y < 0 || x >= N || y >= N) ? null : { x, y };
+}
+ov.addEventListener('pointerdown', e => {
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  const p = mapPx(e); if (!p) return; e.preventDefault();
+  try { ov.setPointerCapture(e.pointerId); } catch (err) {}
+  handleDown(p.x, p.y); setHover(faceAt(p.x, p.y) ? { ...p, src:'map' } : null);
+});
+ov.addEventListener('pointermove', e => {
+  const p = mapPx(e);
+  setHover(p && faceAt(p.x, p.y) ? { ...p, src:'map' } : null);
+  if (drawing && p) { const [lx, ly] = lastPx || [p.x, p.y]; line(lx, ly, p.x, p.y, dab); lastPx = [p.x, p.y]; liveCommit(); }
+});
+['pointerup', 'pointercancel'].forEach(t => ov.addEventListener(t, () => { if (drawing) endStroke(); }));
+ov.addEventListener('pointerleave', () => { if (!drawing) setHover(null); });
+/* ---------- zoom and two-finger gestures (shared by the workshops) ---------- */
+/* One finger paints as before. A second finger turns the touch into a gesture: the stroke the first
+   finger just started is taken back, and the two fingers pinch to zoom and drag to pan. */
+function twoFinger(el, h) {
+  const pts = new Map(); let g = null, mark = null;
+  const pair = () => { const a = [...pts.values()]; if (a.length < 2) return { x:a[0].x, y:a[0].y, d:0 };
+    return { x:(a[0].x + a[1].x) / 2, y:(a[0].y + a[1].y) / 2, d:Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y) }; };
+  el.addEventListener('pointerdown', e => {
+    if (e.pointerType !== 'touch') return;
+    pts.set(e.pointerId, { x:e.clientX, y:e.clientY });
+    if (pts.size === 1) { mark = h.mark ? h.mark() : null; return; }
+    e.stopPropagation(); e.preventDefault();
+    if (!g && h.cancel) h.cancel(mark && performance.now() - mark.t < 700 ? mark : null);
+    g = pair();
+  }, true);
+  el.addEventListener('pointermove', e => {
+    const p = pts.get(e.pointerId); if (!p) return;
+    p.x = e.clientX; p.y = e.clientY;
+    if (!g) return;
+    e.stopPropagation(); e.preventDefault();
+    const n = pair(); h.move(g.d && n.d ? n.d / g.d : 1, n.x - g.x, n.y - g.y, g); g = n;
+  }, true);
+  const up = e => { if (!pts.delete(e.pointerId)) return; if (g) { if (pts.size) g = pair(); else { g = null; if (h.end) h.end(); } } if (!pts.size) mark = null; };
+  el.addEventListener('pointerup', up, true); el.addEventListener('pointercancel', up, true);
+}
+function setupMapZoom(o) {
+  const box = o.box, inner = o.inner, bar = o.bar; let z = 1, settle = 0;
+  const maxZ = () => (typeof o.max === 'function' ? o.max() : o.max) || 6;
+  const q = s => bar && bar.querySelector(s);
+  function set(nz, cx, cy, quick) {
+    nz = Math.max(1, Math.min(maxZ(), nz)); if (Math.abs(nz - 1) < .02) nz = 1;
+    const r = box.getBoundingClientRect();
+    const px = cx == null ? box.clientWidth / 2 : cx - r.left - box.clientLeft, py = cy == null ? box.clientHeight / 2 : cy - r.top - box.clientTop;
+    const ux = (box.scrollLeft + px) / z, uy = (box.scrollTop + py) / z;
+    z = nz; inner.style.width = z === 1 ? '' : (z * 100).toFixed(2) + '%'; box.classList.toggle('zoomed', z > 1);
+    box.scrollLeft = ux * z - px; box.scrollTop = uy * z - py;
+    if (bar) { q('[data-z="out"]').disabled = z <= 1; q('[data-z="in"]').disabled = z >= maxZ() - .01; q('[data-z="fit"]').disabled = z <= 1; q('output').textContent = Math.round(z * 100) + ' %'; }
+    clearTimeout(settle); settle = setTimeout(() => o.onZoomed(z), quick ? 150 : 0);
+  }
+  twoFinger(box, { mark:o.mark, cancel:o.cancel, move:(s, dx, dy, prev) => { set(z * s, prev.x, prev.y, true); box.scrollLeft -= dx; box.scrollTop -= dy; }, end:() => set(z) });
+  box.addEventListener('wheel', e => {
+    if (!(e.ctrlKey || e.metaKey)) return; e.preventDefault();
+    set(z * Math.exp(-Math.max(-60, Math.min(60, e.deltaY)) * .012), e.clientX, e.clientY, true);
+  }, { passive:false });
+  if (bar) {
+    bar.addEventListener('click', e => { const b = e.target.closest('[data-z]'); if (!b) return;
+      set(b.dataset.z === 'in' ? z * 1.5 : b.dataset.z === 'out' ? z / 1.5 : 1); });
+    const hint = q('.zoomhint');
+    if (hint) hint.textContent = matchMedia('(pointer: coarse)').matches
+      ? 'Nyp med två fingrar för att zooma. Dra med två fingrar för att flytta kartan.'
+      : 'Håll Ctrl och rulla med musen för att zooma. Rulla för att flytta kartan när du har zoomat in.';
+  }
+  if (bar) { q('[data-z="out"]').disabled = q('[data-z="fit"]').disabled = true; }
+  return { set, get z() { return z; } };
+}
+const strokeGuard = { mark:() => ({ t:performance.now(), u:undoS.length, p:new Uint8ClampedArray(pix.data) }),
+  cancel:m => { if (!m) { if (drawing) endStroke(); return; } if (drawing && strokeSnap) pix.data.set(strokeSnap); else if (undoS.length > m.u) { pix.data.set(m.p); undoS.length = m.u; updateUndo(); } strokeSnap = null; drawing = false; lastPx = null; commit(); } };
+var mapZoom = setupMapZoom({ box:$('#mapbox'), inner:$('#mapzoom'), bar:$('#zoombar'), max:6, ...strokeGuard, onZoomed:() => sizeOverlay() });
+window.__verkstan = { get zoom() { return mapZoom.z; }, get pix() { return pix; }, get undo() { return undoS.length; }, get view() { return { dist:R.dist, zoom:R.zoom }; } }; /* read-only peek used by tests */
+
+/* ---------- 3D figure ---------- */
+const R = { yaw:-.55, pitch:.12, dist:72 };
+function setUVs(geo, u, v, w, h, d) {
+  const f = (x1, y1, x2, y2) => [[x1 / N, 1 - y2 / N], [x2 / N, 1 - y2 / N], [x2 / N, 1 - y1 / N], [x1 / N, 1 - y1 / N]];
+  const top = f(u + d, v, u + w + d, v + d), bottom = f(u + w + d, v, u + 2 * w + d, v + d);
+  const rside = f(u, v + d, u + d, v + d + h), front = f(u + d, v + d, u + w + d, v + d + h);
+  const lside = f(u + w + d, v + d, u + w + 2 * d, v + h + d), back = f(u + w + 2 * d, v + d, u + 2 * w + 2 * d, v + h + d);
+  const order = [
+    [lside[3], lside[2], lside[0], lside[1]], [rside[3], rside[2], rside[0], rside[1]],
+    [top[3], top[2], top[0], top[1]], [bottom[0], bottom[1], bottom[3], bottom[2]],
+    [front[3], front[2], front[0], front[1]], [back[3], back[2], back[0], back[1]]
+  ];
+  const uv = geo.attributes.uv; let i = 0;
+  order.forEach(face => face.forEach(p => uv.setXY(i++, p[0], p[1]))); uv.needsUpdate = true;
+}
+function init3d() {
+  const stage = $('#stage');
+  if (!window.THREE) { stage.innerHTML = '<p class="no3d">3D-figuren kunde inte laddas. Kartan fungerar som vanligt.</p>'; return; }
+  try { R.renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true }); }
+  catch (e) { stage.innerHTML = '<p class="no3d">Den här webbläsaren kan inte visa 3D. Kartan fungerar som vanligt.</p>'; return; }
+  R.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  stage.appendChild(R.renderer.domElement);
+  R.scene = new THREE.Scene();
+  R.camera = new THREE.PerspectiveCamera(32, 1, 1, 500);
+  R.scene.add(new THREE.AmbientLight(0xffffff, .72));
+  const dl = new THREE.DirectionalLight(0xffffff, .4); dl.position.set(5, 10, 8); R.scene.add(dl);
+  R.pivot = new THREE.Group(); R.scene.add(R.pivot);
+  R.comp = document.createElement('canvas'); R.comp.width = R.comp.height = N; R.cctx = R.comp.getContext('2d');
+  R.tex = new THREE.CanvasTexture(R.comp); R.tex.magFilter = THREE.NearestFilter; R.tex.minFilter = THREE.NearestFilter; R.tex.generateMipmaps = false;
+  R.matBase = new THREE.MeshLambertMaterial({ map:R.tex });
+  R.matOver = new THREE.MeshLambertMaterial({ map:R.tex, alphaTest:.5 });
+  R.ground = new THREE.Mesh(new THREE.CircleGeometry(11, 48), new THREE.MeshBasicMaterial({ color:T['line-strong'] || '#999', transparent:true, opacity:.45 }));
+  R.ground.rotation.x = -Math.PI / 2; R.ground.position.y = -16.05; R.pivot.add(R.ground);
+  R.ray = new THREE.Raycaster(); R.ndc = new THREE.Vector2();
+  buildModel();
+  const resize = () => { const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; R.renderer.setSize(w, h, false); R.camera.aspect = w / h; R.camera.updateProjectionMatrix(); dirty3d = true; };
+  new ResizeObserver(resize).observe(stage); resize();
+
+  const cv = R.renderer.domElement; let drag = null;
+  cv.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+    const hit = mode3d === 'paint' ? hit3d(e) : null;
+    if (hit) { drag = { type:'paint' }; handleDown(hit.x, hit.y); }
+    else { drag = { type:'rot', x:e.clientX, y:e.clientY }; cv.style.cursor = 'grabbing'; }
+  });
+  cv.addEventListener('pointermove', e => {
+    if (drag && drag.type === 'rot') {
+      R.yaw += (e.clientX - drag.x) * .01; R.pitch = Math.max(-.7, Math.min(.7, R.pitch + (e.clientY - drag.y) * .008));
+      drag.x = e.clientX; drag.y = e.clientY; dirty3d = true; return;
+    }
+    const hit = hit3d(e);
+    setHover(hit ? { x:hit.x, y:hit.y, src:'3d' } : null);
+    if (drag && drag.type === 'paint' && drawing && hit) { dab(hit.x, hit.y); liveCommit(); }
+  });
+  const up = () => { if (drawing) endStroke(); drag = null; cv.style.cursor = ''; };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+  cv.addEventListener('pointerleave', () => { if (!drag) setHover(null); });
+  cv.addEventListener('wheel', e => { e.preventDefault(); R.dist = Math.max(36, Math.min(115, R.dist + e.deltaY * .05)); dirty3d = true; }, { passive:false });
+  twoFinger(stage, { ...strokeGuard, move:s => { if (s !== 1) (s => { R.dist = Math.max(36, Math.min(115, R.dist / s)); dirty3d = true; })(s); } });
+}
+function buildModel() {
+  if (!R.renderer) return;
+  (R.meshes || []).forEach(m => { R.pivot.remove(m); m.geometry.dispose(); });
+  R.meshes = parts.map(p => {
+    const i = p.inf || 0, g = new THREE.BoxGeometry(p.w + 2 * i, p.h + 2 * i, p.d + 2 * i);
+    setUVs(g, p.u, p.v, p.w, p.h, p.d);
+    const m = new THREE.Mesh(g, p.layer === 1 ? R.matBase : R.matOver);
+    m.position.set(p.pos[0], p.pos[1] - 16, p.pos[2]); m.userData.part = p; R.pivot.add(m); return m;
+  });
+  applyView3d();
+}
+function applyView3d() { if (R.meshes) R.meshes.forEach(m => { m.visible = m.userData.part.layer === 1 || view !== '1'; }); dirty3d = true; }
+function hit3d(e) {
+  if (!R.renderer) return null;
+  const r = R.renderer.domElement.getBoundingClientRect();
+  R.ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  R.pivot.rotation.set(R.pitch, R.yaw, 0); R.pivot.updateMatrixWorld(true);
+  R.camera.position.set(0, 0, R.dist); R.camera.updateMatrixWorld(true);
+  R.ray.setFromCamera(R.ndc, R.camera);
+  const targets = R.meshes.filter(m => m.visible && (view === 'both' || String(m.userData.part.layer) === view));
+  for (const h of R.ray.intersectObjects(targets, false)) {
+    if (!h.uv || !h.face) continue;
+    const p = h.object.userData.part, f = p.faces[MAT2FACE[h.face.materialIndex]];
+    const x = Math.min(f.x + f.w - 1, Math.max(f.x, Math.floor(h.uv.x * N)));
+    const y = Math.min(f.y + f.h - 1, Math.max(f.y, Math.floor((1 - h.uv.y) * N)));
+    if (view === 'both' && p.layer === 2 && get(x, y)[3] === 0) continue;
+    return { x, y };
+  }
+  return null;
+}
+function drawComposite(t) {
+  const c = R.cctx; c.clearRect(0, 0, N, N); c.drawImage(paint, 0, 0);
+  if (spotlight) {
+    const a = reduceMotion ? .4 : .2 + .3 * (.5 + .5 * Math.sin(t / 260));
+    c.fillStyle = `rgba(255,170,40,${a})`; stepTargets().forEach(f => c.fillRect(f.x, f.y, f.w, f.h));
+  }
+  if (hover) {
+    const f = faceAt(hover.x, hover.y);
+    if (f && !(hover.src === '3d' && mode3d === 'paint')) { c.fillStyle = 'rgba(255,176,46,.6)'; c.fillRect(f.x, f.y, f.w, f.h); }
+    c.fillStyle = 'rgba(255,255,255,.85)'; c.fillRect(hover.x, hover.y, 1, 1);
+    if (mirror) { const m = mirrorOf(hover.x, hover.y); if (m) { c.fillStyle = 'rgba(255,255,255,.6)'; c.fillRect(m[0], m[1], 1, 1); } }
+  }
+}
+
+/* ---------- load, new, example, save ---------- */
+function loadFromImage(im, opts = {}) {
+  if (im.naturalWidth !== 64 || im.naturalHeight !== 64) { msg(`Bilden är ${im.naturalWidth} × ${im.naturalHeight} pixlar. En skin ska vara 64 × 64 pixlar.`); return false; }
+  const c = document.createElement('canvas'); c.width = c.height = N;
+  const x = c.getContext('2d', { willReadFrequently:true }); x.drawImage(im, 0, 0);
+  if (!opts.draft) pushUndo();
+  pix = x.getImageData(0, 0, N, N);
+  if (opts.detect) {
+    let isSlim = true; for (let j = 0; j < 12; j++) if (pix.data[((20 + j) * N + 54) * 4 + 3] || pix.data[((20 + j) * N + 55) * 4 + 3]) isSlim = false;
+    if (isSlim !== slim) { slim = isSlim; buildGeometry(); buildModel(); updateModelUI(); }
+  }
+  problems = null; $('#checkList').innerHTML = ''; commit(!opts.draft);
+  return true;
+}
+function setModel(s) {
+  if (s === slim) return;
+  slim = s; buildGeometry();
+  let ch = false;
+  parts.filter(p => p.layer === 1 && p.kind === 'arm').forEach(p => p.faces.forEach(f => {
+    for (let y = f.y; y < f.y + f.h; y++) for (let x = f.x; x < f.x + f.w; x++) if (get(x, y)[3] === 0 && set(x, y, ...DOLL[f.fi], 255)) ch = true;
+  }));
+  buildModel(); updateModelUI(); commit();
+  if (problems) runCheck(true);
+  msg(s ? 'Armarna är nu 3 pixlar breda (Slim). Lägg märke till att kartan ändrades för armarna.' : 'Armarna är nu 4 pixlar breda (Classic).');
+}
+function updateModelUI() {
+  $$('#modelSeg button').forEach(b => b.setAttribute('aria-pressed', String((b.dataset.model === 'slim') === slim)));
+  $('#modelNote').textContent = slim ? 'Slim (Alex)' : 'Classic (Steve)';
+}
+function paintExample() {
+  const H = h => fromHex(h);
+  const skin = H('#D9A07A'), hair = H('#2A211D'), hood = H('#D9542C'), hoodD = H('#B5431F'), str = H('#F3F1EC'),
+        pants = H('#4F5F3B'), shoe = H('#2F2F33'), eye = H('#3E8F55'), mouth = H('#A86650'), bean = H('#E8B53F'), beanD = H('#C8962A');
+  const pf = (id, fi, col, y0 = 0, y1, x0 = 0, x1) => { const f = byId[id].faces[fi]; const yy = y1 ?? f.h - 1, xx = x1 ?? f.w - 1;
+    for (let y = y0; y <= yy; y++) for (let x = x0; x <= xx; x++) set(f.x + x, f.y + y, ...col, 255); };
+  const all = (id, col) => { for (let i = 0; i < 6; i++) pf(id, i, col); };
+  all('head', skin); pf('head', 0, hair); pf('head', 5, hair); pf('head', 2, hair, 0, 3); pf('head', 4, hair, 0, 3);
+  pf('head', 3, hair, 0, 0); pf('head', 3, hair, 1, 1, 0, 0); pf('head', 3, hair, 1, 1, 7, 7);
+  set(9, 12, ...str); set(10, 12, ...eye); set(13, 12, ...eye); set(14, 12, ...str); set(11, 14, ...mouth); set(12, 14, ...mouth);
+  all('body', hood); pf('body', 3, hoodD, 7, 9, 1, 6); pf('body', 3, str, 1, 3, 2, 2); pf('body', 3, str, 1, 3, 5, 5);
+  [2, 3, 4, 5].forEach(i => pf('body', i, hoodD, 11, 11));
+  ['rarm', 'larm'].forEach(id => { all(id, hood); [2, 3, 4, 5].forEach(i => { pf(id, i, hoodD, 9, 9); pf(id, i, skin, 10, 11); }); pf(id, 1, skin); });
+  ['rleg', 'lleg'].forEach(id => { all(id, pants); [2, 3, 4, 5].forEach(i => pf(id, i, shoe, 9, 11)); pf(id, 1, shoe); });
+  pf('hat', 0, bean); [2, 3, 4, 5].forEach(i => { pf('hat', i, bean, 0, 1); pf('hat', i, beanD, 2, 2); });
+}
+const STANDALONE = !(window.claude && typeof window.claude.use === 'function');
+const downloadsP = STANDALONE ? Promise.resolve(null) : window.claude.use('downloads').catch(() => null);
+function saveLocal(name, blob) { const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = name; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000); }
+async function savePng() {
+  const raw = $('#skinName').value.trim() || 'min-skin';
+  const name = raw.replace(/[^\p{L}\p{N}_-]+/gu, '-').replace(/^-+|-+$/g, '') || 'min-skin';
+  const blob = await new Promise(r => paint.toBlob(r, 'image/png'));
+  const dl = await downloadsP;
+  if (!dl) {
+    if (STANDALONE) { saveLocal(name + '.png', blob); msg(`${name}.png är sparad i Hämtade filer. I Minecraft går du till Omklädningsrummet, Importera och Välj nytt skin${matchMedia('(pointer: coarse)').matches ? ', och hittar bilden i Hämtade filer' : ''}.`); return; }
+    msg('Spara-knappen fungerar inte här. Högerklicka på bilden under Spara och välj Spara bild som.'); return;
+  }
+  try { await dl.save({ filename: name + '.png', data: blob }); msg(`${name}.png är sparad. Ladda upp den i Minecraft.`); }
+  catch (err) {
+    const code = err && err.code;
+    if (code === 'declined') msg('Ingen fil sparades.');
+    else if (code === 'rate_limited') msg('Vänta en liten stund och försök igen.');
+    else msg('Det gick inte att spara här. Högerklicka på bilden under Spara och välj Spara bild som.');
+  }
+}
+
+/* ---------- wiring ---------- */
+function bindSeg(sel, attr, fn) { $$(sel + ' button').forEach(b => b.addEventListener('click', () => fn(b.dataset[attr]))); }
+function markSeg(sel, attr, val) { $$(sel + ' button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset[attr] === val))); }
+function wire() {
+  bindSeg('#fillSeg', 'fill', v => { fillMode = v; markSeg('#fillSeg', 'fill', v); if (tool !== 'fill') setTool('fill'); });
+  bindSeg('#viewSeg', 'view', v => { view = v; markSeg('#viewSeg', 'view', v); applyView3d(); overlayDirty = true; });
+  bindSeg('#modeSeg', 'mode', v => { mode3d = v; markSeg('#modeSeg', 'mode', v); $('#stage').classList.toggle('painting', v === 'paint'); dirty3d = true; });
+  bindSeg('#modelSeg', 'model', v => setModel(v === 'slim'));
+  $('#mirrorChk').addEventListener('change', e => { mirror = e.target.checked; overlayDirty = dirty3d = true; });
+  $('#gridChk').addEventListener('change', e => { showGrid = e.target.checked; overlayDirty = true; });
+  $('#guideChk').addEventListener('change', e => { showGuides = e.target.checked; overlayDirty = true; });
+  $('#undoBtn').addEventListener('click', undo); $('#redoBtn').addEventListener('click', redo);
+  $('#colorIn').addEventListener('input', e => setColor(fromHex(e.target.value)));
+  $('#turnBtn').addEventListener('click', () => { R.yaw += Math.PI; dirty3d = true; });
+  $('#resetBtn').addEventListener('click', () => { R.yaw = -.55; R.pitch = .12; R.dist = 72; dirty3d = true; });
+  $('#spotBtn').addEventListener('click', () => setSpot(!spotlight));
+  $('#prevBtn').addEventListener('click', () => goStep(step - 1));
+  $('#nextBtn').addEventListener('click', () => goStep(step + 1));
+  $('#checkBtn').addEventListener('click', () => runCheck(false));
+  $('#saveBtn').addEventListener('click', savePng);
+  $('#newBtn').addEventListener('click', () => { pushUndo(); makeDoll(); problems = null; commit(); msg('En ny tom docka. Ångra med Ctrl+Z om ni ångrar er.'); goStep(0); });
+  $('#exampleBtn').addEventListener('click', () => { pushUndo(); makeDoll(); paintExample(); problems = null; commit(); msg('Här är ett exempel att titta på. Ångra med Ctrl+Z för att få tillbaka ert eget.'); });
+  $('#openBtn').addEventListener('click', () => $('#fileIn').click());
+  $('#fileIn').addEventListener('change', e => {
+    const file = e.target.files && e.target.files[0]; if (!file) return;
+    const fr = new FileReader();
+    fr.onload = () => { const im = new Image(); im.onload = () => { if (loadFromImage(im, { detect:true })) msg(`Skinnet är öppnat. Armarna ser ut att vara ${slim ? 'Slim, 3 pixlar' : 'Classic, 4 pixlar'}.`); };
+      im.onerror = () => msg('Filen gick inte att läsa som en PNG-bild.'); im.src = fr.result; };
+    fr.readAsDataURL(file); e.target.value = '';
+  });
+  document.addEventListener('keydown', e => {
+    if (e.target.closest && e.target.closest('input, textarea, select')) return;
+    const k = e.key.toLowerCase(), mod = e.ctrlKey || e.metaKey;
+    if (mod && k === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); return; }
+    if (mod && k === 'y') { e.preventDefault(); redo(); return; }
+    if (mod || e.altKey) return;
+    const map = { b:'pen', e:'eraser', g:'fill', i:'picker', s:'dark', l:'light' };
+    if (map[k]) setTool(map[k]);
+    else if (k === 'm') { mirror = !mirror; $('#mirrorChk').checked = mirror; overlayDirty = dirty3d = true; }
+  });
+  new ResizeObserver(sizeOverlay).observe($('#mapbox'));
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readTokens);
+  new MutationObserver(readTokens).observe(document.documentElement, { attributes:true, attributeFilter:['data-theme'] });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { overlayDirty = true; });
+}
+function frame(t) {
+  requestAnimationFrame(frame);
+  if (overlayDirty) { overlayDirty = false; drawOverlay(); }
+  if (R.renderer && (dirty3d || (spotlight && !reduceMotion))) {
+    dirty3d = false; drawComposite(t); R.tex.needsUpdate = true;
+    R.pivot.rotation.set(R.pitch, R.yaw, 0); R.camera.position.set(0, 0, R.dist); R.camera.lookAt(0, 0, 0);
+    R.renderer.render(R.scene, R.camera);
+  }
+}
+
+/* ---------- start ---------- */
+let saved = null;
+try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+if (saved && typeof saved === 'object') {
+  slim = !!saved.slim; step = Math.min(STEPS.length - 1, Math.max(0, saved.step | 0)); maxStep = Math.max(step, saved.maxStep | 0);
+  if (Array.isArray(saved.recent)) recent = saved.recent.filter(h => /^#[0-9A-F]{6}$/i.test(h)).slice(0, 12);
+}
+buildGeometry(); makeDoll();
+readTokens(); buildTools(); buildPills(); wire();
+fillRow($('#palSkin'), PAL_SKIN.map(fromHex)); fillRow($('#palHair'), PAL_HAIR.map(fromHex)); fillRow($('#palCloth'), PAL_CLOTH.map(fromHex));
+renderRecent(); setColor(cur); setTool('pen');
+markSeg('#fillSeg', 'fill', fillMode); markSeg('#viewSeg', 'view', view); markSeg('#modeSeg', 'mode', mode3d); updateModelUI();
+renderStep(); updateUndo(); updateStatus();
+commit(false); $('#preview').src = paint.toDataURL('image/png');
+init3d(); sizeOverlay();
+if (saved && saved.png) {
+  const im = new Image();
+  im.onload = () => { if (loadFromImage(im, { draft:true })) { $('#preview').src = paint.toDataURL('image/png'); msg('Ert senaste utkast är tillbaka.'); } };
+  im.src = saved.png;
+}
+requestAnimationFrame(frame);
+})();
+</script>

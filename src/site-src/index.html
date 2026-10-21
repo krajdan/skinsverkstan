@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Verkstan</title>
+<meta name="description" content="Måla egna skins, föremål och mobs till Minecraft Bedrock direkt i webbläsaren. Gratis, på dator, platta och mobil.">
+<meta name="theme-color" content="#5B45A8">
+<meta name="apple-mobile-web-app-title" content="Verkstan">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Pixelify+Sans:wght@500;600&display=swap">
+<style>
+:root{
+  --bg:#E8E6EE; --panel:#FAF9FC; --panel-2:#EFEDF4; --ink:#1D1A26; --muted:#5C5768; --line:#CFCBD9; --line-strong:#9A94A8;
+  --accent:#5B45A8; --accent-ink:#FFFFFF; --accent-soft:#E4DEF6; --warm:#D7841C;
+  --f-display:"Pixelify Sans", ui-monospace, "Courier New", monospace;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --r:8px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121018; --panel:#1A1722; --panel-2:#221E2B; --ink:#E8E5EF; --muted:#9C96A9; --line:#2F2A39; --line-strong:#514A5E;
+    --accent:#B49DFF; --accent-ink:#160F2B; --accent-soft:#2E2647; --warm:#F0AD4C; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121018; --panel:#1A1722; --panel-2:#221E2B; --ink:#E8E5EF; --muted:#9C96A9; --line:#2F2A39; --line-strong:#514A5E;
+  --accent:#B49DFF; --accent-ink:#160F2B; --accent-soft:#2E2647; --warm:#F0AD4C; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 var(--f-body)}
+a{color:var(--accent)}
+.wrap{max-width:1120px;margin:0 auto;padding:28px max(16px,env(safe-area-inset-right,0px)) 48px max(16px,env(safe-area-inset-left,0px));display:grid;gap:34px}
+header{display:flex;align-items:center;gap:16px}
+header img{width:64px;height:64px;image-rendering:pixelated;border-radius:12px;flex:none}
+h1{font:600 clamp(34px,8vw,48px)/1 var(--f-display);margin:0;letter-spacing:.01em}
+.tag{margin:6px 0 0;color:var(--muted);font-size:17px}
+.intro{margin:0;max-width:62ch;font-size:18px;text-wrap:pretty}
+.cards{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.card{display:grid;grid-template-rows:auto auto 1fr auto;gap:8px;padding:18px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);color:inherit;text-decoration:none;transition:border-color .15s, transform .15s}
+.card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.card:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.card canvas{width:72px;height:72px;image-rendering:pixelated;background:var(--panel-2);border-radius:6px;padding:6px}
+.card h2{font:600 24px/1.1 var(--f-display);margin:4px 0 0}
+.card p{margin:0;color:var(--muted);text-wrap:pretty}
+.card .go{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:6px;padding-top:12px;border-top:1px solid var(--line);font-weight:700;color:var(--accent)}
+.card .go small{font-weight:400;color:var(--muted);font-size:14px}
+h3{font:600 24px/1.15 var(--f-display);margin:0 0 12px}
+.how{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.how section{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px}
+.how h4{margin:0 0 8px;font-size:17px}
+.how ol{margin:0;padding-left:22px;display:grid;gap:6px}
+.how p{margin:10px 0 0;font-size:15px;color:var(--muted)}
+.note{margin:12px 0 0;color:var(--muted);font-size:15px;max-width:75ch}
+footer{border-top:1px solid var(--line);padding-top:16px;font-size:14px;color:var(--muted);display:grid;gap:4px}
+footer p{margin:0;max-width:80ch}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="icons/icon-192.png" alt="" width="64" height="64">
+    <div>
+      <h1>Verkstan</h1>
+      <p class="tag">Skins, föremål och mobs till Minecraft Bedrock</p>
+    </div>
+  </header>
+
+  <p class="intro">Tre verkstäder där du målar allt själv, pixel för pixel, och får färdiga filer till spelet. Det är gratis och fungerar på dator, platta och mobil. Det du gör sparas i webbläsaren.</p>
+
+  <nav class="cards" aria-label="Verkstäder">
+    <a class="card" href="skinverkstaden.html">
+      <canvas width="12" height="12" data-sprite="skin" aria-hidden="true"></canvas>
+      <h2>Skinverkstaden</h2>
+      <p>Måla ett eget skin på kartan eller direkt på 3D-figuren. Välj vanliga eller smala armar.</p>
+      <span class="go">Öppna <small>Ger en PNG-bild</small></span>
+    </a>
+    <a class="card" href="foremalsverkstaden.html">
+      <canvas width="12" height="12" data-sprite="sword" aria-hidden="true"></canvas>
+      <h2>Föremålsverkstaden</h2>
+      <p>Mat, vapen, verktyg och rustningar med setbonus. Gör egna material med recept på arbetsbänken och i ugnen.</p>
+      <span class="go">Öppna <small>Ger ett add-on</small></span>
+    </a>
+    <a class="card" href="mobverkstaden.html">
+      <canvas width="12" height="12" data-sprite="dragon" aria-hidden="true"></canvas>
+      <h2>Mobverkstaden</h2>
+      <p>Djur, monster och flygande drakar som går att tämja och rida. Välj nos, horn, svans och vingar.</p>
+      <span class="go">Öppna <small>Ger ett add-on</small></span>
+    </a>
+  </nav>
+
+  <div>
+    <h3>Så kommer det in i Minecraft</h3>
+    <div class="how">
+      <section>
+        <h4>Dator med Windows</h4>
+        <ol>
+          <li>Tryck på <b>Spara add-on</b> i verkstaden.</li>
+          <li>Öppna Hämtade filer och dubbelklicka på <b>.mcaddon</b>-filen. Minecraft startar och importerar den.</li>
+          <li>Skapa eller redigera en värld och slå på paketet under <b>Beteendepaket</b>.</li>
+        </ol>
+      </section>
+      <section>
+        <h4>iPad och iPhone</h4>
+        <ol>
+          <li>Tryck på <b>Spara add-on</b> och sedan <b>Hämta</b>.</li>
+          <li>Öppna appen <b>Filer</b> och mappen Hämtade filer. Tryck på filen och välj Minecraft, via Dela-knappen om den inte öppnas direkt.</li>
+          <li>Slå på paketet i världens inställningar under <b>Beteendepaket</b>.</li>
+        </ol>
+      </section>
+      <section>
+        <h4>Android</h4>
+        <ol>
+          <li>Tryck på <b>Spara add-on</b>.</li>
+          <li>Tryck på den hämtade filen, i aviseringen eller under Hämtade filer, och öppna den med Minecraft.</li>
+          <li>Slå på paketet i världens inställningar under <b>Beteendepaket</b>.</li>
+        </ol>
+      </section>
+    </div>
+    <p class="note"><b>Skins:</b> spara PNG-bilden, gå till Omklädningsrummet i Minecraft, välj klassiska skins och sedan <b>Importera</b> och <b>Välj nytt skin</b>. Spelkonsoler som PS5, Xbox och Switch kan inte ladda in egna add-ons eller skins.</p>
+    <p class="note"><b>Som en app:</b> på iPad trycker du på Dela och <b>Lägg till på hemskärmen</b>. På Android öppnar du menyn och väljer <b>Lägg till på startskärmen</b>.</p>
+  </div>
+
+  <footer>
+    <p>Ett fristående hobbyprojekt. Inte en officiell Minecraft-produkt. Inte godkänd av eller kopplad till Mojang eller Microsoft.</p>
+    <p lang="en">NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.</p>
+    <p>3D-figurerna använder <a href="https://threejs.org">three.js</a> (MIT-licens). <a href="https://github.com/krajdan/minecraft-verkstan">Källkod på GitHub</a>.</p>
+  </footer>
+</div>
+<script>
+/* tiny pixel sprites for the cards; letters map to colours */
+const SPRITES = {
+  skin: { pal:{ h:'#4A2F1B', s:'#E0A97A', d:'#C68A5E', w:'#FFFFFF', e:'#3B5BA8', m:'#9C4F3A', t:'#2C8A55', T:'#1F6B41' }, rows:[
+    '..hhhhhhhh..', '.hhhhhhhhhh.', '.hssssssssh.', '.ssssssssss.', '.swessssews.', '.ssssddssss.',
+    '.ssmmmmmmss.', '..ssssssss..', '.tttttttttt.', 'tttTttttTttt', 'tttTttttTttt', 'tttTttttTttt'] },
+  sword: { pal:{ w:'#F4F4F8', b:'#8FD8E8', B:'#4FA9C4', g:'#C9962E', h:'#6B4423', k:'#3A2414' }, rows:[
+    '..........ww', '.........wbw', '........wbB.', '.......wbB..', '......wbB...', '.g...wbB....',
+    '.gg.wbB.....', '..ggbB......', '..hgg.......', '.hk.gg......', 'hk..........', 'k...........'] },
+  dragon: { pal:{ d:'#7457D4', D:'#4E3896', l:'#A28DF2', e:'#F0AD4C', k:'#160F2B', t:'#FFFFFF', h:'#E8E5EF', r:'#C0392F' }, rows:[
+    '.h..........', '.hh.........', '..dd........', '.ddddd......', 'dldddddd....', 'dlekdddddd..',
+    'dddddddddddd', 'DDddddddtdtd', '.DDdrrrrrrr.', '..DDDtDtDtD.', '...DD.......', '....D.......'] },
+};
+document.querySelectorAll('canvas[data-sprite]').forEach(cv => {
+  const sp = SPRITES[cv.dataset.sprite], c = cv.getContext('2d');
+  sp.rows.forEach((row, y) => [...row].forEach((ch, x) => { if (sp.pal[ch]) { c.fillStyle = sp.pal[ch]; c.fillRect(x, y, 1, 1); } }));
+});
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>

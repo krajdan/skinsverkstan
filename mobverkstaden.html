@@ -1,0 +1,1706 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#5B45A8">
+<meta name="apple-mobile-web-app-title" content="Verkstan">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>[hidden]{display:none!important}body{margin:0}
+.sitenav{max-width:1340px;margin:0 auto;padding:8px max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}
+.sitenav a{display:inline-flex;align-items:center;gap:6px;min-height:40px;font:700 15px/1.2 "Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;color:var(--accent);text-decoration:none}
+.sitenav a:hover{text-decoration:underline}
+</style>
+<title>Mobverkstaden</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500&family=Pixelify+Sans:wght@500;600&display=swap">
+<style>
+/* Layout: the painter's bench (tools, unfolded 64x64 body map, colors) on the left; the walking figure, guide, behaviour, world and collection on the right */
+:root{
+  --bg:#E8E6EE; --panel:#FAF9FC; --panel-2:#EFEDF4; --ink:#1D1A26; --muted:#5C5768; --line:#CFCBD9; --line-strong:#9A94A8;
+  --accent:#5B45A8; --accent-ink:#FFFFFF; --accent-soft:#E4DEF6;
+  --warm:#D7841C; --warm-soft:#F7E5C6; --danger:#C0392F; --ok:#2C8A55;
+  --check-a:#FFFFFF; --check-b:#DEDBE6; --grid:rgba(29,26,38,.14); --unused:#BBB6C6;
+  --g-head:#7457D4; --g-body:#1C977A; --g-arms:#CF5B2A; --g-legs:#BF4279; --g-wings:#B7791F;
+  --slot:#8B8B8B; --slot-hi:#C6C6C6; --slot-lo:#373737;
+  --f-display:"Pixelify Sans", ui-monospace, "Courier New", monospace;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121018; --panel:#1A1722; --panel-2:#221E2B; --ink:#E8E5EF; --muted:#9C96A9; --line:#2F2A39; --line-strong:#514A5E;
+    --accent:#B49DFF; --accent-ink:#160F2B; --accent-soft:#2E2647;
+    --warm:#F0AD4C; --warm-soft:#3A2A12; --danger:#F07367; --ok:#5DC78E;
+    --check-a:#2C2835; --check-b:#23202B; --grid:rgba(232,229,239,.11); --unused:#3F3A4A;
+    --g-head:#A28DF2; --g-body:#4BC6A0; --g-arms:#F28A5B; --g-legs:#EC79A7; --g-wings:#F0B35A;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121018; --panel:#1A1722; --panel-2:#221E2B; --ink:#E8E5EF; --muted:#9C96A9; --line:#2F2A39; --line-strong:#514A5E;
+  --accent:#B49DFF; --accent-ink:#160F2B; --accent-soft:#2E2647;
+  --warm:#F0AD4C; --warm-soft:#3A2A12; --danger:#F07367; --ok:#5DC78E;
+  --check-a:#2C2835; --check-b:#23202B; --grid:rgba(232,229,239,.11); --unused:#3F3A4A;
+  --g-head:#A28DF2; --g-body:#4BC6A0; --g-arms:#F28A5B; --g-legs:#EC79A7; --g-wings:#F0B35A;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--f-body)}
+.app{max-width:1340px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:18px}
+.app>*,.brand,.brand>div{min-width:0}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px}
+.brand{display:flex;align-items:center;gap:14px}
+#logo{width:48px;height:48px;image-rendering:pixelated;border-radius:4px;background:var(--panel-2);box-shadow:0 0 0 1px var(--line-strong)}
+h1{font:600 clamp(22px,6.2vw,30px)/1.05 var(--f-display);margin:0;letter-spacing:.01em;overflow-wrap:anywhere}
+.tagline{margin:3px 0 0;color:var(--muted);font-size:15px}
+.files{margin-left:auto;display:flex;flex-wrap:wrap;gap:8px}
+.btn{border:1px solid var(--line-strong);background:var(--panel);border-radius:var(--r);padding:7px 13px;cursor:pointer;min-height:38px;font-size:15px;line-height:1.2}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.small{min-height:32px;padding:5px 10px;font-size:14px}
+.btn.danger{color:var(--danger);border-color:var(--danger)}
+.btn.warm{border-color:var(--warm);background:var(--warm-soft);font-weight:700}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line-strong);border-radius:var(--r);overflow:hidden;background:var(--panel)}
+.seg button{border:0;border-right:1px solid var(--line);background:transparent;font-size:14px;padding:6px 11px;cursor:pointer;min-height:34px}
+.seg button:last-child{border-right:0}
+.seg button:hover{background:var(--panel-2)}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);font-weight:700}
+.chk{display:inline-flex;align-items:center;gap:7px;font-size:14px;cursor:pointer;user-select:none}
+.chk input{width:17px;height:17px;accent-color:var(--accent);margin:0}
+.lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-weight:700}
+select{border:1px solid var(--line-strong);border-radius:var(--r);background:var(--panel);padding:6px 8px;min-height:34px;font-size:14px;max-width:100%}
+.layout{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1000px){.layout{grid-template-columns:minmax(0,1fr) 410px;align-items:start}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+.card h2{font:600 19px/1.2 var(--f-display);margin:0}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.bench{display:grid;grid-template-columns:76px minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:640px){.bench{grid-template-columns:minmax(0,1fr)}}
+.tools{display:flex;flex-direction:column;gap:6px;position:sticky;top:max(12px,env(safe-area-inset-top,0px))}
+@media (max-width:640px){.tools{flex-direction:row;flex-wrap:wrap;position:static}}
+.tool{display:grid;justify-items:center;gap:3px;padding:8px 4px 6px;border:1px solid var(--line);background:var(--panel);border-radius:var(--r);font-size:13px;line-height:1.1;cursor:pointer;min-width:66px}
+.tool:hover{border-color:var(--line-strong)}
+.tool svg{width:24px;height:24px}
+.tool kbd{font:500 10px/1 var(--f-mono);color:var(--muted)}
+.tool[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tool[aria-pressed="true"] kbd{color:var(--accent-ink)}
+.mapcol{display:grid;gap:10px;min-width:0}
+.mapbar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;max-width:640px}
+.mapbar .grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mapbox{position:relative;width:100%;max-width:640px;aspect-ratio:1/1;border:1px solid var(--line-strong);border-radius:4px;overflow:hidden;
+  background:repeating-conic-gradient(var(--check-a) 0 25%, var(--check-b) 0 50%) 0 0/3.125% 3.125%;touch-action:none;user-select:none}
+.mapbox.big{background-size:1.5625% 1.5625%}
+#paint,#ov{position:absolute;inset:0;width:100%;height:100%;display:block}
+#paint{image-rendering:pixelated;image-rendering:crisp-edges}
+#ov{cursor:crosshair}
+.status{font:13px/1.45 var(--f-mono);color:var(--muted);min-height:1.45em;display:flex;gap:4px 14px;flex-wrap:wrap;max-width:640px}
+.status b{color:var(--ink);font-weight:500}
+.chip{display:inline-block;width:11px;height:11px;border-radius:2px;border:1px solid var(--line-strong);vertical-align:-1px;margin-right:5px}
+.msg{margin:0;font-size:15px;min-height:1.5em;max-width:640px}
+.hint{font-size:14px;color:var(--muted);margin:0;max-width:640px}
+.help{font-size:13px;line-height:1.45;color:var(--muted);margin:0}
+.idline{font:13px var(--f-mono);color:var(--muted);word-break:break-all}
+.colors{display:grid;gap:12px;max-width:640px}
+.cur{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.cur .big{width:44px;height:44px;border-radius:6px;border:1px solid var(--line-strong)}
+.cur input[type=color]{width:44px;height:38px;border:1px solid var(--line-strong);border-radius:var(--r);padding:2px;background:var(--panel);cursor:pointer}
+.cur code{font:500 15px var(--f-mono)}
+.crow{display:grid;grid-template-columns:78px minmax(0,1fr);gap:10px;align-items:center}
+@media (max-width:420px){.crow{grid-template-columns:minmax(0,1fr)}}
+.swrow{display:flex;flex-wrap:wrap;gap:5px}
+.sw{width:28px;height:28px;border-radius:4px;border:1px solid var(--line-strong);cursor:pointer;padding:0}
+.sw[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:2px}
+.shade-row .sw{width:34px}
+.empty{font-size:13px;color:var(--muted)}
+.side{display:grid;gap:16px}
+.stage{height:340px;position:relative;border-radius:6px;background:var(--panel-2);touch-action:none;margin:12px 0 10px;overflow:hidden}
+@media (max-width:640px){.stage{height:290px}}
+.stage canvas{display:block;width:100%;height:100%;cursor:grab}
+.stage.painting canvas{cursor:crosshair}
+.stage .no3d{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;margin:0;color:var(--muted);font-size:14px}
+.viewrow{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.note{font-size:14px;color:var(--muted);margin:10px 0 0}
+.pills{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:12px 0 10px;padding:0}
+.pills button{width:34px;height:34px;border:1px solid var(--line);background:var(--panel);border-radius:4px;font:600 16px/1 var(--f-display);cursor:pointer}
+.pills button.done{background:var(--accent-soft);border-color:var(--accent-soft)}
+.pills button[aria-current="step"]{background:var(--warm-soft);border-color:var(--warm);box-shadow:inset 0 0 0 1px var(--warm)}
+#stepTitle{font:600 22px/1.15 var(--f-display);margin:2px 0 6px;text-wrap:balance}
+#stepText{margin:0 0 10px;max-width:60ch}
+.tip{font-size:14px;color:var(--muted);border-left:3px solid var(--warm);border-radius:0;padding:2px 0 2px 10px;margin:0 0 12px}
+.tip code{font:500 13px var(--f-mono);color:var(--ink);word-break:break-all}
+.guide-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.guide-actions .spacer{flex:1}
+.form{display:grid;gap:14px;margin-top:12px}
+.field{display:grid;gap:6px}
+.field>label,.field>.lbl{font-size:13px;color:var(--muted);font-weight:700}
+.text{border:1px solid var(--line-strong);border-radius:var(--r);background:var(--panel);padding:7px 10px;font-size:15px;width:100%;min-width:0}
+.range{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}
+.range input{accent-color:var(--accent);width:100%}
+.range output{font:500 14px var(--f-mono);min-width:7ch;text-align:right}
+.sub{display:grid;gap:12px;padding:12px;border:1px solid var(--line);border-radius:var(--r);background:var(--panel-2)}
+.picker{display:grid;gap:6px}
+.drop{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:start}
+.drop .cnt{display:flex;align-items:center;gap:4px;font-size:14px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{border:1px solid var(--line-strong);background:var(--panel);border-radius:999px;padding:5px 11px;font-size:13px;cursor:pointer;min-height:32px}
+.chips button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);font-weight:700}
+.egg{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.egg canvas{width:64px;height:64px;image-rendering:pixelated;background:var(--slot);box-shadow:inset 3px 3px 0 var(--slot-lo),inset -3px -3px 0 var(--slot-hi);padding:8px}
+.egg label{display:grid;gap:4px;font-size:13px;color:var(--muted);font-weight:700}
+.egg input[type=color]{width:52px;height:38px;border:1px solid var(--line-strong);border-radius:var(--r);padding:2px;background:var(--panel);cursor:pointer}
+.coll{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:6px}
+.coll li{display:flex;align-items:center;gap:8px}
+.coll .pick{flex:1;min-width:0;display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--panel);border-radius:var(--r);padding:6px 10px;cursor:pointer;text-align:left}
+.coll .pick[aria-current="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
+.coll canvas{width:32px;height:32px;image-rendering:pixelated;flex:none;border-radius:3px;box-shadow:0 0 0 1px var(--line-strong)}
+.coll .nm{font-weight:700;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.coll .ty{font-size:13px;color:var(--muted)}
+.coll .meta{min-width:0}
+.exp{display:grid;gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+@media (max-width:420px){.two{grid-template-columns:minmax(0,1fr)}}
+.ver{font:13px var(--f-mono);color:var(--muted)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+.legal{border-top:1px solid var(--line);padding-top:14px;font-size:13px;line-height:1.5;color:var(--muted)}
+.legal p{margin:0 0 4px;max-width:72ch}
+/* zoomable map and finger-sized controls */
+.mapzoom{position:relative;width:100%;aspect-ratio:1/1;background:inherit;touch-action:none}
+.mapbox.zoomed,.edbox.zoomed{overflow:auto;scrollbar-width:thin;overscroll-behavior:contain}
+.zoombar{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;max-width:640px}
+.zoombar .btn.small{min-width:38px;font-weight:700}
+.zoombar output{font:500 13px/1 var(--f-mono);min-width:6ch;text-align:center;color:var(--muted)}
+.zoomhint{font-size:13px;line-height:1.4;color:var(--muted);flex:1 1 220px;min-width:0;margin:0}
+html{-webkit-text-size-adjust:100%}
+button,label,select,a{touch-action:manipulation}
+@media (pointer:coarse){
+  .btn{min-height:44px}
+  .btn.small{min-height:40px}
+  .zoombar .btn.small{min-width:46px}
+  .seg button{min-height:42px;padding:6px 13px}
+  .chk{min-height:40px}
+  .chk input{width:22px;height:22px}
+  .swrow{gap:7px}
+  .sw{width:36px;height:36px}
+  .shade-row .sw{width:42px}
+  .pills button{width:40px;height:40px}
+  .chips button{min-height:40px;padding:6px 13px}
+  select{min-height:42px}
+}
+</style>
+</head>
+<body>
+<nav class="sitenav"><a href="./">&larr; Alla verkstäder</a></nav>
+<script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});</script>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <canvas id="logo" width="8" height="8" aria-hidden="true"></canvas>
+      <div>
+        <h1>Mobverkstaden</h1>
+        <p class="tagline">Bygg egna varelser till Minecraft Bedrock</p>
+      </div>
+    </div>
+    <div class="files">
+      <button class="btn" id="newBtn" type="button">Ny mob</button>
+      <button class="btn" id="openBtn" type="button">Öppna PNG</button>
+      <input type="file" id="fileIn" accept="image/png" hidden>
+      <button class="btn" id="exampleBtn" type="button">Lägg till exempel</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <section class="bench" aria-label="Målarbänk">
+      <div class="tools" role="toolbar" aria-label="Verktyg" id="tools"></div>
+      <div class="mapcol">
+        <div class="mapbar">
+          <div class="grp">
+            <span class="lbl" id="fillLbl">Hinken fyller</span>
+            <div class="seg" id="fillSeg" role="group" aria-labelledby="fillLbl">
+              <button type="button" data-fill="area">En yta</button>
+              <button type="button" data-fill="part">Hel del</button>
+            </div>
+          </div>
+          <button class="btn small warm" id="baseBtn" type="button" title="Fyller tomma rutor med vald färg, med ljus och skugga">Grundmåla</button>
+          <div class="grp">
+            <label class="chk"><input type="checkbox" id="mirrorChk"> Spegla</label>
+            <label class="chk"><input type="checkbox" id="gridChk" checked> Rutnät</label>
+            <label class="chk"><input type="checkbox" id="guideChk" checked> Hjälplinjer</label>
+          </div>
+          <div class="grp">
+            <button class="btn small" id="undoBtn" type="button" title="Ångra (Ctrl+Z)">Ångra</button>
+            <button class="btn small" id="redoBtn" type="button" title="Gör om (Ctrl+Y)">Gör om</button>
+            <button class="btn small" id="clearBtn" type="button">Rensa del</button>
+          </div>
+        </div>
+        <div class="mapbox" id="mapbox">
+          <div class="mapzoom" id="mapzoom">
+            <canvas id="paint" width="64" height="64"></canvas>
+            <canvas id="ov" role="img" aria-label="Mobbens karta, 64 gånger 64 pixlar. Klicka och dra för att måla."></canvas>
+          </div>
+        </div>
+        <div class="zoombar" id="zoombar">
+          <button class="btn small" type="button" data-z="out" aria-label="Zooma ut" title="Zooma ut">&minus;</button>
+          <output aria-live="polite">100 %</output>
+          <button class="btn small" type="button" data-z="in" aria-label="Zooma in" title="Zooma in">+</button>
+          <button class="btn small" type="button" data-z="fit">Hela kartan</button>
+          <p class="zoomhint"></p>
+        </div>
+        <div class="status" id="status"></div>
+        <p class="msg" id="msg" role="status" aria-live="polite"></p>
+        <p class="hint" id="mapHint"></p>
+        <section class="card colors" aria-label="Färger">
+          <div class="cur">
+            <span class="big" id="curSw" aria-hidden="true"></span>
+            <input type="color" id="colorIn" aria-label="Välj valfri färg">
+            <code id="hexOut">#000000</code>
+          </div>
+          <div class="crow"><span class="lbl">Nyanser</span><div class="swrow shade-row" id="shadeRow" aria-label="Nyanser av vald färg, mörkast till vänster"></div></div>
+          <div class="crow"><span class="lbl">Päls</span><div class="swrow" id="palFur"></div></div>
+          <div class="crow"><span class="lbl">Starka</span><div class="swrow" id="palBright"></div></div>
+          <div class="crow"><span class="lbl">Ögon</span><div class="swrow" id="palEyes"></div></div>
+          <div class="crow"><span class="lbl">Senaste</span><div class="swrow" id="palRecent"></div></div>
+        </section>
+      </div>
+    </section>
+
+    <aside class="side">
+      <section class="card" aria-label="3D-figuren">
+        <div class="card-head">
+          <h2>Figuren</h2>
+          <div class="seg" id="modeSeg" role="group" aria-label="Vad musen gör på figuren">
+            <button type="button" data-mode="rotate">Snurra</button>
+            <button type="button" data-mode="paint">Måla</button>
+          </div>
+        </div>
+        <div class="stage" id="stage"></div>
+        <div class="viewrow">
+          <label class="chk"><input type="checkbox" id="walkChk" checked> Visa gång</label>
+          <button class="btn small" id="turnBtn" type="button">Vänd</button>
+          <button class="btn small" id="resetBtn" type="button">Vrid tillbaka</button>
+        </div>
+        <p class="note">Peka på kartan så lyser samma ruta upp på figuren. Dra för att snurra och scrolla för att zooma. Med Måla kan ni måla direkt på figuren.</p>
+      </section>
+
+      <section class="card" aria-label="Guide">
+        <div class="card-head"><h2>Guide</h2><span class="lbl" id="stepCount">Steg 1 av 7</span></div>
+        <ol class="pills" id="pills"></ol>
+        <h3 id="stepTitle"></h3>
+        <p id="stepText"></p>
+        <p class="tip" id="stepTip"></p>
+        <div class="guide-actions">
+          <span class="spacer"></span>
+          <button class="btn" id="prevBtn" type="button">Förra</button>
+          <button class="btn primary" id="nextBtn" type="button">Nästa</button>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Kropp och beteende">
+        <h2>Kropp och beteende</h2>
+        <div class="form">
+          <div class="field">
+            <label for="mobName">Namn</label>
+            <input class="text" id="mobName" maxlength="32" autocomplete="off">
+            <span class="idline" id="idLine"></span>
+          </div>
+          <div class="field">
+            <span class="lbl" id="bodyLbl">Kropp</span>
+            <div class="seg" id="bodySeg" role="group" aria-labelledby="bodyLbl">
+              <button type="button" data-body="quad">Fyrbent</button>
+              <button type="button" data-body="biped">Tvåbent</button>
+              <button type="button" data-body="dragon">Drake</button>
+            </div>
+            <span class="help" id="bodyHelp"></span>
+          </div>
+          <div class="sub" id="partsField">
+            <div class="field" id="noseField"><span class="lbl" id="noseLbl">Nos</span>
+              <div class="seg" id="noseSeg" role="group" aria-labelledby="noseLbl">
+                <button type="button" data-nose="none">Ingen</button><button type="button" data-nose="snout">Kort</button><button type="button" data-nose="long">Lång</button><button type="button" data-nose="beak">Näbb</button>
+              </div></div>
+            <div class="field"><span class="lbl" id="hornLbl">Horn</span>
+              <div class="seg" id="hornSeg" role="group" aria-labelledby="hornLbl">
+                <button type="button" data-horns="none">Inga</button><button type="button" data-horns="small">Små</button><button type="button" data-horns="big">Stora</button>
+              </div></div>
+            <div class="field" id="tailField"><span class="lbl" id="tailLbl">Svans</span>
+              <div class="seg" id="tailSeg" role="group" aria-labelledby="tailLbl">
+                <button type="button" data-tail="none">Ingen</button><button type="button" data-tail="short">Kort</button><button type="button" data-tail="long">Lång</button>
+              </div></div>
+            <div class="field"><span class="lbl">Mer</span>
+              <div class="chips" id="partChips">
+                <button type="button" data-part="ears">Öron</button><button type="button" data-part="spikes">Taggar</button><button type="button" data-part="wings">Vingar</button>
+              </div></div>
+          </div>
+          <div class="sub" id="flyField">
+            <label class="chk"><input type="checkbox" id="flyChk"> Kan flyga</label>
+            <label class="chk" id="rideField"><input type="checkbox" id="rideChk"> Går att rida på och styra i luften när den är tämjd</label>
+            <span class="help" id="flyHelp"></span>
+          </div>
+          <div class="field">
+            <span class="lbl" id="behLbl">Beteende</span>
+            <div class="seg" id="behSeg" role="group" aria-labelledby="behLbl">
+              <button type="button" data-beh="passive">Snäll</button>
+              <button type="button" data-beh="neutral">Neutral</button>
+              <button type="button" data-beh="hostile">Farlig</button>
+              <button type="button" data-beh="pet">Husdjur</button>
+            </div>
+            <span class="help" id="behHelp"></span>
+          </div>
+          <div class="field">
+            <label for="hpIn">Liv</label>
+            <div class="range"><input type="range" id="hpIn" min="2" max="60" step="2"><output id="hpOut" for="hpIn"></output></div>
+          </div>
+          <div class="field">
+            <label for="spIn">Fart</label>
+            <div class="range"><input type="range" id="spIn" min="0" max="4" step="1"><output id="spOut" for="spIn"></output></div>
+          </div>
+          <div class="field" id="dmgField">
+            <label for="dmgIn">Skada när den anfaller</label>
+            <div class="range"><input type="range" id="dmgIn" min="1" max="20" step="1"><output id="dmgOut" for="dmgIn"></output></div>
+          </div>
+          <div class="field">
+            <label for="sizeIn">Storlek</label>
+            <div class="range"><input type="range" id="sizeIn" min="0.5" max="4" step="0.25"><output id="sizeOut" for="sizeIn"></output></div>
+          </div>
+          <div class="field" id="foodField">
+            <label for="pk_food_sel">Gillar att äta</label>
+            <div class="picker" id="pk_food"></div>
+            <span class="help">Den följer efter den som håller maten, och två vuxna som får mat gör en unge.</span>
+          </div>
+          <div class="field" id="tameField">
+            <label for="pk_tame_sel">Tämjs med</label>
+            <div class="picker" id="pk_tame"></div>
+            <span class="help">Ge den det här några gånger så blir den ert husdjur. Det följer med er och sätter sig när ni klickar på det.</span>
+          </div>
+          <label class="chk" id="burnField"><input type="checkbox" id="burnChk"> Brinner i solen, som en zombie</label>
+          <div class="field">
+            <label for="soundSel">Låter som</label>
+            <select id="soundSel"></select>
+          </div>
+          <div class="field">
+            <span class="lbl">Tappar när den dör</span>
+            <div class="drop"><div class="picker" id="pk_drop0"></div><div class="cnt"><select id="d0min" aria-label="Minst"></select>–<select id="d0max" aria-label="Högst"></select></div></div>
+            <div class="drop"><div class="picker" id="pk_drop1"></div><div class="cnt"><select id="d1min" aria-label="Minst"></select>–<select id="d1max" aria-label="Högst"></select></div></div>
+            <span class="help">Egna föremål från Föremålsverkstaden går att välja med Eget föremål. Skriv dess ID, till exempel verkstad:mansten.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-label="I världen">
+        <h2>I världen</h2>
+        <div class="form">
+          <label class="chk"><input type="checkbox" id="spawnChk"> Dyker upp av sig själv i världen</label>
+          <div class="sub" id="spawnFields">
+            <div class="field">
+              <span class="lbl">Var</span>
+              <div class="chips" id="biomeChips"></div>
+            </div>
+            <div class="field">
+              <span class="lbl" id="lightLbl">När</span>
+              <div class="seg" id="lightSeg" role="group" aria-labelledby="lightLbl">
+                <button type="button" data-light="day">Där det är ljust</button>
+                <button type="button" data-light="night">I mörker</button>
+                <button type="button" data-light="any">Både och</button>
+              </div>
+            </div>
+            <div class="field">
+              <span class="lbl" id="wLbl">Hur ofta</span>
+              <div class="seg" id="weightSeg" role="group" aria-labelledby="wLbl">
+                <button type="button" data-w="rare">Sällan</button>
+                <button type="button" data-w="some">Ibland</button>
+                <button type="button" data-w="often">Ofta</button>
+              </div>
+            </div>
+            <div class="field">
+              <span class="lbl" id="hLbl">Hur många tillsammans</span>
+              <div class="seg" id="herdSeg" role="group" aria-labelledby="hLbl">
+                <button type="button" data-herd="1-1">En</button>
+                <button type="button" data-herd="1-3">1 till 3</button>
+                <button type="button" data-herd="2-4">2 till 4</button>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <span class="lbl">Spawnägg</span>
+            <div class="egg">
+              <canvas id="eggCv" width="16" height="16" aria-hidden="true"></canvas>
+              <label>Grundfärg<input type="color" id="eggBase"></label>
+              <label>Prickar<input type="color" id="eggSpot"></label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Samling och add-on">
+        <div class="card-head"><h2>Samling</h2><span class="lbl" id="collCount"></span></div>
+        <ul class="coll" id="collList"></ul>
+        <div class="exp">
+          <div class="two">
+            <div class="field"><label for="addonName">Add-onets namn</label><input class="text" id="addonName" maxlength="40" autocomplete="off"></div>
+            <div class="field"><label for="nsIn">Förled i ID</label><input class="text" id="nsIn" maxlength="20" autocomplete="off" spellcheck="false"></div>
+          </div>
+          <span class="ver" id="verLine"></span>
+          <button class="btn primary" id="exportBtn" type="button">Spara add-on (.zip)</button>
+          <p class="note" id="expNote" style="margin:0">Dubbelklicka sedan på Installera i Minecraft på skrivbordet, så öppnas add-onet i spelet. Guiden visar resten.</p>
+        </div>
+      </section>
+    </aside>
+  </div>
+  <footer class="legal">
+    <p>Ett fristående hobbyprojekt. Inte en officiell Minecraft-produkt. Inte godkänd av eller kopplad till Mojang eller Microsoft.</p>
+    <p lang="en">NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.</p>
+  </footer>
+</div>
+
+<script src="lib/three.min.js"></script>
+<script>window.MVCore = (() => {
+  'use strict';
+  const enc = new TextEncoder();
+
+  /* ---------- zip (stored, no compression) ---------- */
+  const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  function crc32(b) { let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = CRC[(c ^ b[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+  function zipStore(files, date = new Date()) {
+    const time = ((date.getHours() << 11) | (date.getMinutes() << 5) | (date.getSeconds() >> 1)) & 0xFFFF;
+    const day = (((date.getFullYear() - 1980) << 9) | ((date.getMonth() + 1) << 5) | date.getDate()) & 0xFFFF;
+    const parts = [], central = []; let offset = 0;
+    for (const f of files) {
+      const name = enc.encode(f.name), data = f.data, crc = crc32(data);
+      const lh = new DataView(new ArrayBuffer(30));
+      lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, 0, true);
+      lh.setUint16(10, time, true); lh.setUint16(12, day, true); lh.setUint32(14, crc, true);
+      lh.setUint32(18, data.length, true); lh.setUint32(22, data.length, true); lh.setUint16(26, name.length, true); lh.setUint16(28, 0, true);
+      parts.push(new Uint8Array(lh.buffer), name, data);
+      const ch = new DataView(new ArrayBuffer(46));
+      ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true); ch.setUint16(10, 0, true);
+      ch.setUint16(12, time, true); ch.setUint16(14, day, true); ch.setUint32(16, crc, true);
+      ch.setUint32(20, data.length, true); ch.setUint32(24, data.length, true); ch.setUint16(28, name.length, true);
+      ch.setUint16(30, 0, true); ch.setUint16(32, 0, true); ch.setUint16(34, 0, true); ch.setUint16(36, 0, true); ch.setUint32(38, 0, true); ch.setUint32(42, offset, true);
+      central.push(new Uint8Array(ch.buffer), name);
+      offset += 30 + name.length + data.length;
+    }
+    const cdSize = central.reduce((a, b) => a + b.length, 0);
+    const end = new DataView(new ArrayBuffer(22));
+    end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true);
+    end.setUint32(12, cdSize, true); end.setUint32(16, offset, true);
+    const all = [...parts, ...central, new Uint8Array(end.buffer)];
+    const out = new Uint8Array(all.reduce((a, b) => a + b.length, 0)); let p = 0;
+    for (const c of all) { out.set(c, p); p += c.length; }
+    return out;
+  }
+
+  function slug(s, fallback) {
+    let t = String(s || '').toLowerCase().replace(/[åä]/g, 'a').replace(/ö/g, 'o').normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 32).replace(/_+$/g, '');
+    if (!t) t = fallback;
+    if (/^[0-9]/.test(t)) t = 'm_' + t;
+    return t;
+  }
+  function mobIds(mobs) {
+    const used = new Set();
+    return mobs.map(m => { const b = slug(m.name, 'mob'); let id = b, n = 2; while (used.has(id)) id = b + '_' + n++; used.add(id); return id; });
+  }
+
+  /* ---------- bodies (Bedrock coordinates: the mob faces -z, its right side is -x) ----------
+     part strings: "key" = m.parts[key] is true, "key=value" = m.parts[key] === value, alternatives joined with "|" */
+  const tailSeg = (i) => ({ name:`tail${i}`, parent: i === 1 ? 'body' : `tail${i - 1}`, pivot:[0, 17, 10 + (i - 1) * 6], cubes:[
+    { r:'tail', origin:[-2, 15, 10 + (i - 1) * 6], size:[4, 4, 6], uv:[80, 22] },
+    { r:'spike', part:'spikes', origin:[-1, 19, 11 + (i - 1) * 6], size:[2, 4, 3], uv:[112, 0] }] });
+  const neckSeg = (i) => ({ name:`neck${i}`, parent: i === 1 ? 'body' : `neck${i - 1}`, pivot:[0, 17, -10 - (i - 1) * 6], cubes:[
+    { r:'neck', origin:[-3, 14, -16 - (i - 1) * 6], size:[6, 6, 6], uv:[88, 0] },
+    { r:'spike', part:'spikes', origin:[-1, 20, -15 - (i - 1) * 6], size:[2, 4, 3], uv:[112, 0] }] });
+  const BODIES = {
+    quad: {
+      label:'Fyrbent', size:64, coll:[0.9, 1.25], seat:1.05, wings:'wings',
+      regions: [
+        { key:'head',  name:'Huvud',          short:'Huvud', box:[0, 0, 8, 8, 8],    mirror:'head',  group:'head' },
+        { key:'snout', name:'Nos',            short:'Nos',   box:[32, 0, 4, 3, 1],   mirror:'snout', group:'head', part:'nose=snout' },
+        { key:'lsnout',name:'Lång nos',       short:'Nos',   box:[48, 8, 4, 3, 4],   mirror:'lsnout',group:'head', part:'nose=long' },
+        { key:'beak',  name:'Näbb',           short:'Näbb',  box:[34, 16, 4, 2, 3],  mirror:'beak',  group:'head', part:'nose=beak' },
+        { key:'horn',  name:'Små horn',       short:'Horn',  box:[44, 0, 1, 3, 1],   mirror:null,    group:'head', part:'horns=small' },
+        { key:'bhorn', name:'Stora horn',     short:'Horn',  box:[0, 16, 2, 2, 5],   mirror:null,    group:'head', part:'horns=big' },
+        { key:'ear',   name:'Öron',           short:'Öra',   box:[34, 22, 2, 2, 1],  mirror:null,    group:'head', part:'ears' },
+        { key:'body',  name:'Kropp',          short:'Kropp', box:[0, 16, 10, 8, 14], mirror:'body',  group:'body' },
+        { key:'spike', name:'Ryggtaggar',     short:'Tagg',  box:[40, 22, 1, 2, 3],  mirror:'spike', group:'body', part:'spikes' },
+        { key:'leg',   name:'Ben',            short:'Ben',   box:[0, 38, 4, 8, 4],   mirror:null,    group:'legs' },
+        { key:'tail',  name:'Svans',          short:'Svans', box:[16, 38, 2, 2, 6],  mirror:'tail',  group:'body', part:'tail=short|tail=long' },
+        { key:'tail2', name:'Svansspets',     short:'Spets', box:[48, 0, 2, 2, 6],   mirror:'tail2', group:'body', part:'tail=long' },
+        { key:'wing',  name:'Vinge',          short:'Vinge', box:[32, 38, 8, 1, 7],  mirror:null,    group:'wings', part:'wings' },
+        { key:'wtip',  name:'Vingspets',      short:'Spets', box:[32, 46, 8, 1, 6],  mirror:null,    group:'wings', part:'wings' }
+      ],
+      bones: [
+        { name:'body', pivot:[0, 12, 0], cubes:[
+          { r:'body', origin:[-5, 8, -7], size:[10, 8, 14], uv:[0, 16] },
+          { r:'spike', part:'spikes', origin:[-0.5, 16, -5], size:[1, 2, 3], uv:[40, 22] },
+          { r:'spike', part:'spikes', origin:[-0.5, 16, 0], size:[1, 2, 3], uv:[40, 22] },
+          { r:'spike', part:'spikes', origin:[-0.5, 16, 4], size:[1, 2, 3], uv:[40, 22] }] },
+        { name:'head', parent:'body', pivot:[0, 13, -7], cubes:[
+          { r:'head', origin:[-4, 10, -14], size:[8, 8, 8], uv:[0, 0] },
+          { r:'snout', part:'nose=snout', origin:[-2, 11, -15], size:[4, 3, 1], uv:[32, 0] },
+          { r:'lsnout', part:'nose=long', origin:[-2, 11, -18], size:[4, 3, 4], uv:[48, 8] },
+          { r:'beak', part:'nose=beak', origin:[-2, 12, -17], size:[4, 2, 3], uv:[34, 16] },
+          { r:'horn', part:'horns=small', origin:[-4, 18, -11], size:[1, 3, 1], uv:[44, 0] },
+          { r:'horn', part:'horns=small', origin:[3, 18, -11], size:[1, 3, 1], uv:[44, 0], mirror:true },
+          { r:'bhorn', part:'horns=big', origin:[-5, 16, -9], size:[2, 2, 5], uv:[0, 16] },
+          { r:'bhorn', part:'horns=big', origin:[3, 16, -9], size:[2, 2, 5], uv:[0, 16], mirror:true },
+          { r:'ear', part:'ears', origin:[-5, 18, -9], size:[2, 2, 1], uv:[34, 22] },
+          { r:'ear', part:'ears', origin:[3, 18, -9], size:[2, 2, 1], uv:[34, 22], mirror:true }] },
+        { name:'leg0', parent:'body', pivot:[-3, 8, 5],  cubes:[{ r:'leg', origin:[-5, 0, 3],  size:[4, 8, 4], uv:[0, 38] }] },
+        { name:'leg1', parent:'body', pivot:[3, 8, 5],   cubes:[{ r:'leg', origin:[1, 0, 3],   size:[4, 8, 4], uv:[0, 38], mirror:true }] },
+        { name:'leg2', parent:'body', pivot:[-3, 8, -5], cubes:[{ r:'leg', origin:[-5, 0, -7], size:[4, 8, 4], uv:[0, 38] }] },
+        { name:'leg3', parent:'body', pivot:[3, 8, -5],  cubes:[{ r:'leg', origin:[1, 0, -7],  size:[4, 8, 4], uv:[0, 38], mirror:true }] },
+        { name:'tail', parent:'body', pivot:[0, 15, 7], part:'tail=short|tail=long', cubes:[{ r:'tail', origin:[-1, 13, 7], size:[2, 2, 6], uv:[16, 38] }] },
+        { name:'tail2', parent:'tail', pivot:[0, 14, 13], part:'tail=long', cubes:[{ r:'tail2', origin:[-1, 13, 13], size:[2, 2, 6], uv:[48, 0] }] },
+        { name:'wing_r', parent:'body', pivot:[-5, 16, -2], part:'wings', cubes:[{ r:'wing', origin:[-13, 15.5, -4], size:[8, 1, 7], uv:[32, 38] }] },
+        { name:'wingtip_r', parent:'wing_r', pivot:[-13, 16, -2], part:'wings', cubes:[{ r:'wtip', origin:[-21, 15.5, -4], size:[8, 1, 6], uv:[32, 46] }] },
+        { name:'wing_l', parent:'body', pivot:[5, 16, -2], part:'wings', cubes:[{ r:'wing', origin:[5, 15.5, -4], size:[8, 1, 7], uv:[32, 38], mirror:true }] },
+        { name:'wingtip_l', parent:'wing_l', pivot:[13, 16, -2], part:'wings', cubes:[{ r:'wtip', origin:[13, 15.5, -4], size:[8, 1, 6], uv:[32, 46], mirror:true }] }
+      ]
+    },
+    biped: {
+      label:'Tvåbent', size:64, coll:[0.6, 1.9], seat:1.6, wings:null,
+      regions: [
+        { key:'head',  name:'Huvud',           short:'Huvud', box:[0, 0, 8, 8, 8],    mirror:'head',  group:'head' },
+        { key:'hat',   name:'Huvud, yttre',    short:'Yttre', box:[32, 0, 8, 8, 8],   mirror:'hat',   group:'head', outer:true },
+        { key:'body',  name:'Kropp',           short:'Kropp', box:[16, 16, 8, 12, 4], mirror:'body',  group:'body' },
+        { key:'jacket',name:'Kropp, yttre',    short:'Yttre', box:[16, 32, 8, 12, 4], mirror:'jacket',group:'body', outer:true },
+        { key:'rarm',  name:'Höger arm',       short:'H arm', box:[40, 16, 4, 12, 4], mirror:'larm',  group:'arms' },
+        { key:'rarm2', name:'Höger ärm',       short:'H arm', box:[40, 32, 4, 12, 4], mirror:'larm2', group:'arms', outer:true },
+        { key:'larm',  name:'Vänster arm',     short:'V arm', box:[32, 48, 4, 12, 4], mirror:'rarm',  group:'arms' },
+        { key:'larm2', name:'Vänster ärm',     short:'V arm', box:[48, 48, 4, 12, 4], mirror:'rarm2', group:'arms', outer:true },
+        { key:'rleg',  name:'Höger ben',       short:'H ben', box:[0, 16, 4, 12, 4],  mirror:'lleg',  group:'legs' },
+        { key:'rleg2', name:'Höger byxben',    short:'H ben', box:[0, 32, 4, 12, 4],  mirror:'lleg2', group:'legs', outer:true },
+        { key:'lleg',  name:'Vänster ben',     short:'V ben', box:[16, 48, 4, 12, 4], mirror:'rleg',  group:'legs' },
+        { key:'lleg2', name:'Vänster byxben',  short:'V ben', box:[0, 48, 4, 12, 4],  mirror:'rleg2', group:'legs', outer:true }
+      ],
+      bones: [
+        { name:'body', pivot:[0, 24, 0], cubes:[{ r:'body', origin:[-4, 12, -2], size:[8, 12, 4], uv:[16, 16] }, { r:'jacket', origin:[-4, 12, -2], size:[8, 12, 4], uv:[16, 32], inflate:0.25 }] },
+        { name:'head', parent:'body', pivot:[0, 24, 0], cubes:[{ r:'head', origin:[-4, 24, -4], size:[8, 8, 8], uv:[0, 0] }, { r:'hat', origin:[-4, 24, -4], size:[8, 8, 8], uv:[32, 0], inflate:0.5 }] },
+        { name:'rightarm', parent:'body', pivot:[-5, 22, 0], cubes:[{ r:'rarm', origin:[-8, 12, -2], size:[4, 12, 4], uv:[40, 16] }, { r:'rarm2', origin:[-8, 12, -2], size:[4, 12, 4], uv:[40, 32], inflate:0.25 }] },
+        { name:'leftarm', parent:'body', pivot:[5, 22, 0], cubes:[{ r:'larm', origin:[4, 12, -2], size:[4, 12, 4], uv:[32, 48] }, { r:'larm2', origin:[4, 12, -2], size:[4, 12, 4], uv:[48, 48], inflate:0.25 }] },
+        { name:'rightleg', parent:'body', pivot:[-1.9, 12, 0], cubes:[{ r:'rleg', origin:[-3.9, 0, -2], size:[4, 12, 4], uv:[0, 16] }, { r:'rleg2', origin:[-3.9, 0, -2], size:[4, 12, 4], uv:[0, 32], inflate:0.25 }] },
+        { name:'leftleg', parent:'body', pivot:[1.9, 12, 0], cubes:[{ r:'lleg', origin:[-0.1, 0, -2], size:[4, 12, 4], uv:[16, 48] }, { r:'lleg2', origin:[-0.1, 0, -2], size:[4, 12, 4], uv:[0, 48], inflate:0.25 }] }
+      ]
+    },
+    dragon: {
+      label:'Drake', size:128, coll:[1.8, 1.5], seat:1.4, wings:'always',
+      regions: [
+        { key:'head',  name:'Huvud',         short:'Huvud', box:[0, 0, 10, 8, 10],   mirror:'head',  group:'head' },
+        { key:'snout', name:'Nos',           short:'Nos',   box:[40, 0, 8, 4, 8],    mirror:'snout', group:'head' },
+        { key:'jaw',   name:'Käke',          short:'Käke',  box:[40, 12, 8, 2, 8],   mirror:'jaw',   group:'head' },
+        { key:'horn',  name:'Horn',          short:'Horn',  box:[72, 0, 2, 2, 6],    mirror:null,    group:'head', part:'horns=small|horns=big' },
+        { key:'neck',  name:'Hals',          short:'Hals',  box:[88, 0, 6, 6, 6],    mirror:'neck',  group:'body' },
+        { key:'spike', name:'Taggar',        short:'Tagg',  box:[112, 0, 2, 4, 3],   mirror:'spike', group:'body', part:'spikes' },
+        { key:'body',  name:'Kropp',         short:'Kropp', box:[0, 22, 12, 10, 20], mirror:'body',  group:'body' },
+        { key:'leg',   name:'Ben',           short:'Ben',   box:[64, 22, 4, 10, 4],  mirror:null,    group:'legs' },
+        { key:'tail',  name:'Svans',         short:'Svans', box:[80, 22, 4, 4, 6],   mirror:'tail',  group:'body' },
+        { key:'wbar',  name:'Vingens ben',   short:'Ben',   box:[0, 52, 16, 2, 2],   mirror:null,    group:'wings' },
+        { key:'tbar',  name:'Spetsens ben',  short:'Ben',   box:[36, 52, 16, 1, 1],  mirror:null,    group:'wings' },
+        { key:'wskin', name:'Vinghud',       short:'Vinghud', box:[0, 56, 16, 0, 14],  mirror:null,  group:'wings' },
+        { key:'tskin', name:'Vingspets',     short:'Spets', box:[60, 56, 16, 0, 14],  mirror:null,    group:'wings' }
+      ],
+      bones: [
+        { name:'body', pivot:[0, 15, 0], cubes:[
+          { r:'body', origin:[-6, 10, -10], size:[12, 10, 20], uv:[0, 22] },
+          { r:'spike', part:'spikes', origin:[-1, 20, -8], size:[2, 4, 3], uv:[112, 0] },
+          { r:'spike', part:'spikes', origin:[-1, 20, -2], size:[2, 4, 3], uv:[112, 0] },
+          { r:'spike', part:'spikes', origin:[-1, 20, 4], size:[2, 4, 3], uv:[112, 0] }] },
+        neckSeg(1), neckSeg(2), neckSeg(3),
+        { name:'head', parent:'neck3', pivot:[0, 17, -28], cubes:[
+          { r:'head', origin:[-5, 13, -38], size:[10, 8, 10], uv:[0, 0] },
+          { r:'snout', origin:[-4, 14, -46], size:[8, 4, 8], uv:[40, 0] },
+          { r:'horn', part:'horns=small|horns=big', origin:[-4, 21, -32], size:[2, 2, 6], uv:[72, 0] },
+          { r:'horn', part:'horns=small|horns=big', origin:[2, 21, -32], size:[2, 2, 6], uv:[72, 0], mirror:true }] },
+        { name:'jaw', parent:'head', pivot:[0, 14, -38], cubes:[{ r:'jaw', origin:[-4, 12, -46], size:[8, 2, 8], uv:[40, 12] }] },
+        { name:'leg0', parent:'body', pivot:[-5, 10, 6],  cubes:[{ r:'leg', origin:[-7, 0, 4],  size:[4, 10, 4], uv:[64, 22] }] },
+        { name:'leg1', parent:'body', pivot:[5, 10, 6],   cubes:[{ r:'leg', origin:[3, 0, 4],   size:[4, 10, 4], uv:[64, 22], mirror:true }] },
+        { name:'leg2', parent:'body', pivot:[-5, 10, -6], cubes:[{ r:'leg', origin:[-7, 0, -8], size:[4, 10, 4], uv:[64, 22] }] },
+        { name:'leg3', parent:'body', pivot:[5, 10, -6],  cubes:[{ r:'leg', origin:[3, 0, -8],  size:[4, 10, 4], uv:[64, 22], mirror:true }] },
+        tailSeg(1), tailSeg(2), tailSeg(3), tailSeg(4), tailSeg(5),
+        { name:'wing_r', parent:'body', pivot:[-6, 19, -4], cubes:[
+          { r:'wbar', origin:[-22, 18, -5], size:[16, 2, 2], uv:[0, 52] }, { r:'wskin', origin:[-22, 19, -4], size:[16, 0, 14], uv:[0, 56] }] },
+        { name:'wingtip_r', parent:'wing_r', pivot:[-22, 19, -4], cubes:[
+          { r:'tbar', origin:[-38, 18.5, -4.5], size:[16, 1, 1], uv:[36, 52] }, { r:'tskin', origin:[-38, 19, -4], size:[16, 0, 14], uv:[60, 56] }] },
+        { name:'wing_l', parent:'body', pivot:[6, 19, -4], cubes:[
+          { r:'wbar', origin:[6, 18, -5], size:[16, 2, 2], uv:[0, 52], mirror:true }, { r:'wskin', origin:[6, 19, -4], size:[16, 0, 14], uv:[0, 56], mirror:true }] },
+        { name:'wingtip_l', parent:'wing_l', pivot:[22, 19, -4], cubes:[
+          { r:'tbar', origin:[22, 18.5, -4.5], size:[16, 1, 1], uv:[36, 52], mirror:true }, { r:'tskin', origin:[22, 19, -4], size:[16, 0, 14], uv:[60, 56], mirror:true }] }
+      ]
+    }
+  };
+  function partOn(m, part) {
+    if (!part) return true;
+    return part.split('|').some(alt => { const [k, v] = alt.split('='); return v === undefined ? !!m.parts[k] : m.parts[k] === v; });
+  }
+  const hasWings = m => m.body === 'dragon' || (m.body === 'quad' && !!m.parts.wings);
+  const flies = m => !!m.fly && hasWings(m);
+  const rides = m => flies(m) && !!m.ride && m.behavior === 'pet';
+
+  /* ---------- game data ---------- */
+  const FOODS = [
+    ['minecraft:wheat','Vete'], ['minecraft:wheat_seeds','Frön'], ['minecraft:carrot','Morot'], ['minecraft:potato','Potatis'], ['minecraft:beetroot','Rödbeta'],
+    ['minecraft:apple','Äpple'], ['minecraft:golden_apple','Guldäpple'], ['minecraft:golden_carrot','Guldmorot'], ['minecraft:sweet_berries','Söta bär'],
+    ['minecraft:melon_slice','Melonskiva'], ['minecraft:cookie','Kaka'], ['minecraft:sugar','Socker'], ['minecraft:bone','Ben'], ['minecraft:beef','Rått nötkött'],
+    ['minecraft:porkchop','Rått fläsk'], ['minecraft:chicken','Rå kyckling'], ['minecraft:cod','Torsk'], ['minecraft:salmon','Lax'], ['minecraft:kelp','Kelp'],
+    ['minecraft:slime_ball','Slemboll'], ['minecraft:emerald','Smaragd'], ['minecraft:diamond','Diamant'], ['minecraft:blaze_powder','Brännpulver'], ['minecraft:coal','Kol']
+  ];
+  const DROPS = [
+    ['minecraft:leather','Läder'], ['minecraft:feather','Fjäder'], ['minecraft:bone','Ben'], ['minecraft:string','Snöre'], ['minecraft:rotten_flesh','Ruttet kött'],
+    ['minecraft:gunpowder','Krut'], ['minecraft:beef','Rått nötkött'], ['minecraft:porkchop','Rått fläsk'], ['minecraft:chicken','Rå kyckling'], ['minecraft:mutton','Rått fårkött'],
+    ['minecraft:rabbit_hide','Kaninskinn'], ['minecraft:slime_ball','Slemboll'], ['minecraft:egg','Ägg'], ['minecraft:white_wool','Vit ull'], ['minecraft:ink_sac','Bläcksäck'],
+    ['minecraft:glow_ink_sac','Lysande bläcksäck'], ['minecraft:honeycomb','Vaxkaka'], ['minecraft:ender_pearl','Enderpärla'], ['minecraft:iron_nugget','Järnklimp'],
+    ['minecraft:gold_nugget','Guldklimp'], ['minecraft:emerald','Smaragd'], ['minecraft:diamond','Diamant'], ['minecraft:amethyst_shard','Ametistskärva'],
+    ['minecraft:prismarine_shard','Prismarinskärva'], ['minecraft:apple','Äpple'], ['minecraft:cookie','Kaka'], ['minecraft:golden_apple','Guldäpple'],
+    ['minecraft:blaze_powder','Brännpulver'], ['minecraft:phantom_membrane','Fantomhud'], ['minecraft:dragon_breath','Drakandedräkt']
+  ];
+  const SOUNDS = {
+    none:    { label:'Tyst' },
+    pig:     { label:'Gris',    ev:{ ambient:'mob.pig.say', hurt:'mob.pig.say', death:'mob.pig.death', step:'mob.pig.step' } },
+    cow:     { label:'Ko',      ev:{ ambient:'mob.cow.say', hurt:'mob.cow.hurt', death:'mob.cow.hurt', step:'mob.cow.step' } },
+    sheep:   { label:'Får',     ev:{ ambient:'mob.sheep.say', hurt:'mob.sheep.say', death:'mob.sheep.say', step:'mob.sheep.step' } },
+    chicken: { label:'Höna',    ev:{ ambient:'mob.chicken.say', hurt:'mob.chicken.hurt', death:'mob.chicken.hurt', step:'mob.chicken.step' } },
+    wolf:    { label:'Varg',    ev:{ ambient:'mob.wolf.bark', hurt:'mob.wolf.hurt', death:'mob.wolf.death', step:'mob.wolf.step' } },
+    cat:     { label:'Katt',    ev:{ ambient:'mob.cat.straymeow', hurt:'mob.cat.hit', death:'mob.cat.hit' } },
+    fox:     { label:'Räv',     ev:{ ambient:'mob.fox.ambient', hurt:'mob.fox.hurt', death:'mob.fox.death' } },
+    frog:    { label:'Groda',   ev:{ ambient:'mob.frog.ambient', hurt:'mob.frog.hurt', death:'mob.frog.death', step:'mob.frog.step' } },
+    parrot:  { label:'Papegoja',ev:{ ambient:'mob.parrot.idle', hurt:'mob.parrot.hurt', death:'mob.parrot.death' } },
+    dragon:  { label:'Drake',   ev:{ ambient:'mob.enderdragon.growl', hurt:'mob.enderdragon.hit', death:'mob.enderdragon.death' }, volume:0.6 },
+    zombie:  { label:'Zombie',  ev:{ ambient:'mob.zombie.say', hurt:'mob.zombie.hurt', death:'mob.zombie.death', step:'mob.zombie.step' } },
+    skeleton:{ label:'Skelett', ev:{ ambient:'mob.skeleton.say', hurt:'mob.skeleton.hurt', death:'mob.skeleton.death', step:'mob.skeleton.step' } },
+    spider:  { label:'Spindel', ev:{ ambient:'mob.spider.say', hurt:'mob.spider.say', death:'mob.spider.death', step:'mob.spider.step' } }
+  };
+  const BIOMES = [
+    ['common', 'Där djur och monster brukar finnas'], ['plains', 'Slätter'], ['forest', 'Skog'], ['taiga', 'Barrskog'], ['jungle', 'Djungel'],
+    ['desert', 'Öken'], ['savanna', 'Savann'], ['swamp', 'Träsk'], ['frozen', 'Snö och is'], ['mountain', 'Berg'], ['beach', 'Strand'],
+    ['mesa', 'Badlands'], ['meadow', 'Äng'], ['cherry_grove', 'Körsbärsskog']
+  ];
+  const SPEEDS = [0.15, 0.2, 0.25, 0.3, 0.38];
+  const SPEED_LABEL = ['Långsam', 'Lite långsam', 'Vanlig', 'Snabb', 'Väldigt snabb'];
+  const WEIGHTS = { rare:3, some:10, often:25 };
+  const hostile = m => m.behavior === 'hostile';
+  const breeds = m => m.behavior === 'passive' || m.behavior === 'pet' || m.behavior === 'neutral';
+  const fights = m => m.behavior !== 'passive';
+
+  /* ---------- json builders ---------- */
+  function geometryJson(m, ns, id) {
+    const B = BODIES[m.body], bones = [];
+    for (const b of B.bones) {
+      if (!partOn(m, b.part)) continue;
+      const cubes = b.cubes.filter(c => partOn(m, c.part)).map(c => { const o = { origin: c.origin, size: c.size, uv: c.uv }; if (c.inflate) o.inflate = c.inflate; if (c.mirror) o.mirror = true; return o; });
+      const bone = { name: b.name, pivot: b.pivot, cubes }; if (b.parent) bone.parent = b.parent;
+      bones.push(bone);
+    }
+    const big = m.body === 'dragon';
+    return { format_version: '1.12.0', 'minecraft:geometry': [{
+      description: { identifier: `geometry.${ns}.${id}`, texture_width: B.size, texture_height: B.size,
+        visible_bounds_width: big ? 7 : 4, visible_bounds_height: big ? 4 : 3.5, visible_bounds_offset: [0, big ? 1.5 : 1.25, 0] },
+      bones }] };
+  }
+  function animationsJson(ns) {
+    const w = a => `math.cos(query.anim_time * 38.17) * ${a}`;
+    const flap = (sign, phase, air, ground) => `${sign}math.sin(query.life_time * 500.0${phase}) * (query.is_on_ground ? ${ground} : ${air})`;
+    const tails = {}; for (let i = 1; i <= 5; i++) tails[`tail${i}`] = { rotation: [0, `math.sin(query.life_time * 150.0 - ${i * 45}.0) * 8.0`, 0] };
+    return { format_version: '1.8.0', animations: {
+      [`animation.${ns}.mob.quad_walk`]: { loop: true, anim_time_update: 'query.modified_distance_moved', bones: {
+        leg0: { rotation: [w('80.0'), 0, 0] }, leg1: { rotation: [w('-80.0'), 0, 0] }, leg2: { rotation: [w('-80.0'), 0, 0] }, leg3: { rotation: [w('80.0'), 0, 0] } } },
+      [`animation.${ns}.mob.biped_walk`]: { loop: true, anim_time_update: 'query.modified_distance_moved', bones: {
+        rightarm: { rotation: [w('40.0'), 0, 0] }, leftarm: { rotation: [w('-40.0'), 0, 0] }, rightleg: { rotation: [w('-50.0'), 0, 0] }, leftleg: { rotation: [w('50.0'), 0, 0] } } },
+      [`animation.${ns}.mob.arms_forward`]: { loop: true, bones: { rightarm: { rotation: [-80.0, 0, 0] }, leftarm: { rotation: [-80.0, 0, 0] } } },
+      [`animation.${ns}.mob.tail_wag`]: { loop: true, bones: { tail: { rotation: [0, 'math.sin(query.life_time * 300.0) * 15.0', 0] }, tail2: { rotation: [0, 'math.sin(query.life_time * 300.0 - 60.0) * 15.0', 0] } } },
+      [`animation.${ns}.mob.flap`]: { loop: true, bones: {
+        wing_r: { rotation: [0, 0, flap('', '', '35.0', '6.0')] }, wing_l: { rotation: [0, 0, flap('-', '', '35.0', '6.0')] },
+        wingtip_r: { rotation: [0, 0, flap('', ' - 40.0', '25.0', '4.0')] }, wingtip_l: { rotation: [0, 0, flap('-', ' - 40.0', '25.0', '4.0')] } } },
+      [`animation.${ns}.mob.dragon_body`]: { loop: true, bones: Object.assign({
+        jaw: { rotation: ['math.max(0.0, math.sin(query.life_time * 80.0)) * 12.0', 0, 0] },
+        neck1: { rotation: ['math.sin(query.life_time * 60.0) * 3.0', 0, 0] }, neck2: { rotation: ['math.sin(query.life_time * 60.0 - 30.0) * 3.0', 0, 0] } }, tails) }
+    } };
+  }
+  function clientJson(m, ns, id) {
+    const anims = { look: 'animation.common.look_at_target' }, animate = [];
+    if (m.body === 'biped') { anims.walk = `animation.${ns}.mob.biped_walk`; animate.push({ walk: 'query.modified_move_speed' }, 'look'); if (hostile(m)) { anims.arms = `animation.${ns}.mob.arms_forward`; animate.push('arms'); } }
+    else {
+      anims.walk = `animation.${ns}.mob.quad_walk`; animate.push({ walk: 'query.modified_move_speed' }, 'look');
+      if (m.body === 'quad' && m.parts.tail !== 'none') { anims.tail = `animation.${ns}.mob.tail_wag`; animate.push('tail'); }
+      if (hasWings(m)) { anims.flap = `animation.${ns}.mob.flap`; animate.push('flap'); }
+      if (m.body === 'dragon') { anims.dragon = `animation.${ns}.mob.dragon_body`; animate.push('dragon'); }
+    }
+    return { format_version: '1.10.0', 'minecraft:client_entity': { description: {
+      identifier: `${ns}:${id}`,
+      materials: { default: 'entity_alphatest' },
+      textures: { default: `textures/entity/${ns}_${id}` },
+      geometry: { default: `geometry.${ns}.${id}` },
+      animations: anims,
+      scripts: { animate },
+      render_controllers: ['controller.render.default'],
+      spawn_egg: { base_color: m.egg.base, overlay_color: m.egg.spot }
+    } } };
+  }
+  const itemList = v => [v];
+  function entityJson(m, ns, id) {
+    const self = `${ns}:${id}`, B = BODIES[m.body], groups = {}, events = {};
+    const family = [id, 'mob']; if (hostile(m)) family.push('monster');
+    const F = flies(m), RIDE = rides(m);
+    const c = {
+      'minecraft:type_family': { family },
+      'minecraft:collision_box': { width: B.coll[0], height: B.coll[1] },
+      'minecraft:health': { value: m.health, max: m.health },
+      'minecraft:movement': { value: SPEEDS[m.speed] },
+      'minecraft:can_climb': {},
+      'minecraft:pushable': { is_pushable: true, is_pushable_by_piston: true },
+      'minecraft:breathable': { total_supply: 15, suffocate_time: 0 },
+      'minecraft:nameable': {},
+      'minecraft:leashable': {},
+      'minecraft:hurt_on_condition': { damage_conditions: [{ filters: { test: 'in_lava', subject: 'self' }, cause: 'lava', damage_per_tick: 4 }] },
+      'minecraft:behavior.float': { priority: 0 },
+      'minecraft:behavior.look_at_player': { priority: 8, look_distance: 6.0, probability: 0.02 },
+      'minecraft:behavior.random_look_around': { priority: 9 }
+    };
+    if (F) {
+      Object.assign(c, {
+        'minecraft:navigation.fly': { can_path_from_air: true, can_path_over_water: true, avoid_damage_blocks: true },
+        'minecraft:movement.fly': {},
+        'minecraft:can_fly': {},
+        'minecraft:behavior.random_fly': { priority: 6, xz_dist: 15, y_dist: 4, y_offset: 0, speed_multiplier: 1.0, can_land_on_trees: true, avoid_damage_blocks: true },
+        'minecraft:damage_sensor': { triggers: { cause: 'fall', deals_damage: 'no' } }
+      });
+    } else {
+      Object.assign(c, {
+        'minecraft:navigation.walk': { can_path_over_water: true, avoid_water: true, avoid_damage_blocks: true },
+        'minecraft:movement.basic': {},
+        'minecraft:jump.static': {},
+        'minecraft:behavior.random_stroll': { priority: 7, speed_multiplier: 1.0 }
+      });
+    }
+    if (!RIDE) c['minecraft:physics'] = {};
+    if (m.sound !== 'none') c['minecraft:ambient_sound_interval'] = { value: 8.0, range: 16.0, event_name: 'ambient' };
+    if (m.behavior === 'passive') c['minecraft:behavior.panic'] = { priority: 1, speed_multiplier: 1.25 };
+    if (fights(m)) {
+      c['minecraft:attack'] = { damage: m.damage };
+      c['minecraft:behavior.melee_attack'] = { priority: 3, speed_multiplier: 1.2, track_target: true };
+      c['minecraft:behavior.hurt_by_target'] = { priority: 1 };
+    }
+    if (hostile(m)) {
+      c['minecraft:behavior.nearest_attackable_target'] = { priority: 2, must_see: true, reselect_targets: true, within_radius: 25.0,
+        entity_types: [{ filters: { test: 'is_family', subject: 'other', value: 'player' }, max_dist: 25 }] };
+      c['minecraft:despawn'] = { despawn_from_distance: {} };
+      if (m.burns) c['minecraft:burns_in_daylight'] = {};
+    }
+    if (breeds(m) && m.food) c['minecraft:behavior.tempt'] = { priority: 4, speed_multiplier: 1.2, items: itemList(m.food) };
+    const adult = {
+      'minecraft:scale': { value: m.size },
+      'minecraft:experience_reward': { on_death: hostile(m) ? 'query.last_hit_by_player ? 5 : 0' : 'query.last_hit_by_player ? Math.Random(1,3) : 0' },
+      'minecraft:loot': { table: `loot_tables/entities/${ns}_${id}.json` }
+    };
+    if (breeds(m) && m.food) {
+      adult['minecraft:behavior.breed'] = { priority: 3, speed_multiplier: 1.0 };
+      adult['minecraft:breedable'] = { require_tame: m.behavior === 'pet', breed_items: itemList(m.food),
+        breeds_with: { mate_type: self, baby_type: self, breed_event: { event: 'minecraft:entity_born', target: 'baby' } } };
+      adult['minecraft:experience_reward'].on_bred = 'Math.Random(1,7)';
+    }
+    groups[`${ns}:adult`] = adult;
+    const spawnGroups = [`${ns}:adult`], extra = [];
+    if (RIDE) {
+      groups[`${ns}:ground`] = { 'minecraft:physics': { has_gravity: true } };
+      groups[`${ns}:riding`] = {
+        'minecraft:physics': { has_gravity: false },
+        'minecraft:flying_speed': { value: 0.08 + SPEEDS[m.speed] * 0.12 },
+        'minecraft:input_air_controlled': { strafe_speed_modifier: 1.0, backwards_movement_modifier: 0.5 },
+        'minecraft:vertical_movement_action': { vertical_velocity: 0.5 }
+      };
+      extra.push(`${ns}:ground`);
+      events[`${ns}:start_riding`] = { remove: { component_groups: [`${ns}:ground`] }, add: { component_groups: [`${ns}:riding`] } };
+      events[`${ns}:stop_riding`] = { remove: { component_groups: [`${ns}:riding`] }, add: { component_groups: [`${ns}:ground`] } };
+    }
+    if (breeds(m)) {
+      groups[`${ns}:baby`] = { 'minecraft:is_baby': {}, 'minecraft:scale': { value: Math.round(m.size * 50) / 100 },
+        'minecraft:ageable': { duration: 1200, feed_items: m.food ? itemList(m.food) : [], grow_up: { event: 'minecraft:ageable_grow_up', target: 'self' } },
+        'minecraft:behavior.follow_parent': { priority: 6, speed_multiplier: 1.1 } };
+    }
+    if (m.behavior === 'pet') {
+      groups[`${ns}:wild`] = { 'minecraft:tameable': { probability: 0.33, tame_items: itemList(m.tame), tame_event: { event: `${ns}:on_tame`, target: 'self' } } };
+      const tame = {
+        'minecraft:is_tamed': {},
+        'minecraft:behavior.follow_owner': { priority: 5, speed_multiplier: 1.0, start_distance: 10, stop_distance: 2 },
+        'minecraft:behavior.owner_hurt_by_target': { priority: 1 },
+        'minecraft:behavior.owner_hurt_target': { priority: 2 }
+      };
+      if (RIDE) Object.assign(tame, {
+        'minecraft:rideable': { seat_count: 1, family_types: ['player'], interact_text: 'action.interact.ride.horse', pull_in_entities: false,
+          on_rider_enter_event: `${ns}:start_riding`, on_rider_exit_event: `${ns}:stop_riding`,
+          seats: [{ position: [0, Math.round(B.seat * m.size * 100) / 100, 0] }] },
+        'minecraft:behavior.player_ride_tamed': { priority: 1 }
+      });
+      else Object.assign(tame, { 'minecraft:sittable': {}, 'minecraft:behavior.stay_while_sitting': { priority: 2 } });
+      groups[`${ns}:tame`] = tame;
+      spawnGroups.push(`${ns}:wild`);
+      events[`${ns}:on_tame`] = { remove: { component_groups: [`${ns}:wild`] }, add: { component_groups: [`${ns}:tame`] } };
+    }
+    if (breeds(m)) {
+      const babyGroups = [`${ns}:baby`].concat(m.behavior === 'pet' ? [`${ns}:wild`] : [], extra);
+      events['minecraft:entity_spawned'] = { randomize: [{ weight: 90, add: { component_groups: spawnGroups.concat(extra) } }, { weight: 10, add: { component_groups: babyGroups } }] };
+      events['minecraft:entity_born'] = { add: { component_groups: babyGroups } };
+      events['minecraft:ageable_grow_up'] = { remove: { component_groups: [`${ns}:baby`] }, add: { component_groups: [`${ns}:adult`] } };
+    } else {
+      events['minecraft:entity_spawned'] = { add: { component_groups: spawnGroups.concat(extra) } };
+    }
+    return { format_version: RIDE ? '1.21.90' : '1.21.0', 'minecraft:entity': {
+      description: { identifier: self, is_spawnable: true, is_summonable: true },
+      component_groups: groups, components: c, events } };
+  }
+  function lootJson(m) {
+    const pools = m.drops.filter(d => d.item).map(d => ({ rolls: 1, entries: [{ type: 'item', name: d.item, weight: 1, functions: [
+      { function: 'set_count', count: { min: d.min, max: d.max } }, { function: 'looting_enchant', count: { min: 0, max: 1 } }] }] }));
+    return { pools };
+  }
+  function spawnJson(m, ns, id) {
+    const tags = (m.spawn.biomes.length ? m.spawn.biomes : ['common']).map(b => b === 'common' ? (hostile(m) ? 'monster' : 'animal') : b);
+    const uniq = [...new Set(tags)];
+    const filter = uniq.length === 1 ? { test: 'has_biome_tag', operator: '==', value: uniq[0] } : { any_of: uniq.map(v => ({ test: 'has_biome_tag', operator: '==', value: v })) };
+    const light = m.spawn.light === 'day' ? { min: 7, max: 15 } : m.spawn.light === 'night' ? { min: 0, max: 7 } : { min: 0, max: 15 };
+    const cond = { 'minecraft:spawns_on_surface': {} };
+    if (hostile(m)) cond['minecraft:spawns_underground'] = {};
+    cond['minecraft:brightness_filter'] = { min: light.min, max: light.max, adjust_for_weather: hostile(m) };
+    if (hostile(m)) cond['minecraft:difficulty_filter'] = { min: 'easy', max: 'hard' };
+    cond['minecraft:weight'] = { default: WEIGHTS[m.spawn.weight] || 10 };
+    cond['minecraft:herd'] = { min_size: m.spawn.min, max_size: m.spawn.max };
+    cond['minecraft:biome_filter'] = filter;
+    return { format_version: '1.8.0', 'minecraft:spawn_rules': { description: { identifier: `${ns}:${id}`, population_control: hostile(m) ? 'monster' : 'animal' }, conditions: [cond] } };
+  }
+
+  function buildAddon(project, version, texPngs, icon) {
+    const ns = slug(project.ns, 'verkstad');
+    const name = String(project.name || '').trim() || 'Våra mobbar';
+    const base = slug(name, 'mobbar');
+    const ver = [1, 0, version];
+    const ids = mobIds(project.items);
+    const bp = base + '_BP', rp = base + '_RP', U = project.uuids;
+    const J = o => enc.encode(JSON.stringify(o, null, 2));
+    const files = [], rpFiles = [];
+    files.push({ name: `${bp}/manifest.json`, data: J({ format_version: 2,
+      header: { name: `${name} BP`, description: 'Mobbar gjorda i Mobverkstaden', uuid: U.bpH, version: ver, min_engine_version: [1, 21, 30] },
+      modules: [{ type: 'data', uuid: U.bpM, version: ver }], dependencies: [{ uuid: U.rpH, version: ver }] }) });
+    files.push({ name: `${bp}/pack_icon.png`, data: icon });
+    rpFiles.push({ name: `${rp}/manifest.json`, data: J({ format_version: 2,
+      header: { name: `${name} RP`, description: 'Utseende för Mobverkstaden', uuid: U.rpH, version: ver, min_engine_version: [1, 21, 30] },
+      modules: [{ type: 'resources', uuid: U.rpM, version: ver }] }) });
+    rpFiles.push({ name: `${rp}/pack_icon.png`, data: icon });
+    rpFiles.push({ name: `${rp}/animations/${ns}_mobverkstaden.animation.json`, data: J(animationsJson(ns)) });
+    const lang = [], sounds = {};
+    project.items.forEach((m, i) => {
+      const id = ids[i], disp = (m.name || '').trim() || 'Mob';
+      files.push({ name: `${bp}/entities/${id}.json`, data: J(entityJson(m, ns, id)) });
+      files.push({ name: `${bp}/loot_tables/entities/${ns}_${id}.json`, data: J(lootJson(m)) });
+      if (m.spawn.on) files.push({ name: `${bp}/spawn_rules/${id}.json`, data: J(spawnJson(m, ns, id)) });
+      rpFiles.push({ name: `${rp}/entity/${id}.entity.json`, data: J(clientJson(m, ns, id)) });
+      rpFiles.push({ name: `${rp}/models/entity/${id}.geo.json`, data: J(geometryJson(m, ns, id)) });
+      rpFiles.push({ name: `${rp}/textures/entity/${ns}_${id}.png`, data: texPngs[i] });
+      lang.push(`entity.${ns}:${id}.name=${disp}`, `item.spawn_egg.entity.${ns}:${id}.name=Spawnägg: ${disp}`);
+      const s = SOUNDS[m.sound]; if (s && s.ev) sounds[`${ns}:${id}`] = { volume: s.volume || 1.0, pitch: [0.8, 1.2], events: s.ev };
+    });
+    if (Object.keys(sounds).length) rpFiles.push({ name: `${rp}/sounds.json`, data: J({ entity_sounds: { entities: sounds } }) });
+    rpFiles.push({ name: `${rp}/texts/languages.json`, data: J(['en_US', 'sv_SE']) });
+    const langTxt = enc.encode(lang.join('\n') + '\n');
+    rpFiles.push({ name: `${rp}/texts/en_US.lang`, data: langTxt }, { name: `${rp}/texts/sv_SE.lang`, data: langTxt });
+    return { files: files.concat(rpFiles), ns, ids, base };
+  }
+
+  return { zipStore, crc32, slug, mobIds, BODIES, partOn, hasWings, flies, rides, FOODS, DROPS, SOUNDS, BIOMES, SPEEDS, SPEED_LABEL, WEIGHTS,
+    geometryJson, animationsJson, clientJson, entityJson, lootJson, spawnJson, buildAddon };
+})();
+</script>
+<script>
+(() => {
+'use strict';
+const C = window.MVCore;
+const KEY = 'mobverkstaden.v1';
+let N = 64;
+const SZ = b => C.BODIES[b].size, NB = b => SZ(b) * SZ(b) * 4;
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const paint = $('#paint'), pctx = paint.getContext('2d', { willReadFrequently:true });
+const ov = $('#ov'), octx = ov.getContext('2d');
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const FONT_BODY = '"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif';
+const STANDALONE = !(window.claude && typeof window.claude.use === 'function');
+const TOUCH = matchMedia('(pointer: coarse)').matches;
+const OPEN_FILE = TOUCH ? 'Öppna .mcaddon-filen från Hämtade filer, på iPad i appen Filer, och välj Minecraft. Då importeras paketen.' : 'Dubbelklicka på .mcaddon-filen i Hämtade filer. Minecraft öppnas och importerar paketen.';
+const OPEN_SHORT = TOUCH ? 'Tryck på den och välj Minecraft. På iPad hittar du den i appen Filer.' : 'Dubbelklicka på den så öppnas den i Minecraft.';
+const EXPORT_LABEL = STANDALONE ? 'Spara add-on (.mcaddon)' : 'Spara add-on (.zip)';
+const T = {};
+
+/* ---------- helpers ---------- */
+const toHex = c => '#' + c.slice(0, 3).map(v => v.toString(16).padStart(2, '0')).join('').toUpperCase();
+const fromHex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+function hexA(h, a) { if (!h || h[0] !== '#') return h; const c = fromHex(h); return `rgba(${c[0]},${c[1]},${c[2]},${a})`; }
+function rgbToHsl([r, g, b]) { r /= 255; g /= 255; b /= 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b); let h = 0, s = 0; const l = (mx + mn) / 2;
+  if (mx !== mn) { const d = mx - mn; s = l > .5 ? d / (2 - mx - mn) : d / (mx + mn); h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h /= 6; } return [h, s, l]; }
+function hslToRgb([h, s, l]) { if (!s) { const v = Math.round(l * 255); return [v, v, v]; } const q = l < .5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+  const f = t => { if (t < 0) t += 1; if (t > 1) t -= 1; return t < 1/6 ? p + (q - p) * 6 * t : t < 1/2 ? q : t < 2/3 ? p + (q - p) * (2/3 - t) * 6 : p; };
+  return [f(h + 1/3), f(h), f(h - 1/3)].map(v => Math.round(v * 255)); }
+const lim = v => Math.min(.95, Math.max(.05, v));
+const b64e = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s); };
+const b64d = (s, n) => { const u = new Uint8ClampedArray(n); try { const bin = atob(s); for (let i = 0; i < Math.min(bin.length, n); i++) u[i] = bin.charCodeAt(i); } catch (e) {} return u; };
+function uuid() {
+  if (crypto.randomUUID) return crypto.randomUUID();
+  const b = crypto.getRandomValues(new Uint8Array(16)); b[6] = (b[6] & 15) | 64; b[8] = (b[8] & 63) | 128;
+  const h = [...b].map(x => x.toString(16).padStart(2, '0')).join('');
+  return `${h.slice(0,8)}-${h.slice(8,12)}-${h.slice(12,16)}-${h.slice(16,20)}-${h.slice(20)}`;
+}
+const clamp = (v, a, b, d) => { v = Number(v); return Number.isFinite(v) ? Math.min(b, Math.max(a, v)) : d; };
+const isEmpty = u => { for (let i = 3; i < u.length; i += 4) if (u[i]) return false; return true; };
+const hash = (a, b, c) => { let h = Math.imul(a + 1, 73856093) ^ Math.imul(b + 1, 19349663) ^ Math.imul(c + 1, 83492791); h ^= h >>> 13; h = Math.imul(h, 1274126177); return ((h ^ (h >>> 16)) >>> 0) % 7; };
+function esc(s) { return String(s).replace(/[&<>"]/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[ch])); }
+const ID_RE = /^[a-z0-9_.-]+:[a-z0-9_./-]+$/;
+function saveLocal(name, blob) { const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = name; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000); }
+
+/* ---------- project ---------- */
+const BEH = {
+  passive:{ label:'Snäll', help:'Går omkring och springer iväg om man slår den. Kan få ungar.' },
+  neutral:{ label:'Neutral', help:'Snäll tills man slår den. Då anfaller den tillbaka.' },
+  hostile:{ label:'Farlig', help:'Jagar och anfaller spelare, som ett monster. Försvinner när ingen är nära.' },
+  pet:{ label:'Husdjur', help:'Vild tills den tämjs. Sedan följer den med och försvarar sin ägare.' }
+};
+function newMob(name) {
+  const z64 = b64e(new Uint8Array(64 * 64 * 4)), z128 = b64e(new Uint8Array(128 * 128 * 4));
+  return { uid:uuid(), name, body:'quad', parts:{ nose:'snout', horns:'none', tail:'short', ears:false, spikes:false, wings:false }, fly:false, ride:false, tex:{ quad:z64, biped:z64, dragon:z128 },
+    behavior:'passive', health:10, speed:2, damage:3, size:1, food:'minecraft:wheat', tame:'minecraft:bone', burns:false,
+    drops:[{ item:'minecraft:leather', min:0, max:2 }, { item:'', min:1, max:1 }], sound:'pig',
+    spawn:{ on:true, biomes:['common'], light:'day', weight:'some', min:1, max:3 }, egg:{ base:'#C98A5A', spot:'#5B3A24' } };
+}
+function normMob(src) {
+  const d = newMob('Mob'), s = src || {}, o = Object.assign({}, d, s);
+  if (typeof o.name !== 'string') o.name = 'Mob';
+  if (!C.BODIES[o.body]) o.body = 'quad';
+  const sp = s.parts || {};
+  o.parts = Object.assign({}, d.parts);
+  if ('snout' in sp && !('nose' in sp)) o.parts.nose = sp.snout ? 'snout' : 'none';
+  if (typeof sp.horns === 'boolean') o.parts.horns = sp.horns ? 'small' : 'none';
+  if (typeof sp.tail === 'boolean') o.parts.tail = sp.tail ? 'short' : 'none';
+  ['nose', 'horns', 'tail'].forEach(k => { if (typeof sp[k] === 'string') o.parts[k] = sp[k]; });
+  if (!['none', 'snout', 'long', 'beak'].includes(o.parts.nose)) o.parts.nose = 'snout';
+  if (!['none', 'small', 'big'].includes(o.parts.horns)) o.parts.horns = 'none';
+  if (!['none', 'short', 'long'].includes(o.parts.tail)) o.parts.tail = 'short';
+  ['ears', 'spikes', 'wings'].forEach(k => { o.parts[k] = !!sp[k]; });
+  o.fly = !!o.fly; o.ride = !!o.ride;
+  o.tex = Object.assign({}, d.tex, s.tex || {}); ['quad', 'biped', 'dragon'].forEach(k => { if (typeof o.tex[k] !== 'string') o.tex[k] = d.tex[k]; });
+  if (!BEH[o.behavior]) o.behavior = 'passive';
+  o.health = clamp(Math.round(o.health), 2, 60, 10); o.speed = clamp(Math.round(o.speed), 0, 4, 2); o.damage = clamp(Math.round(o.damage), 1, 20, 3);
+  o.size = clamp(o.size, .5, 4, 1);
+  ['food', 'tame'].forEach(k => { if (typeof o[k] !== 'string') o[k] = d[k]; });
+  o.burns = !!o.burns;
+  o.drops = [0, 1].map(i => { const x = Object.assign({}, d.drops[i], (Array.isArray(s.drops) && s.drops[i]) || {}); x.item = typeof x.item === 'string' ? x.item : ''; x.min = clamp(Math.round(x.min), 0, 8, 0); x.max = clamp(Math.round(x.max), x.min, 8, Math.max(1, x.min)); return x; });
+  if (!C.SOUNDS[o.sound]) o.sound = 'pig';
+  o.spawn = Object.assign({}, d.spawn, s.spawn || {}); o.spawn.on = !!o.spawn.on;
+  o.spawn.biomes = Array.isArray(o.spawn.biomes) ? o.spawn.biomes.filter(b => C.BIOMES.some(x => x[0] === b)) : ['common'];
+  if (!['day', 'night', 'any'].includes(o.spawn.light)) o.spawn.light = 'day';
+  if (!C.WEIGHTS[o.spawn.weight]) o.spawn.weight = 'some';
+  o.spawn.min = clamp(Math.round(o.spawn.min), 1, 4, 1); o.spawn.max = clamp(Math.round(o.spawn.max), o.spawn.min, 4, 3);
+  o.egg = Object.assign({}, d.egg, s.egg || {}); ['base', 'spot'].forEach(k => { if (!/^#[0-9A-F]{6}$/i.test(o.egg[k])) o.egg[k] = d.egg[k]; });
+  return o;
+}
+let project = null;
+try { project = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+let firstVisit = false;
+if (!project || !Array.isArray(project.items) || !project.items.length) { firstVisit = true; project = { name:'Våra mobbar', ns:'verkstad', version:0, step:0, maxStep:0, recent:[], active:0, uuids:{}, items:[] }; }
+project.items = project.items.map(normMob);
+project.version = clamp(Math.round(project.version), 0, 100000, 0);
+project.uuids = project.uuids && typeof project.uuids === 'object' ? project.uuids : {};
+['bpH', 'bpM', 'rpH', 'rpM'].forEach(k => { if (typeof project.uuids[k] !== 'string') project.uuids[k] = uuid(); });
+project.recent = Array.isArray(project.recent) ? project.recent.filter(h => /^#[0-9A-F]{6}$/i.test(h)).slice(0, 12) : [];
+if (typeof project.name !== 'string') project.name = 'Våra mobbar';
+if (typeof project.ns !== 'string') project.ns = 'verkstad';
+let saveT = null;
+function saveProject() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(project)); } catch (e) {} }, 250); }
+const active = () => project.items[project.active];
+
+/* ---------- regions of the current body ---------- */
+const FACE = ['topp', 'botten', 'höger sida', 'framsida', 'vänster sida', 'baksida'];
+const MIRROR_FACE = [0, 1, 4, 3, 2, 5];
+function boxFaces(u, v, w, h, d) { return [[u+d, v, w, d], [u+d+w, v, w, d], [u, v+d, d, h], [u+d, v+d, w, h], [u+d+w, v+d, d, h], [u+2*d+w, v+d, w, h]]; }
+let REG = [], RBY = {}, FACES = [], FMAP = new Int16Array(64 * 64);
+function buildRegions() {
+  const m = active(); N = SZ(m.body); REG = []; RBY = {}; FACES = []; FMAP = new Int16Array(N * N).fill(-1);
+  C.BODIES[m.body].regions.forEach((r0, ri) => {
+    const r = Object.assign({}, r0, { ri });
+    r.faces = boxFaces(...r.box).map((q, fi) => { const f = { ri, fi, region:r, x:q[0], y:q[1], w:q[2], h:q[3], idx:-1 };
+      if (f.w > 0 && f.h > 0) { f.idx = FACES.length; FACES.push(f); for (let y = f.y; y < f.y + f.h; y++) for (let x = f.x; x < f.x + f.w; x++) FMAP[y * N + x] = f.idx; }
+      return f; });
+    r.label = r.faces.filter(f => f.w > 0 && f.h > 0).sort((a, b) => b.w * b.h - a.w * a.h)[0];
+    REG.push(r); RBY[r.key] = r;
+  });
+}
+const faceAt = (x, y) => (x < 0 || y < 0 || x >= N || y >= N || FMAP[y * N + x] < 0) ? null : FACES[FMAP[y * N + x]];
+const regionOn = r => C.partOn(active(), r.part);
+function mirrorOf(x, y) {
+  const f = faceAt(x, y); if (!f || !f.region.mirror) return null;
+  const g = RBY[f.region.mirror].faces[MIRROR_FACE[f.fi]]; return [g.x + (g.w - 1 - (x - f.x)), g.y + (y - f.y)];
+}
+
+/* ---------- pixels ---------- */
+let pix = new Uint8ClampedArray(64 * 64 * 4), dirty3d = true, overlayDirty = true, hover = null;
+const get = (x, y) => { const i = (y * N + x) * 4; return [pix[i], pix[i+1], pix[i+2], pix[i+3]]; };
+function set(x, y, r, g, b, a = 255) { const i = (y * N + x) * 4; if (pix[i] === r && pix[i+1] === g && pix[i+2] === b && pix[i+3] === a) return false; pix[i] = r; pix[i+1] = g; pix[i+2] = b; pix[i+3] = a; return true; }
+function liveCommit() { pctx.putImageData(new ImageData(pix, N, N), 0, 0); drawSmall(); dirty3d = true; }
+function commit() { liveCommit(); active().tex[active().body] = b64e(pix); overlayDirty = true; saveProject(); renderColl(); }
+function headRect(m) { const hb = C.BODIES[m.body].regions[0].box; return [hb[0] + hb[4], hb[1] + hb[4], hb[2], hb[3]]; }
+function headPix(m, data) {
+  const S = SZ(m.body), [hx, hy, hw, hh] = headRect(m), out = new Uint8ClampedArray(hw * hh * 4), src = data || b64d(m.tex[m.body], NB(m.body));
+  for (let y = 0; y < hh; y++) for (let x = 0; x < hw; x++) { const a = ((hy + y) * S + hx + x) * 4, b = (y * hw + x) * 4; for (let k = 0; k < 4; k++) out[b + k] = src[a + k]; }
+  return { data: out, w: hw, h: hh };
+}
+function putHead(cv, m, data) { const p = headPix(m, data); if (cv.width !== p.w || cv.height !== p.h) { cv.width = p.w; cv.height = p.h; } const c = cv.getContext('2d'); c.clearRect(0, 0, p.w, p.h); c.putImageData(new ImageData(p.data, p.w, p.h), 0, 0); }
+function drawSmall() { putHead($('#logo'), active(), pix); const th = document.querySelector(`.coll canvas[data-uid="${active().uid}"]`); if (th) putHead(th, active(), pix); }
+let msgT = null;
+function msg(t) { $('#msg').textContent = t; clearTimeout(msgT); msgT = setTimeout(() => { $('#msg').textContent = ''; }, 8000); }
+
+/* ---------- undo ---------- */
+const undoS = [], redoS = [];
+let snap = null, changed = false, visited = null, drawing = false, lastPx = null;
+function pushUndo() { undoS.push(new Uint8ClampedArray(pix)); if (undoS.length > 80) undoS.shift(); redoS.length = 0; }
+function begin() { snap = new Uint8ClampedArray(pix); changed = false; visited = new Set(); }
+function end() { if (snap && changed) { undoS.push(snap); if (undoS.length > 80) undoS.shift(); redoS.length = 0; if (tool === 'pen' || tool === 'fill') addRecent(cur); commit(); } snap = null; drawing = false; lastPx = null; }
+function undo() { if (!undoS.length) { msg('Det finns inget att ångra.'); return; } redoS.push(new Uint8ClampedArray(pix)); pix = undoS.pop(); commit(); }
+function redo() { if (!redoS.length) { msg('Det finns inget att göra om.'); return; } undoS.push(new Uint8ClampedArray(pix)); pix = redoS.pop(); commit(); }
+
+/* ---------- tools ---------- */
+let tool = 'pen', prevTool = 'pen', fillMode = 'area', mirror = false, showGrid = true, showGuides = true;
+let cur = [201, 138, 90], base = cur.slice();
+const ICON = {
+  pen:'<path d="M4 16.5l.9-3.6L13.6 4.2a1.5 1.5 0 0 1 2.1 0l.1.1a1.5 1.5 0 0 1 0 2.1L7.1 15.1z"/><path d="M12 5.8l2.2 2.2"/>',
+  eraser:'<path d="M8.5 16.5L4 12l7.5-7.5a1.4 1.4 0 0 1 2 0l2.5 2.5a1.4 1.4 0 0 1 0 2L9 16.5z"/><path d="M7 9.5l4.5 4.5M9 16.5h8"/>',
+  fill:'<path d="M9.5 3.5l6 6-5.5 5.5a1.5 1.5 0 0 1-2.1 0L4 11.1a1.5 1.5 0 0 1 0-2.1z"/><path d="M4.5 10h11"/><path d="M16.5 12.5s1.5 1.7 1.5 2.7a1.5 1.5 0 0 1-3 0c0-1 1.5-2.7 1.5-2.7z"/>',
+  picker:'<path d="M10.5 6.5l3 3M11.8 7.8L5 14.6v2.4h2.4l6.8-6.8"/><path d="M12.5 5.5l2-2a1.4 1.4 0 0 1 2 2l-2 2"/>',
+  dark:'<circle cx="10" cy="10" r="6.5"/><path d="M10 3.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/>',
+  light:'<circle cx="10" cy="10" r="3.2"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4"/>'
+};
+const TOOLS = [
+  ['pen','Penna','B','Penna: måla en pixel i taget'], ['eraser','Sudd','E','Sudd: gör pixlar genomskinliga'],
+  ['fill','Hink','G','Hink: fyll en yta eller en hel del'], ['picker','Pipett','I','Pipett: hämta en färg från mobben'],
+  ['dark','Skugga','S','Skugga: gör pixlar lite mörkare'], ['light','Ljus','L','Ljus: gör pixlar lite ljusare']
+];
+const TOOL_NAME = Object.fromEntries(TOOLS.map(t => [t[0], t[1]]));
+function buildTools() {
+  $('#tools').innerHTML = TOOLS.map(([id, name, key, tip]) => `<button type="button" class="tool" data-tool="${id}" title="${tip} (${key})" aria-pressed="false"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[id]}</svg>${name}<kbd>${key}</kbd></button>`).join('');
+  $$('.tool').forEach(b => b.addEventListener('click', () => setTool(b.dataset.tool)));
+}
+function setTool(t) { if (t === 'picker' && tool !== 'picker') prevTool = tool; tool = t; $$('.tool').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tool === t))); updateStatus(); }
+function targets(x, y) { const t = [[x, y]]; if (mirror) { const m = mirrorOf(x, y); if (m && (m[0] !== x || m[1] !== y)) t.push(m); } return t; }
+function dab(x, y) {
+  const f = faceAt(x, y); if (!f || !regionOn(f.region)) return;
+  for (const [tx, ty] of targets(x, y)) {
+    if (tool === 'pen') { if (set(tx, ty, cur[0], cur[1], cur[2], 255)) changed = true; }
+    else if (tool === 'eraser') { if (set(tx, ty, 0, 0, 0, 0)) changed = true; }
+    else if (tool === 'dark' || tool === 'light') {
+      const k = ty * N + tx; if (visited.has(k)) continue; visited.add(k);
+      const c = get(tx, ty); if (!c[3]) continue;
+      const n = tool === 'dark' ? c.slice(0, 3).map(v => Math.round(v * .85)) : c.slice(0, 3).map(v => Math.round(v + (255 - v) * .17));
+      if (set(tx, ty, n[0], n[1], n[2], c[3])) changed = true;
+    }
+  }
+}
+function line(x0, y0, x1, y1, fn) { const dx = Math.abs(x1 - x0), sx = x0 < x1 ? 1 : -1, dy = -Math.abs(y1 - y0), sy = y0 < y1 ? 1 : -1; let err = dx + dy;
+  for (;;) { fn(x0, y0); if (x0 === x1 && y0 === y1) break; const e2 = 2 * err; if (e2 >= dy) { err += dy; x0 += sx; } if (e2 <= dx) { err += dx; y0 += sy; } } }
+function floodFace(x, y) {
+  const f = faceAt(x, y); if (!f) return false;
+  const s = get(x, y); if (s[3] === 255 && s[0] === cur[0] && s[1] === cur[1] && s[2] === cur[2]) return false;
+  const same = c => c[0] === s[0] && c[1] === s[1] && c[2] === s[2] && c[3] === s[3];
+  const st = [[x, y]], seen = new Set(); let ch = false;
+  while (st.length) { const [cx, cy] = st.pop(); if (cx < f.x || cy < f.y || cx >= f.x + f.w || cy >= f.y + f.h) continue; const k = cy * N + cx; if (seen.has(k)) continue; seen.add(k);
+    if (!same(get(cx, cy))) continue; if (set(cx, cy, cur[0], cur[1], cur[2], 255)) ch = true; st.push([cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]); }
+  return ch;
+}
+function fillRegion(r) { let ch = false; r.faces.forEach(f => { for (let y = f.y; y < f.y + f.h; y++) for (let x = f.x; x < f.x + f.w; x++) if (set(x, y, cur[0], cur[1], cur[2], 255)) ch = true; }); return ch; }
+function down(x, y) {
+  const f = faceAt(x, y);
+  if (!f) { msg('Den rutan används inte av mobben, så där går det inte att måla.'); return false; }
+  if (!regionOn(f.region)) { msg(`${f.region.name} är avstängd. Slå på den under Delar för att måla där.`); return false; }
+  if (tool === 'picker') { const c = get(x, y); if (!c[3]) { msg('Pixeln är genomskinlig, så det finns ingen färg att hämta.'); return false; } setColor(c); setTool(prevTool === 'picker' ? 'pen' : prevTool); return false; }
+  if (tool === 'fill') {
+    begin();
+    for (const [tx, ty] of targets(x, y)) { const g = faceAt(tx, ty); if (!g) continue; if (fillMode === 'area' ? floodFace(tx, ty) : fillRegion(g.region)) changed = true; }
+    end(); return false;
+  }
+  begin(); drawing = true; dab(x, y); lastPx = [x, y]; liveCommit(); return true;
+}
+function clearPart() {
+  const f = hover && faceAt(hover.x, hover.y); const r = f ? f.region : null;
+  if (!r) { msg('Peka på en del på kartan först, sedan tömmer Rensa del den delen.'); return; }
+  pushUndo(); let ch = false; r.faces.forEach(q => { for (let y = q.y; y < q.y + q.h; y++) for (let x = q.x; x < q.x + q.w; x++) if (set(x, y, 0, 0, 0, 0)) ch = true; });
+  if (!ch) { undoS.pop(); return; } commit(); msg(`${r.name} är tömd. Ångra med Ctrl+Z om det var fel.`);
+}
+function shade(base, f, x, y) {
+  const [hh, s, l] = rgbToHsl(base);
+  let d = f.fi === 0 ? .1 : f.fi === 1 ? -.14 : .06 - .16 * (y / Math.max(1, f.h - 1));
+  if (f.region.group === 'legs' && f.fi >= 2 && y >= f.h - 2) d -= .2;
+  if (f.fi >= 2 && (x === 0 || x === f.w - 1)) d -= .04;
+  d += (hash(x + f.x, y + f.y, f.fi) - 3) * .014;
+  return hslToRgb([hh, s, lim(l + d)]);
+}
+function grundmala() {
+  pushUndo(); let n = 0;
+  FACES.forEach(f => { if (f.region.outer || !regionOn(f.region)) return;
+    for (let y = 0; y < f.h; y++) for (let x = 0; x < f.w; x++) { const i = ((f.y + y) * N + f.x + x) * 4; if (pix[i + 3]) continue; const c = shade(cur, f, x, y); pix[i] = c[0]; pix[i+1] = c[1]; pix[i+2] = c[2]; pix[i+3] = 255; n++; } });
+  if (!n) { undoS.pop(); msg('Allt är redan målat. Peka på en del och tryck Rensa del om ni vill grundmåla den igen.'); return; }
+  addRecent(cur); commit(); msg('Mobben har fått en grundfärg med ljus och skugga. Måla nu ögon och mönster ovanpå.');
+}
+
+/* ---------- colors ---------- */
+const PAL_FUR = ['#F2EBDD','#D9C3A0','#C98A5A','#9A6B44','#6B4A30','#3E2C20','#2A2522','#8C8C8C','#C9C9C9','#E8A5B3','#D96E86','#F0C08A'];
+const PAL_BRIGHT = ['#D23C3C','#E0782F','#F2C14E','#5BAA4A','#2E7D5B','#2EA3B8','#3466C7','#7A4FC4','#C24F8E','#FFFFFF','#1F1F24','#000000'];
+const PAL_EYES = ['#FFFFFF','#111111','#3E8F55','#3466C7','#8A5A3B','#D23C3C','#F2C14E','#B05CFF'];
+let recent = project.recent;
+function swatch(rgb, nb) { const b = document.createElement('button'); b.type = 'button'; b.className = 'sw'; b.style.background = toHex(rgb); b.dataset.hex = toHex(rgb); b.title = toHex(rgb); b.setAttribute('aria-label', toHex(rgb)); b.addEventListener('click', () => setColor(rgb, nb)); return b; }
+function fillRow(el, list, nb = true) { el.replaceChildren(...list.map(c => swatch(c, nb))); }
+function renderShades() { const [h, s, l] = rgbToHsl(base); fillRow($('#shadeRow'), [-.27, -.18, -.09, 0, .09, .18, .27].map(o => o === 0 ? base.slice() : hslToRgb([h, s, Math.min(.97, Math.max(.04, l + o))])), false); }
+function renderRecent() { const el = $('#palRecent'); if (!recent.length) { el.innerHTML = '<span class="empty">Färger ni målar med hamnar här.</span>'; return; } fillRow(el, recent.map(fromHex)); }
+function markSw() { const h = toHex(cur); $$('.sw').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.hex === h))); }
+function setColor(rgb, nb = true) { cur = rgb.slice(0, 3); if (nb) { base = cur.slice(); renderShades(); } $('#curSw').style.background = toHex(cur); $('#hexOut').textContent = toHex(cur); $('#colorIn').value = toHex(cur).toLowerCase(); if (tool === 'eraser' || tool === 'picker') setTool('pen'); markSw(); }
+function addRecent(c) { const h = toHex(c); recent = [h, ...recent.filter(x => x !== h)].slice(0, 12); project.recent = recent; renderRecent(); markSw(); }
+
+/* ---------- overlay ---------- */
+let hatch = null;
+function readTokens() { const cs = getComputedStyle(document.documentElement); ['ink','panel','panel-2','bg','warm','grid','muted','unused','line-strong','g-head','g-body','g-arms','g-legs','g-wings'].forEach(k => T[k] = cs.getPropertyValue('--' + k).trim()); makeHatch(); overlayDirty = true; }
+function makeHatch() {
+  const dpr = ov.clientWidth ? ov.width / ov.clientWidth : 1, k = Math.max(4, Math.round(6 * dpr)), c = document.createElement('canvas');
+  c.width = c.height = k; const x = c.getContext('2d'); x.strokeStyle = T.unused || '#999'; x.lineWidth = Math.max(1, dpr);
+  x.beginPath(); x.moveTo(0, k); x.lineTo(k, 0); x.moveTo(-1, 1); x.lineTo(1, -1); x.moveTo(k - 1, k + 1); x.lineTo(k + 1, k - 1); x.stroke();
+  hatch = octx.createPattern(c, 'repeat');
+}
+function sizeOverlay() { const w = ov.clientWidth; if (!w) return; const px = Math.min(matchMedia('(pointer: coarse)').matches ? 3200 : 4096, Math.round(w * Math.min(3, window.devicePixelRatio || 1))); if (ov.width !== px) { ov.width = ov.height = px; makeHatch(); } overlayDirty = true; }
+function eyeHints() {
+  const m = active();
+  if (m.body === 'dragon') return [[11, 13, 2, 1], [17, 13, 2, 1], [50, 9, 1, 1], [53, 9, 1, 1]];
+  if (m.body === 'quad') return [[9, 11, 2, 1], [13, 11, 2, 1]].concat(m.parts.nose === 'snout' ? [[34, 2, 1, 1], [36, 2, 1, 1]] : m.parts.nose === 'long' ? [[52, 13, 1, 1], [55, 13, 1, 1]] : []);
+  return [[9, 12, 2, 1], [13, 12, 2, 1]];
+}
+function drawOverlay() {
+  const W = ov.width; if (!W) return;
+  const c = octx, s = W / N, dpr = W / (ov.clientWidth || W), X = i => Math.round(i * s);
+  const rect = (x, y, w, h) => [X(x), X(y), X(x + w) - X(x), X(y + h) - X(y)];
+  c.clearRect(0, 0, W, W);
+  for (let y = 0; y < N; y++) { let x = 0; while (x < N) { if (FMAP[y * N + x] < 0) { let x2 = x; while (x2 < N && FMAP[y * N + x2] < 0) x2++;
+    const r = rect(x, y, x2 - x, 1); c.fillStyle = T['panel-2']; c.fillRect(...r); c.fillStyle = hatch || T.unused; c.fillRect(...r); x = x2; } else x++; } }
+  c.fillStyle = hexA(T.panel, .84); FACES.forEach(f => { if (!regionOn(f.region)) c.fillRect(...rect(f.x, f.y, f.w, f.h)); });
+  if (showGrid && s / dpr >= 4) { c.beginPath(); for (let i = 1; i < N; i++) { const p = X(i) + .5; c.moveTo(p, 0); c.lineTo(p, W); c.moveTo(0, p); c.lineTo(W, p); } c.strokeStyle = T.grid; c.lineWidth = 1; c.stroke(); }
+  if (showGuides) {
+    const lw = Math.max(1, Math.round(dpr * 1.25)); c.lineWidth = lw;
+    FACES.forEach(f => { c.strokeStyle = T['g-' + f.region.group]; c.setLineDash(f.region.outer ? [4 * dpr, 3 * dpr] : []);
+      const [rx, ry, rw, rh] = rect(f.x, f.y, f.w, f.h); c.strokeRect(rx + lw / 2, ry + lw / 2, rw - lw, rh - lw); });
+    c.setLineDash([]);
+    if (s / dpr >= 3.5) {
+      const fs = Math.round(Math.max(10, Math.min(13, s / dpr * 1.6))) * dpr; c.font = `700 ${fs}px ${FONT_BODY}`; c.textAlign = 'center'; c.textBaseline = 'middle';
+      REG.forEach(r => { const f = r.label; if (!f || f.w < 3 || f.h < 2) return; const [rx, ry, rw, rh] = rect(f.x, f.y, f.w, f.h); const tw = Math.min(c.measureText(r.short).width, rw - 2 * dpr), pad = 3 * dpr;
+        c.fillStyle = hexA(T.panel, .88); c.fillRect(rx + rw / 2 - tw / 2 - pad, ry + rh / 2 - fs * .7, tw + pad * 2, fs * 1.4);
+        c.fillStyle = regionOn(r) ? T['g-' + r.group] : T.muted; c.fillText(r.short, rx + rw / 2, ry + rh / 2, rw - 2 * dpr); });
+    }
+    if (step === 2) { c.setLineDash([3 * dpr, 2 * dpr]); c.lineWidth = 2 * dpr; c.strokeStyle = T.warm; c.fillStyle = hexA(T.warm, .2);
+      eyeHints().forEach(h => { const [rx, ry, rw, rh] = rect(...h); c.fillRect(rx, ry, rw, rh); c.strokeRect(rx + dpr, ry + dpr, rw - 2 * dpr, rh - 2 * dpr); }); c.setLineDash([]); }
+  }
+  if (hover) {
+    const f = faceAt(hover.x, hover.y);
+    if (f) { c.lineWidth = 2 * dpr; c.strokeStyle = T.warm; const [rx, ry, rw, rh] = rect(f.x, f.y, f.w, f.h); c.strokeRect(rx + dpr, ry + dpr, rw - 2 * dpr, rh - 2 * dpr); }
+    const pr = rect(hover.x, hover.y, 1, 1); c.lineWidth = 2 * dpr; c.strokeStyle = T.ink; c.strokeRect(pr[0] + dpr / 2, pr[1] + dpr / 2, pr[2] - dpr, pr[3] - dpr);
+    if (mirror) { const m = mirrorOf(hover.x, hover.y); if (m && (m[0] !== hover.x || m[1] !== hover.y)) { const mr = rect(m[0], m[1], 1, 1); c.setLineDash([2 * dpr, 2 * dpr]); c.lineWidth = 1.5 * dpr; c.strokeRect(mr[0], mr[1], mr[2], mr[3]); c.setLineDash([]); } }
+  }
+}
+function updateStatus() {
+  const el = $('#status');
+  if (!hover) { el.innerHTML = `<span>Verktyg: <b>${TOOL_NAME[tool]}</b></span><span>Peka på kartan eller figuren för att se vilken del det är.</span>`; return; }
+  const f = faceAt(hover.x, hover.y), c = get(hover.x, hover.y);
+  el.innerHTML = `<span><b>${f.region.name}</b> · ${FACE[f.fi]}</span><span>x ${hover.x} · y ${hover.y}</span><span>${c[3] ? `<span class="chip" style="background:${toHex(c)}"></span>${toHex(c)}` : 'genomskinlig'}</span>`;
+}
+function setHover(h) { if ((h && hover && h.x === hover.x && h.y === hover.y && h.src === hover.src) || (!h && !hover)) return; hover = h; overlayDirty = dirty3d = true; updateStatus(); }
+function pxAt(e) { const r = ov.getBoundingClientRect(); const x = Math.floor((e.clientX - r.left) / r.width * N), y = Math.floor((e.clientY - r.top) / r.height * N); return x < 0 || y < 0 || x >= N || y >= N ? null : { x, y }; }
+function dabSafe(x, y) { dab(x, y); }
+ov.addEventListener('pointerdown', e => { if (e.pointerType === 'mouse' && e.button !== 0) return; const p = pxAt(e); if (!p) return; e.preventDefault(); try { ov.setPointerCapture(e.pointerId); } catch (er) {} down(p.x, p.y); setHover(faceAt(p.x, p.y) ? { ...p, src:'map' } : null); });
+ov.addEventListener('pointermove', e => { const p = pxAt(e); setHover(p && faceAt(p.x, p.y) ? { ...p, src:'map' } : null); if (drawing && p) { const [lx, ly] = lastPx || [p.x, p.y]; line(lx, ly, p.x, p.y, dabSafe); lastPx = [p.x, p.y]; liveCommit(); } });
+['pointerup', 'pointercancel'].forEach(t => ov.addEventListener(t, () => { if (drawing) end(); }));
+ov.addEventListener('pointerleave', () => { if (!drawing) setHover(null); });
+/* ---------- zoom and two-finger gestures (shared by the workshops) ---------- */
+/* One finger paints as before. A second finger turns the touch into a gesture: the stroke the first
+   finger just started is taken back, and the two fingers pinch to zoom and drag to pan. */
+function twoFinger(el, h) {
+  const pts = new Map(); let g = null, mark = null;
+  const pair = () => { const a = [...pts.values()]; if (a.length < 2) return { x:a[0].x, y:a[0].y, d:0 };
+    return { x:(a[0].x + a[1].x) / 2, y:(a[0].y + a[1].y) / 2, d:Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y) }; };
+  el.addEventListener('pointerdown', e => {
+    if (e.pointerType !== 'touch') return;
+    pts.set(e.pointerId, { x:e.clientX, y:e.clientY });
+    if (pts.size === 1) { mark = h.mark ? h.mark() : null; return; }
+    e.stopPropagation(); e.preventDefault();
+    if (!g && h.cancel) h.cancel(mark && performance.now() - mark.t < 700 ? mark : null);
+    g = pair();
+  }, true);
+  el.addEventListener('pointermove', e => {
+    const p = pts.get(e.pointerId); if (!p) return;
+    p.x = e.clientX; p.y = e.clientY;
+    if (!g) return;
+    e.stopPropagation(); e.preventDefault();
+    const n = pair(); h.move(g.d && n.d ? n.d / g.d : 1, n.x - g.x, n.y - g.y, g); g = n;
+  }, true);
+  const up = e => { if (!pts.delete(e.pointerId)) return; if (g) { if (pts.size) g = pair(); else { g = null; if (h.end) h.end(); } } if (!pts.size) mark = null; };
+  el.addEventListener('pointerup', up, true); el.addEventListener('pointercancel', up, true);
+}
+function setupMapZoom(o) {
+  const box = o.box, inner = o.inner, bar = o.bar; let z = 1, settle = 0;
+  const maxZ = () => (typeof o.max === 'function' ? o.max() : o.max) || 6;
+  const q = s => bar && bar.querySelector(s);
+  function set(nz, cx, cy, quick) {
+    nz = Math.max(1, Math.min(maxZ(), nz)); if (Math.abs(nz - 1) < .02) nz = 1;
+    const r = box.getBoundingClientRect();
+    const px = cx == null ? box.clientWidth / 2 : cx - r.left - box.clientLeft, py = cy == null ? box.clientHeight / 2 : cy - r.top - box.clientTop;
+    const ux = (box.scrollLeft + px) / z, uy = (box.scrollTop + py) / z;
+    z = nz; inner.style.width = z === 1 ? '' : (z * 100).toFixed(2) + '%'; box.classList.toggle('zoomed', z > 1);
+    box.scrollLeft = ux * z - px; box.scrollTop = uy * z - py;
+    if (bar) { q('[data-z="out"]').disabled = z <= 1; q('[data-z="in"]').disabled = z >= maxZ() - .01; q('[data-z="fit"]').disabled = z <= 1; q('output').textContent = Math.round(z * 100) + ' %'; }
+    clearTimeout(settle); settle = setTimeout(() => o.onZoomed(z), quick ? 150 : 0);
+  }
+  twoFinger(box, { mark:o.mark, cancel:o.cancel, move:(s, dx, dy, prev) => { set(z * s, prev.x, prev.y, true); box.scrollLeft -= dx; box.scrollTop -= dy; }, end:() => set(z) });
+  box.addEventListener('wheel', e => {
+    if (!(e.ctrlKey || e.metaKey)) return; e.preventDefault();
+    set(z * Math.exp(-Math.max(-60, Math.min(60, e.deltaY)) * .012), e.clientX, e.clientY, true);
+  }, { passive:false });
+  if (bar) {
+    bar.addEventListener('click', e => { const b = e.target.closest('[data-z]'); if (!b) return;
+      set(b.dataset.z === 'in' ? z * 1.5 : b.dataset.z === 'out' ? z / 1.5 : 1); });
+    const hint = q('.zoomhint');
+    if (hint) hint.textContent = matchMedia('(pointer: coarse)').matches
+      ? 'Nyp med två fingrar för att zooma. Dra med två fingrar för att flytta kartan.'
+      : 'Håll Ctrl och rulla med musen för att zooma. Rulla för att flytta kartan när du har zoomat in.';
+  }
+  if (bar) { q('[data-z="out"]').disabled = q('[data-z="fit"]').disabled = true; }
+  return { set, get z() { return z; } };
+}
+const strokeGuard = { mark:() => ({ t:performance.now(), u:undoS.length, p:new Uint8ClampedArray(pix) }),
+  cancel:m => { if (!m) { if (drawing) end(); return; } if (drawing && snap) pix = snap; else if (undoS.length > m.u && m.p.length === pix.length) { pix = m.p; undoS.length = m.u; } snap = null; drawing = false; lastPx = null; commit(); } };
+var mapZoom = setupMapZoom({ box:$('#mapbox'), inner:$('#mapzoom'), bar:$('#zoombar'), max:() => N > 64 ? 10 : 6, ...strokeGuard, onZoomed:() => sizeOverlay() });
+window.__verkstan = { get zoom() { return mapZoom.z; }, get pix() { return pix; }, get undo() { return undoS.length; }, get view() { return { dist:R.dist, zoom:R.zoom }; } }; /* read-only peek used by tests */
+
+/* ---------- 3D figure ---------- */
+const R = { yaw:-.6, pitch:.15, dist:0, mode:'rotate', walk:true };
+function setUVs(geo, u, v, w, h, d, mirrored) {
+  const rr = { top:[u+d, v, w, d], bottom:[u+d+w, v, w, d], rside:[u, v+d, d, h], front:[u+d, v+d, w, h], lside:[u+d+w, v+d, d, h], back:[u+2*d+w, v+d, w, h] };
+  const quad = r => { let x1 = r[0], x2 = r[0] + r[2]; if (mirrored) [x1, x2] = [x2, x1]; const y1 = r[1], y2 = r[1] + r[3];
+    return [[x1 / N, 1 - y2 / N], [x2 / N, 1 - y2 / N], [x2 / N, 1 - y1 / N], [x1 / N, 1 - y1 / N]]; };
+  const faces = [mirrored ? rr.rside : rr.lside, mirrored ? rr.lside : rr.rside, rr.top, rr.bottom, rr.front, rr.back];
+  const uv = geo.attributes.uv; let i = 0;
+  faces.forEach((r, fi) => { const q = quad(r); (fi === 3 ? [q[0], q[1], q[3], q[2]] : [q[3], q[2], q[0], q[1]]).forEach(p => uv.setXY(i++, p[0], p[1])); });
+  uv.needsUpdate = true; return faces;
+}
+function init3d() {
+  const stage = $('#stage');
+  if (!window.THREE) { stage.innerHTML = '<p class="no3d">3D-figuren kunde inte laddas. Kartan fungerar som vanligt.</p>'; return; }
+  try { R.renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true }); } catch (e) { stage.innerHTML = '<p class="no3d">Den här webbläsaren kan inte visa 3D. Kartan fungerar som vanligt.</p>'; return; }
+  R.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); stage.appendChild(R.renderer.domElement);
+  R.scene = new THREE.Scene(); R.camera = new THREE.PerspectiveCamera(32, 1, 1, 600);
+  R.scene.add(new THREE.AmbientLight(0xffffff, .72)); const dl = new THREE.DirectionalLight(0xffffff, .42); dl.position.set(-5, 10, 8); R.scene.add(dl);
+  R.pivot = new THREE.Group(); R.scene.add(R.pivot);
+  R.comp = document.createElement('canvas'); R.comp.width = R.comp.height = N; R.cctx = R.comp.getContext('2d');
+  R.tex = new THREE.CanvasTexture(R.comp); R.tex.magFilter = THREE.NearestFilter; R.tex.minFilter = THREE.NearestFilter; R.tex.generateMipmaps = false;
+  R.mat = new THREE.MeshLambertMaterial({ map:R.tex, alphaTest:.5 });
+  R.ground = new THREE.Mesh(new THREE.CircleGeometry(14, 48), new THREE.MeshBasicMaterial({ color:0x000000, transparent:true, opacity:.13 }));
+  R.ground.rotation.x = -Math.PI / 2; R.scene.add(R.ground);
+  R.ray = new THREE.Raycaster(); R.ndc = new THREE.Vector2();
+  const resize = () => { const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; R.renderer.setSize(w, h, false); R.camera.aspect = w / h; R.camera.updateProjectionMatrix(); };
+  new ResizeObserver(resize).observe(stage); resize();
+  const cv = R.renderer.domElement; let drag = null;
+  cv.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    try { cv.setPointerCapture(e.pointerId); } catch (er) {}
+    if (R.mode === 'paint') { const hit = hit3d(e); if (hit) { drag = { type:'paint' }; if (!down(hit.x, hit.y)) drag = null; return; } }
+    drag = { type:'rot', x:e.clientX, y:e.clientY }; cv.style.cursor = 'grabbing';
+  });
+  cv.addEventListener('pointermove', e => {
+    if (drag && drag.type === 'rot') { R.yaw += (e.clientX - drag.x) * .01; R.pitch = Math.max(-.7, Math.min(.9, R.pitch + (e.clientY - drag.y) * .008)); drag.x = e.clientX; drag.y = e.clientY; return; }
+    const hit = hit3d(e); setHover(hit ? { x:hit.x, y:hit.y, src:'3d' } : null);
+    if (drag && drag.type === 'paint' && drawing && hit) { dab(hit.x, hit.y); liveCommit(); }
+  });
+  const up = () => { if (drawing) end(); drag = null; cv.style.cursor = ''; };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+  cv.addEventListener('pointerleave', () => { if (!drag && hover && hover.src === '3d') setHover(null); });
+  cv.addEventListener('wheel', e => { e.preventDefault(); R.zoom = Math.max(.55, Math.min(1.8, (R.zoom || 1) * (1 + e.deltaY * .001))); }, { passive:false });
+  twoFinger(stage, { ...strokeGuard, move:s => { if (s !== 1) (s => { R.zoom = Math.max(.55, Math.min(1.8, (R.zoom || 1) / s)); })(s); } });
+}
+function buildModel() {
+  if (!R.renderer) return;
+  if (R.model) { R.pivot.remove(R.model); R.model.traverse(o => { if (o.geometry) o.geometry.dispose(); }); }
+  if (R.comp.width !== N) {
+    R.comp.width = R.comp.height = N; R.tex.dispose(); R.tex = new THREE.CanvasTexture(R.comp);
+    R.tex.magFilter = THREE.NearestFilter; R.tex.minFilter = THREE.NearestFilter; R.tex.generateMipmaps = false; R.mat.map = R.tex; R.mat.needsUpdate = true;
+  }
+  const m = active(), B = C.BODIES[m.body], groups = {}, model = new THREE.Group(); R.meshes = []; R.bones = {};
+  for (const b of B.bones) {
+    if (!C.partOn(m, b.part)) continue;
+    const g = new THREE.Group(); const par = b.parent && groups[b.parent] ? groups[b.parent] : null;
+    const pv = new THREE.Vector3(b.pivot[0], b.pivot[1], -b.pivot[2]);
+    g.userData.pivot = pv; groups[b.name] = g; R.bones[b.name] = g;
+    if (par) { g.position.copy(pv).sub(par.userData.pivot); par.add(g); } else { g.position.copy(pv); model.add(g); }
+    for (const c of b.cubes) {
+      if (!C.partOn(m, c.part)) continue;
+      const r = RBY[c.r], [u, v, w, h, d] = r.box, i = c.inflate || 0;
+      const geo = new THREE.BoxGeometry(c.size[0] + 2 * i, c.size[1] + 2 * i, c.size[2] + 2 * i);
+      const rects = setUVs(geo, u, v, w, h, d, !!c.mirror), mesh = new THREE.Mesh(geo, R.mat);
+      const cx = c.origin[0] + c.size[0] / 2, cy = c.origin[1] + c.size[1] / 2, cz = -(c.origin[2] + c.size[2] / 2);
+      mesh.position.set(cx - pv.x, cy - pv.y, cz - pv.z); mesh.userData = { rects, outer:!!r.outer, region:r.key }; g.add(mesh); R.meshes.push(mesh);
+    }
+  }
+  const box = new THREE.Box3().setFromObject(model), ctr = box.getCenter(new THREE.Vector3()), size = box.getSize(new THREE.Vector3());
+  model.position.set(-ctr.x, -box.min.y - size.y / 2, -ctr.z);
+  R.model = model; R.pivot.add(model); R.ground.position.y = -size.y / 2 - .05; R.fitH = (Math.max(size.y, size.z * .75, size.x) + 8) * 1.12;
+  dirty3d = true;
+}
+function hit3d(e) {
+  if (!R.renderer || !R.meshes) return null;
+  const r = R.renderer.domElement.getBoundingClientRect();
+  R.ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  R.scene.updateMatrixWorld(true); R.ray.setFromCamera(R.ndc, R.camera);
+  for (const h of R.ray.intersectObjects(R.meshes, false)) {
+    if (!h.uv || !h.face) continue;
+    const q = h.object.userData.rects[h.face.materialIndex];
+    const x = Math.min(q[0] + q[2] - 1, Math.max(q[0], Math.floor(h.uv.x * N))), y = Math.min(q[1] + q[3] - 1, Math.max(q[1], Math.floor((1 - h.uv.y) * N)));
+    if (h.object.userData.outer && !pix[(y * N + x) * 4 + 3]) continue;
+    return { x, y };
+  }
+  return null;
+}
+function drawComposite() {
+  const c = R.cctx; c.clearRect(0, 0, N, N); c.putImageData(new ImageData(pix, N, N), 0, 0);
+  if (hover) {
+    const f = faceAt(hover.x, hover.y);
+    if (f && !(hover.src === '3d' && R.mode === 'paint')) { c.fillStyle = 'rgba(255,176,46,.6)'; c.fillRect(f.x, f.y, f.w, f.h); }
+    c.fillStyle = 'rgba(255,255,255,.9)'; c.fillRect(hover.x, hover.y, 1, 1);
+    if (mirror) { const m = mirrorOf(hover.x, hover.y); if (m) { c.fillStyle = 'rgba(255,255,255,.6)'; c.fillRect(m[0], m[1], 1, 1); } }
+  }
+  R.tex.needsUpdate = true;
+}
+function animate3d(t) {
+  if (!R.renderer || !R.model) return;
+  const m = active(), mv = R.walk && !reduceMotion, sw = mv ? Math.sin(t / 220) : 0, rad = Math.PI / 180, B = R.bones;
+  if (m.body !== 'biped') {
+    ['leg0', 'leg3'].forEach(k => { if (B[k]) B[k].rotation.x = sw * 35 * rad; }); ['leg1', 'leg2'].forEach(k => { if (B[k]) B[k].rotation.x = -sw * 35 * rad; });
+    const tt = reduceMotion ? 0 : t;
+    if (B.tail) B.tail.rotation.y = Math.sin(tt / 160) * 15 * rad; if (B.tail2) B.tail2.rotation.y = Math.sin(tt / 160 - 1) * 15 * rad;
+    for (let i = 1; i <= 5; i++) if (B['tail' + i]) B['tail' + i].rotation.y = Math.sin(tt / 420 - i * .8) * 8 * rad;
+    const amp = C.flies(m) ? 32 : 8, f1 = mv ? Math.sin(t / 140) : 0, f2 = mv ? Math.sin(t / 140 - .7) : 0;
+    if (B.wing_r) B.wing_r.rotation.z = f1 * amp * rad; if (B.wing_l) B.wing_l.rotation.z = -f1 * amp * rad;
+    if (B.wingtip_r) B.wingtip_r.rotation.z = f2 * amp * .7 * rad; if (B.wingtip_l) B.wingtip_l.rotation.z = -f2 * amp * .7 * rad;
+    if (B.jaw) B.jaw.rotation.x = Math.max(0, Math.sin(tt / 600)) * 14 * rad;
+  }
+  else { const fwd = m.behavior === 'hostile' ? 80 * rad : 0;
+    if (R.bones.rightarm) R.bones.rightarm.rotation.x = fwd + sw * 30 * rad; if (R.bones.leftarm) R.bones.leftarm.rotation.x = fwd - sw * 30 * rad;
+    if (R.bones.rightleg) R.bones.rightleg.rotation.x = -sw * 35 * rad; if (R.bones.leftleg) R.bones.leftleg.rotation.x = sw * 35 * rad; }
+  R.pivot.rotation.set(R.pitch, R.yaw, 0);
+  const dist = (R.fitH || 30) / (2 * Math.tan(16 * rad)) * (R.zoom || 1);
+  R.camera.position.set(0, 0, dist); R.camera.lookAt(0, 0, 0);
+  R.renderer.render(R.scene, R.camera);
+}
+
+/* ---------- item pickers ---------- */
+const OWN = '__own';
+function makePicker(id, list, key, idx) {
+  const root = $('#pk_' + id), sel = document.createElement('select'), inp = document.createElement('input');
+  sel.id = `pk_${id}_sel`; inp.className = 'text'; inp.placeholder = 'verkstad:mansten'; inp.spellcheck = false; inp.autocomplete = 'off'; inp.setAttribute('aria-label', 'ID för eget föremål');
+  sel.innerHTML = (idx !== undefined ? '<option value="">Inget</option>' : '') + list.map(([v, l]) => `<option value="${v}">${esc(l)}</option>`).join('') + `<option value="${OWN}">Eget föremål…</option>`;
+  root.append(sel, inp);
+  const getV = () => idx !== undefined ? active().drops[idx].item : active()[key];
+  const setV = v => { if (idx !== undefined) active().drops[idx].item = v; else active()[key] = v; saveProject(); renderLines(); };
+  sel.addEventListener('change', () => { if (sel.value === OWN) { inp.hidden = false; inp.focus(); setV(ID_RE.test(inp.value.trim()) ? inp.value.trim() : getV()); } else { inp.hidden = true; setV(sel.value); } });
+  inp.addEventListener('input', () => { const v = inp.value.trim().toLowerCase(); inp.setCustomValidity(v && !ID_RE.test(v) ? 'Skriv som förled:namn, till exempel verkstad:mansten' : ''); if (ID_RE.test(v)) setV(v); });
+  return { render() { const v = getV(), known = !v || list.some(x => x[0] === v); sel.value = known ? v : OWN; inp.hidden = known; if (!known && document.activeElement !== inp) inp.value = v; } };
+}
+let pickers = [];
+
+/* ---------- properties ---------- */
+const markSeg = (sel, attr, val) => $$(sel + ' button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset[attr] === String(val))));
+function idsNow() { return C.mobIds(project.items); }
+function renderLines() {
+  const m = active(), ns = C.slug(project.ns, 'verkstad');
+  $('#idLine').textContent = `ID i spelet: ${ns}:${idsNow()[project.active]}`;
+}
+function renderProps() {
+  const m = active();
+  $('#mobName').value = m.name; renderLines();
+  markSeg('#bodySeg', 'body', m.body);
+  const isQ = m.body === 'quad', isD = m.body === 'dragon';
+  $('#bodyHelp').textContent = isQ ? 'Som en gris, ko eller varg. Välj nos, horn, svans och mer nedanför.' : isD ? 'En stor drake med hals och svans i flera delar, vingar och käke. Draken har en större karta än de andra.' : 'Som en zombie eller ett skinn. Ni kan öppna ett skinn från Skinverkstaden med Öppna PNG.';
+  $('#partsField').hidden = m.body === 'biped'; $('#noseField').hidden = !isQ; $('#tailField').hidden = !isQ;
+  markSeg('#noseSeg', 'nose', m.parts.nose); markSeg('#tailSeg', 'tail', m.parts.tail);
+  const hb = $$('#hornSeg button'); hb[1].textContent = isD ? 'Horn' : 'Små'; hb[2].hidden = isD;
+  markSeg('#hornSeg', 'horns', isD && m.parts.horns === 'big' ? 'small' : m.parts.horns);
+  $$('#partChips button').forEach(b => { b.hidden = isD && b.dataset.part !== 'spikes'; b.setAttribute('aria-pressed', String(!!m.parts[b.dataset.part])); });
+  $('#flyField').hidden = !C.hasWings(m); $('#flyChk').checked = m.fly; $('#rideField').hidden = !(m.fly && m.behavior === 'pet'); $('#rideChk').checked = m.ride;
+  $('#flyHelp').textContent = !m.fly ? 'Mobben har vingar men går på marken.' : m.behavior === 'pet'
+    ? (m.ride ? 'Tämj den först. Klicka sedan på den för att sitta upp. Hopp tar er uppåt och ni flyger åt det håll ni tittar.' : 'Den flyger omkring själv och följer med sin ägare när den är tämjd.')
+    : 'Den flyger omkring själv och landar ibland. Välj Husdjur om ni vill kunna tämja och rida den.';
+  markSeg('#behSeg', 'beh', m.behavior); $('#behHelp').textContent = BEH[m.behavior].help;
+  $('#hpIn').value = m.health; $('#hpOut').textContent = `${m.health / 2} ♥`;
+  $('#spIn').value = m.speed; $('#spOut').textContent = C.SPEED_LABEL[m.speed];
+  $('#dmgField').hidden = m.behavior === 'passive'; $('#dmgIn').value = m.damage; $('#dmgOut').textContent = `${m.damage / 2} ♥`;
+  $('#sizeIn').value = m.size; $('#sizeOut').textContent = `×${m.size}`;
+  $('#foodField').hidden = m.behavior === 'hostile'; $('#tameField').hidden = m.behavior !== 'pet'; $('#burnField').hidden = m.behavior !== 'hostile'; $('#burnChk').checked = m.burns;
+  $('#soundSel').value = m.sound;
+  m.drops.forEach((d, i) => { $(`#d${i}min`).value = d.min; $(`#d${i}max`).value = d.max; });
+  pickers.forEach(p => p.render());
+  $('#spawnChk').checked = m.spawn.on; $('#spawnFields').hidden = !m.spawn.on;
+  $$('#biomeChips button').forEach(b => b.setAttribute('aria-pressed', String(m.spawn.biomes.includes(b.dataset.biome))));
+  markSeg('#lightSeg', 'light', m.spawn.light); markSeg('#weightSeg', 'w', m.spawn.weight); markSeg('#herdSeg', 'herd', `${m.spawn.min}-${m.spawn.max}`);
+  $('#eggBase').value = m.egg.base.toLowerCase(); $('#eggSpot').value = m.egg.spot.toLowerCase(); drawEgg();
+  $('#mapHint').textContent = isQ ? 'Benen målas en gång och används till alla fyra. Horn, öron och vingar målas en gång till båda sidor. Bleka rutor är delar som är avstängda.'
+    : isD ? 'Halsen, svansen, benen och taggarna målas en gång och används till alla delar. Vinghuden har en översida och en undersida. Rutor med snedstreck används inte.'
+    : 'Streckade ramar är det yttre lagret, som hår, hatt och kläder. Det som inte målas där blir genomskinligt.';
+}
+function change(fn) { fn(active()); saveProject(); renderProps(); renderColl(); }
+function drawEgg() {
+  const m = active(), c = $('#eggCv').getContext('2d'), bse = m.egg.base, spt = m.egg.spot; c.clearRect(0, 0, 16, 16);
+  const rows = [[6, 9], [5, 10], [4, 11], [4, 11], [3, 12], [3, 12], [3, 12], [3, 12], [3, 12], [3, 12], [4, 11], [4, 11], [5, 10]];
+  rows.forEach(([a, b], i) => { c.fillStyle = bse; c.fillRect(a, 2 + i, b - a + 1, 1); });
+  c.fillStyle = spt; [[7, 4], [9, 6], [5, 8], [10, 9], [7, 11], [4, 11], [11, 7], [6, 6]].forEach(([x, y]) => c.fillRect(x, y, 1, 1));
+}
+
+/* ---------- collection ---------- */
+let confirmDel = null, confirmT = null;
+function renderColl() {
+  const ids = idsNow();
+  $('#collCount').textContent = `${project.items.length} st`;
+  const ul = $('#collList'); ul.innerHTML = '';
+  project.items.forEach((m, i) => {
+    const li = document.createElement('li');
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'pick'; b.setAttribute('aria-current', String(i === project.active));
+    const cv = document.createElement('canvas'); cv.width = cv.height = 8; cv.dataset.uid = m.uid; cv.setAttribute('aria-hidden', 'true'); putHead(cv, m, i === project.active ? pix : null);
+    const meta = document.createElement('span'); meta.className = 'meta';
+    meta.innerHTML = `<span class="nm">${esc(m.name.trim() || 'Mob')}</span><span class="ty">${C.BODIES[m.body].label} · ${BEH[m.behavior].label}${C.flies(m) ? ' · flyger' : ''} · ${ids[i]}</span>`;
+    b.append(cv, meta); b.addEventListener('click', () => selectMob(i));
+    const del = document.createElement('button'); del.type = 'button'; del.className = 'btn small' + (confirmDel === m.uid ? ' danger' : '');
+    del.textContent = confirmDel === m.uid ? 'Säker?' : 'Ta bort'; del.setAttribute('aria-label', `Ta bort ${m.name || 'mob'}`);
+    del.addEventListener('click', () => removeMob(m.uid));
+    li.append(b, del); ul.append(li);
+  });
+  $('#addonName').value = project.name; $('#nsIn').value = project.ns;
+  $('#verLine').textContent = `Nästa version: 1.0.${project.version + 1}`;
+}
+function loadActive() { buildRegions(); pix = b64d(active().tex[active().body], N * N * 4); if (paint.width !== N) { paint.width = N; paint.height = N; } $('#mapbox').classList.toggle('big', N > 64); undoS.length = 0; redoS.length = 0; hover = null; liveCommit(); buildModel(); overlayDirty = true; updateStatus(); }
+function commitView() { renderProps(); renderColl(); renderStep(); }
+function selectMob(i) { if (i === project.active) return; project.active = i; loadActive(); saveProject(); commitView(); }
+function addMob(m) { project.items.push(m); project.active = project.items.length - 1; loadActive(); saveProject(); commitView(); }
+function removeMob(uid) {
+  if (confirmDel !== uid) { confirmDel = uid; clearTimeout(confirmT); confirmT = setTimeout(() => { confirmDel = null; renderColl(); }, 4000); renderColl(); return; }
+  confirmDel = null; const i = project.items.findIndex(x => x.uid === uid); if (i < 0) return;
+  const name = project.items[i].name; project.items.splice(i, 1);
+  if (!project.items.length) project.items.push(newMob('Min mob'));
+  if (i < project.active) project.active--; project.active = Math.max(0, Math.min(project.active, project.items.length - 1));
+  loadActive(); saveProject(); commitView(); msg(`${name || 'Mobben'} är borttagen.`);
+}
+function paintExample(body, S, plan, dots) {
+  const buf = new Uint8ClampedArray(S * S * 4), regs = {};
+  C.BODIES[body].regions.forEach(r => { regs[r.key] = boxFaces(...r.box).map((q, fi) => ({ fi, x:q[0], y:q[1], w:q[2], h:q[3], region:r })).filter(f => f.w > 0 && f.h > 0); });
+  const put = (x, y, c) => { const i = (y * S + x) * 4; buf[i] = c[0]; buf[i+1] = c[1]; buf[i+2] = c[2]; buf[i+3] = 255; };
+  Object.entries(plan).forEach(([key, col]) => regs[key].forEach(f => { for (let y = 0; y < f.h; y++) for (let x = 0; x < f.w; x++) put(f.x + x, f.y + y, shade(col, f, x, y)); }));
+  dots.forEach(([x, y, c]) => put(x, y, c));
+  return { buf, regs, put };
+}
+function exampleMob() {
+  const m = newMob('Mossgris'); m.parts = { nose:'snout', horns:'small', tail:'short', ears:false, spikes:false, wings:false }; m.egg = { base:'#7FA35B', spot:'#3E5A2A' }; m.food = 'minecraft:sweet_berries';
+  m.drops = [{ item:'minecraft:leather', min:0, max:2 }, { item:'minecraft:sweet_berries', min:0, max:1 }];
+  const W = [250, 250, 250], K = [20, 20, 20], G = [88, 122, 60], NO = [120, 70, 70];
+  const { buf } = paintExample('quad', 64, { head:[127, 163, 91], body:[127, 163, 91], leg:[104, 84, 60], snout:[214, 160, 150], horn:[235, 225, 200], tail:[104, 140, 70] },
+    [[9, 11, W], [10, 11, K], [13, 11, K], [14, 11, W], [34, 2, NO], [36, 2, NO]].concat([[16, 20], [20, 22], [26, 19], [32, 24], [38, 21], [17, 30], [29, 33], [41, 34], [22, 35]].map(([x, y]) => [x, y, G])));
+  m.tex.quad = b64e(buf);
+  return m;
+}
+function exampleDragon() {
+  const m = newMob('Gnistdrake'); m.body = 'dragon'; m.parts = Object.assign({}, m.parts, { horns:'small', spikes:true });
+  Object.assign(m, { fly:true, ride:true, behavior:'pet', tame:'minecraft:golden_apple', food:'minecraft:beef', sound:'dragon', health:40, size:1, damage:6 });
+  m.egg = { base:'#B3361F', spot:'#F2B33D' }; m.drops = [{ item:'minecraft:blaze_powder', min:0, max:2 }, { item:'', min:1, max:1 }];
+  const R1 = [179, 54, 31], R2 = [120, 36, 22], GO = [242, 179, 61], OR = [242, 128, 52], Y = [255, 214, 64], K = [30, 20, 10], WH = [245, 240, 225];
+  const ex = paintExample('dragon', 128, { head:R1, snout:R1, jaw:R2, neck:R1, body:R1, tail:R1, leg:R2, horn:WH, spike:GO, wbar:R2, tbar:R2, wskin:OR, tskin:GO },
+    [[11, 13, Y], [12, 13, K], [17, 13, K], [18, 13, Y], [50, 9, K], [53, 9, K]].concat([48, 50, 52, 54].map(x => [x, 20, WH])));
+  const belly = ex.regs.body.find(f => f.fi === 1); for (let y = 0; y < belly.h; y++) for (let x = 0; x < belly.w; x++) ex.put(belly.x + x, belly.y + y, shade(GO, belly, x, y));
+  m.tex.dragon = b64e(ex.buf);
+  return m;
+}
+
+/* ---------- guide ---------- */
+const STEPS = [
+  { t:'Kropp', x:'Välj fyrbent, tvåbent eller drake under Kropp och beteende. En fyrbent mob kan få olika nos, horn, svans, öron, taggar och vingar.',
+    tip:'Kartan till vänster är mobbens kropp utvikt. Peka på kartan så lyser samma ställe upp på figuren.' },
+  { t:'Grundfärg', x:'Välj en färg, till exempel under Päls, och tryck Grundmåla. Då får alla delar en grundfärg med ljus och skugga.',
+    tip:'Grundmåla fyller bara tomma rutor. Vill ni ha en annan färg på benen målar ni dem först, eller pekar på dem och trycker Rensa del.' },
+  { t:'Ansikte', x:'Måla ögon på huvudets framsida. De orange rutorna visar var ögonen brukar sitta. Ett vitt öga med en mörk pupill syns bra.',
+    tip:'Slå på Spegla så blir båda ögonen lika. Har mobben nos kan ni måla näsborrar på nosens framsida.' },
+  { t:'Mönster', x:'Måla fläckar, ränder eller kläder. Välj Måla ovanför figuren för att måla direkt på den. Skugga och Ljus ger djup.',
+    tip:'Några pixlar i en lite annan nyans gör att päls ser levande ut.' },
+  { t:'Beteende', x:'Bestäm om mobben är snäll, neutral, farlig eller ett husdjur. Ställ in liv, fart, skada och storlek, vad den äter och vad den tappar. Har den vingar kan den flyga, och ett flygande husdjur går att rida på.',
+    tip:'Ett hjärta är två livspoäng. En zombie har 10 hjärtan och en gris 5.' },
+  { t:'Världen', x:'Välj om mobben ska dyka upp av sig själv, och i så fall var, när och hur ofta. Ge spawnägget två färger.',
+    tip:'Spawnägget finns i det kreativa inventariet. Med det kan ni sätta ut mobben var ni vill.' },
+  { t:'Spara och installera', x:'', tip:'' }
+];
+let step = Math.round(clamp(project.step, 0, 6, 0)), maxStep = Math.round(clamp(project.maxStep, 0, 6, 0));
+function buildPills() { $('#pills').innerHTML = STEPS.map((s, i) => `<li><button type="button" data-step="${i}" aria-label="Steg ${i + 1}: ${s.t}" title="${s.t}">${i + 1}</button></li>`).join(''); $$('#pills button').forEach(b => b.addEventListener('click', () => goStep(+b.dataset.step))); }
+function goStep(i) { step = Math.max(0, Math.min(6, i)); maxStep = Math.max(maxStep, step); project.step = step; project.maxStep = maxStep; saveProject(); renderStep(); }
+function renderStep() {
+  const s = STEPS[step];
+  $('#stepCount').textContent = `Steg ${step + 1} av ${STEPS.length}`; $('#stepTitle').textContent = s.t;
+  if (step === 6) {
+    const ns = C.slug(project.ns, 'verkstad'), id = idsNow()[project.active];
+    $('#stepText').textContent = (STANDALONE ? 'Tryck Spara add-on. ' + OPEN_FILE : 'Tryck Spara add-on och dubbelklicka sedan på Installera i Minecraft på skrivbordet.') + ' Öppna en värld, gå till Inställningar och Beteendepaket, och aktivera ert paket. Resurspaketet följer med automatiskt.';
+    $('#stepTip').innerHTML = `Mobbarna är ett eget add-on. Det kan vara påslaget samtidigt som föremålen. Med fusk påslaget kan ni skriva <code>/summon ${esc(ns)}:${esc(id)}</code> i chatten.`;
+  } else { $('#stepText').textContent = s.x; $('#stepTip').textContent = s.tip; }
+  $('#prevBtn').style.visibility = step === 0 ? 'hidden' : 'visible';
+  $('#nextBtn').style.visibility = step === 6 ? 'hidden' : 'visible';
+  $$('#pills button').forEach((b, i) => { b.classList.toggle('done', i !== step && i <= maxStep); if (i === step) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+  overlayDirty = true;
+}
+
+/* ---------- export ---------- */
+const downloadsP = STANDALONE ? Promise.resolve(null) : window.claude.use('downloads').catch(() => null);
+function canvasBytes(cv) { return new Promise((res, rej) => cv.toBlob(b => b ? b.arrayBuffer().then(a => res(new Uint8Array(a)), rej) : rej(new Error('png')), 'image/png')); }
+function pngBytes(u, w, h) { const cv = document.createElement('canvas'); cv.width = w; cv.height = h; cv.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(u), w, h), 0, 0); return canvasBytes(cv); }
+function packIcon(m) {
+  const src = document.createElement('canvas'); src.width = src.height = 8; putHead(src, m);
+  const cv = document.createElement('canvas'); cv.width = cv.height = 64; const c = cv.getContext('2d');
+  c.fillStyle = '#3B3550'; c.fillRect(0, 0, 64, 64); c.imageSmoothingEnabled = false; c.drawImage(src, 8, 8, 48, 48); return canvasBytes(cv);
+}
+function problemsFor(m) {
+  const nm = m.name.trim() || 'Mobben', out = [];
+  if (isEmpty(b64d(m.tex[m.body], NB(m.body)))) out.push(`${nm} har inget utseende ännu.`);
+  const ids = [m.food, m.tame].concat(m.drops.map(d => d.item)).filter(Boolean);
+  if (ids.some(v => !ID_RE.test(v))) out.push(`${nm} har ett eget föremål med felaktigt ID.`);
+  if (m.behavior === 'pet' && !m.tame) out.push(`${nm} behöver något att tämjas med.`);
+  return out;
+}
+async function exportAddon() {
+  active().tex[active().body] = b64e(pix);
+  const probs = project.items.flatMap(problemsFor);
+  if (probs.length) { msg(`${probs[0]}${probs.length > 1 ? ` Det finns ${probs.length - 1} saker till att fixa.` : ''}`); return; }
+  const ns = C.slug(project.ns, 'verkstad'); if (ns === 'minecraft') { msg('Förledet kan inte vara minecraft. Välj ett eget, till exempel verkstad.'); return; }
+  const btn = $('#exportBtn'); btn.textContent = 'Packar…';
+  try {
+    const version = project.version + 1, pngs = [];
+    for (const m of project.items) pngs.push(await pngBytes(b64d(m.tex[m.body], NB(m.body)), SZ(m.body), SZ(m.body)));
+    const { files, base } = C.buildAddon(project, version, pngs, await packIcon(project.items[0]));
+    const zip = C.zipStore(files), dl = await downloadsP;
+    const done = name => { project.version = version; saveProject(); renderColl(); goStep(6); msg(name); };
+    if (!dl) {
+      if (STANDALONE) { saveLocal(`${base}.mcaddon`, new Blob([zip], { type:'application/octet-stream' })); done(`${base}.mcaddon är sparad i Hämtade filer som version 1.0.${version}. ${OPEN_SHORT}`); return; }
+      msg('Spara fungerar inte i den här vyn. Öppna sidan i claude.ai i en webbläsare och försök igen.'); return;
+    }
+    try { await dl.save({ filename:`${base}.zip`, data:new Blob([zip], { type:'application/zip' }) }); done(`${base}.zip är sparad som version 1.0.${version}. Dubbelklicka på Installera i Minecraft på skrivbordet.`); }
+    catch (err) { const code = err && err.code; msg(code === 'declined' ? 'Ingen fil sparades.' : code === 'rate_limited' ? 'Vänta en liten stund och försök igen.' : 'Det gick inte att spara filen här.'); }
+  } catch (e) { msg('Något gick fel när add-onet packades. Försök igen.'); }
+  finally { btn.textContent = EXPORT_LABEL; }
+}
+
+/* ---------- wiring ---------- */
+function bindSeg(sel, attr, fn) { $$(sel + ' button').forEach(b => b.addEventListener('click', () => fn(b.dataset[attr]))); }
+function wire() {
+  bindSeg('#fillSeg', 'fill', v => { fillMode = v; markSeg('#fillSeg', 'fill', v); if (tool !== 'fill') setTool('fill'); });
+  bindSeg('#modeSeg', 'mode', v => { R.mode = v; markSeg('#modeSeg', 'mode', v); $('#stage').classList.toggle('painting', v === 'paint'); });
+  $('#walkChk').addEventListener('change', e => { R.walk = e.target.checked; });
+  $('#turnBtn').addEventListener('click', () => { R.yaw += Math.PI; });
+  $('#resetBtn').addEventListener('click', () => { R.yaw = -.6; R.pitch = .15; R.zoom = 1; });
+  $('#mirrorChk').addEventListener('change', e => { mirror = e.target.checked; overlayDirty = dirty3d = true; });
+  $('#gridChk').addEventListener('change', e => { showGrid = e.target.checked; overlayDirty = true; });
+  $('#guideChk').addEventListener('change', e => { showGuides = e.target.checked; overlayDirty = true; });
+  $('#undoBtn').addEventListener('click', undo); $('#redoBtn').addEventListener('click', redo); $('#clearBtn').addEventListener('click', clearPart);
+  $('#baseBtn').addEventListener('click', grundmala);
+  $('#colorIn').addEventListener('input', e => setColor(fromHex(e.target.value)));
+  $('#mobName').addEventListener('input', e => { active().name = e.target.value; saveProject(); renderLines(); renderColl(); if (step === 6) renderStep(); });
+  bindSeg('#bodySeg', 'body', v => { const m = active(); if (m.body === v) return; m.tex[m.body] = b64e(pix); m.body = v;
+    if (v === 'biped' && m.sound === 'pig') m.sound = 'zombie';
+    if (v === 'dragon' && isEmpty(b64d(m.tex.dragon, NB('dragon')))) { m.fly = true; m.ride = true; if (m.behavior === 'passive') m.behavior = 'pet'; if (m.sound === 'pig') m.sound = 'dragon'; if (m.health < 30) m.health = 30; }
+    loadActive(); saveProject(); commitView();
+    msg(v === 'biped' ? 'Nu är mobben tvåbent. Varje kropp har en egen karta, så det ni målat finns kvar om ni byter tillbaka.' : v === 'dragon' ? 'Nu är mobben en drake. Den kan flyga och går att rida på när den är tämjd. Tryck Grundmåla för att komma igång.' : 'Nu är mobben fyrbent.'); });
+  const setPart = (k, v) => { const m = active(); m.parts[k] = v; if (k === 'wings' && !v) { m.fly = false; m.ride = false; } saveProject(); buildModel(); overlayDirty = true; renderProps(); renderColl(); };
+  bindSeg('#noseSeg', 'nose', v => setPart('nose', v)); bindSeg('#hornSeg', 'horns', v => setPart('horns', v)); bindSeg('#tailSeg', 'tail', v => setPart('tail', v));
+  $$('#partChips button').forEach(b => b.addEventListener('click', () => { const k = b.dataset.part; setPart(k, !active().parts[k]); if (k === 'wings' && active().parts.wings) msg('Vingar tillagda. Kryssa i Kan flyga om mobben ska flyga.'); }));
+  $('#flyChk').addEventListener('change', e => change(m => { m.fly = e.target.checked; if (!m.fly) m.ride = false; }));
+  $('#rideChk').addEventListener('change', e => change(m => { m.ride = e.target.checked; }));
+  bindSeg('#behSeg', 'beh', v => change(m => { m.behavior = v; if (v === 'hostile' && m.spawn.light === 'day') m.spawn.light = 'night'; if (v !== 'hostile' && m.spawn.light === 'night') m.spawn.light = 'day'; }));
+  $('#hpIn').addEventListener('input', e => change(m => { m.health = Math.round(clamp(e.target.value, 2, 60, 10)); }));
+  $('#spIn').addEventListener('input', e => change(m => { m.speed = Math.round(clamp(e.target.value, 0, 4, 2)); }));
+  $('#dmgIn').addEventListener('input', e => change(m => { m.damage = Math.round(clamp(e.target.value, 1, 20, 3)); }));
+  $('#sizeIn').addEventListener('input', e => change(m => { m.size = clamp(e.target.value, .5, 3, 1); }));
+  $('#burnChk').addEventListener('change', e => change(m => { m.burns = e.target.checked; }));
+  $('#soundSel').innerHTML = Object.entries(C.SOUNDS).map(([k, s]) => `<option value="${k}">${s.label}</option>`).join('');
+  $('#soundSel').addEventListener('change', e => change(m => { m.sound = e.target.value; }));
+  const nums = Array.from({ length:9 }, (_, i) => `<option value="${i}">${i}</option>`).join('');
+  [0, 1].forEach(i => {
+    $(`#d${i}min`).innerHTML = nums; $(`#d${i}max`).innerHTML = nums;
+    $(`#d${i}min`).addEventListener('change', e => change(m => { m.drops[i].min = +e.target.value; if (m.drops[i].max < m.drops[i].min) m.drops[i].max = m.drops[i].min; }));
+    $(`#d${i}max`).addEventListener('change', e => change(m => { m.drops[i].max = +e.target.value; if (m.drops[i].min > m.drops[i].max) m.drops[i].min = m.drops[i].max; }));
+  });
+  pickers = [makePicker('food', C.FOODS, 'food'), makePicker('tame', C.FOODS, 'tame'), makePicker('drop0', C.DROPS, null, 0), makePicker('drop1', C.DROPS, null, 1)];
+  $('#spawnChk').addEventListener('change', e => change(m => { m.spawn.on = e.target.checked; }));
+  $('#biomeChips').innerHTML = C.BIOMES.map(([k, l]) => `<button type="button" data-biome="${k}">${l}</button>`).join('');
+  $$('#biomeChips button').forEach(b => b.addEventListener('click', () => change(m => {
+    const k = b.dataset.biome; let s = new Set(m.spawn.biomes);
+    if (k === 'common') s = new Set(['common']); else { s.delete('common'); s.has(k) ? s.delete(k) : s.add(k); }
+    if (!s.size) s.add('common'); m.spawn.biomes = [...s]; })));
+  bindSeg('#lightSeg', 'light', v => change(m => { m.spawn.light = v; }));
+  bindSeg('#weightSeg', 'w', v => change(m => { m.spawn.weight = v; }));
+  bindSeg('#herdSeg', 'herd', v => change(m => { const [a, b] = v.split('-').map(Number); m.spawn.min = a; m.spawn.max = b; }));
+  $('#eggBase').addEventListener('input', e => { active().egg.base = e.target.value.toUpperCase(); saveProject(); drawEgg(); });
+  $('#eggSpot').addEventListener('input', e => { active().egg.spot = e.target.value.toUpperCase(); saveProject(); drawEgg(); });
+  $('#addonName').addEventListener('input', e => { project.name = e.target.value; saveProject(); });
+  $('#nsIn').addEventListener('input', e => { project.ns = e.target.value; saveProject(); renderLines(); if (step === 6) renderStep(); });
+  $('#nsIn').addEventListener('blur', () => { project.ns = C.slug(project.ns, 'verkstad'); saveProject(); renderColl(); renderLines(); });
+  $('#exportBtn').addEventListener('click', exportAddon);
+  $('#prevBtn').addEventListener('click', () => goStep(step - 1)); $('#nextBtn').addEventListener('click', () => goStep(step + 1));
+  $('#newBtn').addEventListener('click', () => { active().tex[active().body] = b64e(pix); addMob(newMob(`Mob ${project.items.length + 1}`)); goStep(0); msg('En ny mob är tillagd. Välj kropp och tryck Grundmåla för att komma igång.'); $('#mobName').focus(); $('#mobName').select(); });
+  $('#exampleBtn').addEventListener('click', () => { active().tex[active().body] = b64e(pix); addMob(exampleDragon()); msg('Gnistdrake är tillagd som exempel. Ta bort den innan ni sparar om ni inte vill ha med den.'); });
+  $('#openBtn').addEventListener('click', () => $('#fileIn').click());
+  $('#fileIn').addEventListener('change', e => {
+    const f = e.target.files && e.target.files[0]; if (!f) return; const fr = new FileReader();
+    fr.onload = () => { const im = new Image(); im.onload = () => {
+      if (im.naturalWidth !== N || im.naturalHeight !== N) { msg(`Bilden är ${im.naturalWidth} × ${im.naturalHeight} pixlar. Den här mobbens bild ska vara ${N} × ${N} pixlar.`); return; }
+      const c = document.createElement('canvas'); c.width = c.height = N; const x = c.getContext('2d', { willReadFrequently:true }); x.drawImage(im, 0, 0);
+      pushUndo(); pix = new Uint8ClampedArray(x.getImageData(0, 0, N, N).data); commit(); msg('Bilden är inläst. Ett skinn passar en tvåbent mob. Ångra med Ctrl+Z om det var fel.'); };
+      im.onerror = () => msg('Filen gick inte att läsa som en PNG-bild.'); im.src = fr.result; };
+    fr.readAsDataURL(f); e.target.value = '';
+  });
+  document.addEventListener('keydown', e => {
+    if (e.target.closest && e.target.closest('input, textarea, select')) return;
+    const k = e.key.toLowerCase(), mod = e.ctrlKey || e.metaKey;
+    if (mod && k === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); return; }
+    if (mod && k === 'y') { e.preventDefault(); redo(); return; }
+    if (mod || e.altKey) return;
+    const map = { b:'pen', e:'eraser', g:'fill', i:'picker', s:'dark', l:'light' };
+    if (map[k]) setTool(map[k]); else if (k === 'm') { mirror = !mirror; $('#mirrorChk').checked = mirror; overlayDirty = dirty3d = true; }
+  });
+  new ResizeObserver(sizeOverlay).observe($('#mapbox'));
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readTokens);
+  new MutationObserver(readTokens).observe(document.documentElement, { attributes:true, attributeFilter:['data-theme'] });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { overlayDirty = true; });
+}
+function frame(t) {
+  requestAnimationFrame(frame);
+  if (overlayDirty) { overlayDirty = false; drawOverlay(); }
+  if (dirty3d && R.renderer) { dirty3d = false; drawComposite(); }
+  animate3d(t);
+}
+
+/* ---------- start ---------- */
+if (firstVisit) { project.items.push(newMob('Min mob')); project.active = 0; }
+project.active = Math.round(clamp(project.active, 0, project.items.length - 1, 0));
+readTokens(); buildTools(); buildPills(); wire();
+$('#exportBtn').textContent = EXPORT_LABEL;
+if (STANDALONE) $('#expNote').textContent = 'Filen hamnar i Hämtade filer. ' + OPEN_SHORT + ' Guiden visar resten.';
+fillRow($('#palFur'), PAL_FUR.map(fromHex)); fillRow($('#palBright'), PAL_BRIGHT.map(fromHex)); fillRow($('#palEyes'), PAL_EYES.map(fromHex));
+renderRecent(); setColor(cur); setTool('pen'); markSeg('#fillSeg', 'fill', fillMode); markSeg('#modeSeg', 'mode', R.mode);
+init3d(); loadActive(); commitView(); sizeOverlay(); updateStatus();
+if (firstVisit) { project.items.push(exampleMob(), exampleDragon()); renderColl(); msg('Min mob är tom och redo att målas. Mossgris och Gnistdrake i samlingen är exempel att titta på.'); }
+saveProject();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
