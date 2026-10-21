@@ -187,6 +187,18 @@ button,label,select,a{touch-action:manipulation}
   .chips button{min-height:40px;padding:6px 13px}
   select{min-height:42px}
 }
+/* recording */
+.rec{display:grid;gap:10px}
+.rec .help{margin:0;font-size:14px;line-height:1.45;color:var(--muted)}
+.recrow{display:flex;flex-wrap:wrap;gap:8px}
+#recBtn.on{background:var(--danger);border-color:var(--danger);color:#FFFFFF}
+.recdot{font:500 14px/1 var(--f-mono);color:var(--danger)}
+.recpill{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:40;display:flex;align-items:center;gap:12px;min-height:46px;padding:10px 18px;border:0;border-radius:999px;background:var(--danger);color:#FFFFFF;font:700 15px/1 var(--f-body);box-shadow:0 6px 20px rgba(0,0,0,.28);cursor:pointer}
+.recpill span{font:500 14px/1 var(--f-mono)}
+.reclock{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;background:rgba(10,8,16,.6)}
+.reclock>div{display:grid;gap:10px;min-width:min(300px,100%);padding:20px 24px;border-radius:10px;background:var(--panel);color:var(--ink);text-align:center;font-weight:700}
+.reclock progress{width:100%;accent-color:var(--accent)}
+.reclock small{font-weight:400;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -295,6 +307,15 @@ button,label,select,a{touch-action:manipulation}
         <p class="note">Peka på kartan så lyser samma ruta upp på figuren. Dra för att snurra och scrolla för att zooma. Med Måla kan ni måla direkt på figuren.</p>
       </section>
 
+      <section class="card rec" aria-label="Spela in">
+        <div class="card-head"><h2>Spela in</h2><span class="recdot" id="recTime" hidden>● 0:00</span></div>
+        <p class="help">Spela in kartan och figuren medan ni målar. Timelapse gör en snabbspolad film av allt som har målats sedan ni öppnade skinnet.</p>
+        <div class="recrow">
+          <button class="btn primary" id="recBtn" type="button">Spela in</button>
+          <button class="btn" id="lapseBtn" type="button">Gör timelapse</button>
+        </div>
+        <label class="chk"><input type="checkbox" id="recMic"> Ta med mikrofonen</label>
+      </section>
       <section class="card" aria-label="Guide">
         <div class="card-head"><h2>Guide</h2><span class="lbl" id="stepCount">Steg 1 av 9</span></div>
         <ol class="pills" id="pills"></ol>
@@ -848,7 +869,7 @@ function setUVs(geo, u, v, w, h, d) {
 function init3d() {
   const stage = $('#stage');
   if (!window.THREE) { stage.innerHTML = '<p class="no3d">3D-figuren kunde inte laddas. Kartan fungerar som vanligt.</p>'; return; }
-  try { R.renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true }); }
+  try { R.renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true, preserveDrawingBuffer:true }); }
   catch (e) { stage.innerHTML = '<p class="no3d">Den här webbläsaren kan inte visa 3D. Kartan fungerar som vanligt.</p>'; return; }
   R.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   stage.appendChild(R.renderer.domElement);
@@ -1076,6 +1097,152 @@ if (saved && saved.png) {
   im.onload = () => { if (loadFromImage(im, { draft:true })) { $('#preview').src = paint.toDataURL('image/png'); msg('Ert senaste utkast är tillbaka.'); } };
   im.src = saved.png;
 }
+/* ---------- recording: live film and timelapse of the map next to the 3D figure ---------- */
+/* The film is drawn on its own 1280x720 canvas: the name on top, the map on the left and the 3D figure on the right.
+   Every change to the picture is kept as a snapshot, so a timelapse can replay the painting from the start. */
+function setupRecorder(h) {
+  const W = 1280, H = 720;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const c = cv.getContext('2d');
+  const FD = '"Pixelify Sans", ui-monospace, monospace', FB = '"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif';
+  const snaps = []; let key = null, lastSnap = 0, trail = 0, playing = false;
+  let rec = null, chunks = [], micStream = null, t0 = 0, raf = 0, kind = 'live', progress = null, pill = null, lock = null;
+  const btn = $('#recBtn'), lapseBtn = $('#lapseBtn'), mic = $('#recMic'), clock = $('#recTime');
+
+  const same = (a, b) => { if (a.length !== b.length) return false; for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false; return true; };
+  function snap() {
+    const k = h.key(); if (k !== key) { snaps.length = 0; key = k; }
+    const p = h.getPix(), last = snaps[snaps.length - 1];
+    if (last && same(last, p)) return;
+    snaps.push(new Uint8ClampedArray(p));
+    if (snaps.length > Math.max(120, Math.min(900, Math.floor(24e6 / p.length)))) { const keep = snaps.filter((s, i) => i % 2 === 0 || i === snaps.length - 1); snaps.length = 0; snaps.push(...keep); }
+  }
+  function changed() {
+    if (playing) return;
+    const now = performance.now(); clearTimeout(trail);
+    if (now - lastSnap > 110) { lastSnap = now; snap(); }
+    trail = setTimeout(() => { lastSnap = performance.now(); snap(); }, 160);
+  }
+
+  function rrect(x, y, w, hh, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + hh, r); c.arcTo(x + w, y + hh, x, y + hh, r); c.arcTo(x, y + hh, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+  let checker = null;
+  function checkerPattern() {
+    if (checker) return checker;
+    const t = document.createElement('canvas'); t.width = t.height = 36; const x = t.getContext('2d');
+    x.fillStyle = '#2C2835'; x.fillRect(0, 0, 36, 36); x.fillStyle = '#23202B'; x.fillRect(0, 0, 18, 18); x.fillRect(18, 18, 18, 18);
+    return (checker = c.createPattern(t, 'repeat'));
+  }
+  function draw() {
+    c.fillStyle = '#15121D'; c.fillRect(0, 0, W, H);
+    c.textBaseline = 'alphabetic'; c.textAlign = 'left';
+    c.fillStyle = '#F2EFF8'; c.font = `600 38px ${FD}`; c.fillText(h.name(), 48, 66, 760);
+    c.fillStyle = '#A9A3B6'; c.font = `500 20px ${FB}`; c.fillText(h.title, 48, 96);
+    c.textAlign = 'right'; c.fillStyle = '#B49DFF'; c.font = `600 22px ${FD}`; c.fillText('Verkstan', W - 48, 66);
+    c.textAlign = 'left';
+    const S = 568, mx = 48, my = 124;
+    c.save(); rrect(mx, my, S, S, 10); c.clip(); c.fillStyle = checkerPattern(); c.fillRect(mx, my, S, S);
+    c.imageSmoothingEnabled = false; c.drawImage(h.paint, mx, my, S, S);
+    c.imageSmoothingEnabled = true; if (h.ov.width) c.drawImage(h.ov, mx, my, S, S);
+    c.restore();
+    const gx = 648, gy = 124, gw = 584, gh = 568;
+    c.fillStyle = '#221E2B'; rrect(gx, gy, gw, gh, 10); c.fill();
+    const g = h.gl();
+    if (g && g.width && g.height) { const r = Math.min(gw / g.width, gh / g.height), w = g.width * r, hh = g.height * r; c.drawImage(g, gx + (gw - w) / 2, gy + (gh - hh) / 2, w, hh); }
+    if (progress != null) { c.fillStyle = '#2E2647'; c.fillRect(48, H - 14, W - 96, 4); c.fillStyle = '#B49DFF'; c.fillRect(48, H - 14, (W - 96) * progress, 4); }
+  }
+  function loop() { raf = requestAnimationFrame(loop); draw(); tick(); }
+  const fmt = ms => { const s = Math.floor(ms / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+  function tick() {
+    const tx = '● ' + fmt(performance.now() - t0);
+    if (clock) { clock.hidden = kind !== 'live'; clock.textContent = tx; }
+    if (pill) pill.querySelector('span').textContent = tx;
+  }
+  function mime() {
+    if (!window.MediaRecorder) return null;
+    for (const m of ['video/mp4;codecs=avc1.42E01E', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm']) if (MediaRecorder.isTypeSupported(m)) return m;
+    return '';
+  }
+  function ui() {
+    const on = !!rec;
+    btn.textContent = on && kind === 'live' ? 'Stoppa och spara' : 'Spela in';
+    btn.classList.toggle('on', on && kind === 'live');
+    btn.disabled = on && kind !== 'live'; lapseBtn.disabled = on; mic.disabled = on;
+    if (clock) clock.hidden = !(on && kind === 'live');
+    if (on && kind === 'live' && !pill) {
+      pill = document.createElement('button'); pill.type = 'button'; pill.className = 'recpill';
+      pill.innerHTML = '<span>● 0:00</span><b>Stoppa</b>'; pill.addEventListener('click', stop); document.body.append(pill);
+    } else if (!(on && kind === 'live') && pill) { pill.remove(); pill = null; }
+  }
+  async function start(k) {
+    const type = mime();
+    if (type === null || !cv.captureStream) { h.msg('Den här webbläsaren kan inte spela in film. Prova Chrome, Edge eller Safari.'); return false; }
+    kind = k; const stream = cv.captureStream(30);
+    if (k === 'live' && mic.checked) {
+      try { micStream = await navigator.mediaDevices.getUserMedia({ audio:true }); micStream.getAudioTracks().forEach(t => stream.addTrack(t)); }
+      catch (e) { micStream = null; h.msg('Mikrofonen fick inte användas, så filmen spelas in utan ljud.'); }
+    }
+    try { rec = new MediaRecorder(stream, type ? { mimeType:type, videoBitsPerSecond:6000000 } : { videoBitsPerSecond:6000000 }); }
+    catch (e) { rec = null; h.msg('Det gick inte att starta inspelningen i den här webbläsaren.'); return false; }
+    chunks = [];
+    const name = h.name(), lapse = k === 'lapse', used = rec.mimeType || type || 'video/webm';
+    rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+    rec.onstop = () => {
+      const ext = /mp4/.test(used) ? 'mp4' : 'webm';
+      const blob = new Blob(chunks, { type:used.split(';')[0] }); chunks = []; rec = null; progress = null; ui();
+      const base = (name.replace(/[^\p{L}\p{N}_-]+/gu, '-').replace(/^-+|-+$/g, '') || 'film') + (lapse ? '-timelapse' : '');
+      if (blob.size) h.save(blob, `${base}.${ext}`); else h.msg('Filmen blev tom. Försök igen.');
+    };
+    draw(); rec.start(1000); t0 = performance.now(); cancelAnimationFrame(raf); loop(); ui();
+    return true;
+  }
+  function stop() {
+    if (!rec) return;
+    cancelAnimationFrame(raf); raf = 0; draw();
+    try { rec.requestData(); } catch (e) {}
+    rec.stop();
+    if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+  }
+  const frames = n => new Promise(r => { let i = 0; const f = () => (++i >= n ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); });
+  async function timelapse() {
+    clearTimeout(trail); snap();
+    if (snaps.length < 2) { h.msg('Måla lite först. Timelapsen visar allt som har målats sedan ni öppnade det här.'); return; }
+    const list = snaps.slice(), original = new Uint8ClampedArray(h.getPix());
+    lock = document.createElement('div'); lock.className = 'reclock';
+    lock.innerHTML = '<div role="status"><span>Gör timelapse …</span><progress max="1" value="0"></progress><small>Vänta tills filmen är sparad.</small></div>';
+    document.body.append(lock);
+    playing = true;
+    h.setPix(list[0]); h.refresh(); await frames(2);
+    if (!(await start('lapse'))) { h.setPix(original); h.refresh(); playing = false; lock.remove(); return; }
+    const total = Math.max(4, Math.min(20, list.length / 12)) * 1000, bar = lock.querySelector('progress');
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+    await wait(400);
+    let shown = 0; const s0 = performance.now();
+    while (shown < list.length - 1) {
+      await frames(1);
+      const i = Math.min(list.length - 1, Math.floor((performance.now() - s0) / total * list.length));
+      if (i > shown) { shown = i; h.setPix(list[i]); h.refresh(); progress = i / (list.length - 1); bar.value = progress * .85; }
+    }
+    const s1 = performance.now(); let last = s1;
+    while (performance.now() - s1 < 2600) { await frames(1); const now = performance.now(); h.spin((now - last) / 16.7); last = now; bar.value = .85 + .15 * (now - s1) / 2600; }
+    stop();
+    h.setPix(original); h.refresh(); playing = false;
+    lock.remove(); lock = null;
+  }
+  btn.addEventListener('click', () => { if (rec && kind === 'live') stop(); else if (!rec) start('live').then(ok => { if (ok) h.msg('Inspelningen är igång. Tryck på Stoppa när ni är klara, så sparas filmen.'); }); });
+  lapseBtn.addEventListener('click', () => { if (!rec) timelapse(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden && rec && kind === 'live') stop(); });
+  snap();
+  return { changed, get playing() { return playing; } };
+}
+var recorder = setupRecorder({ title:'Skinverkstaden', name:() => $('#skinName').value.trim() || 'Mitt skin', key:() => 'skin',
+  getPix:() => pix.data, setPix:p => pix.data.set(p), refresh:() => liveCommit(), spin:k => { R.yaw += .03 * k; dirty3d = true; },
+  gl:() => R.renderer && R.renderer.domElement, paint, ov, msg,
+  save:async (blob, filename) => {
+    const dl = await downloadsP;
+    if (dl) { try { await dl.save({ filename, data:blob }); msg(`${filename} är sparad.`); return; } catch (err) { if (err && err.code === 'declined') { msg('Ingen film sparades.'); return; } } }
+    if (STANDALONE) { saveLocal(filename, blob); msg(`${filename} är sparad i Hämtade filer.`); }
+    else msg('Filmen kunde inte sparas här. Öppna verkstaden från webbsidan för att spela in.');
+  } });
+liveCommit = (f => function () { const r = f.apply(this, arguments); recorder.changed(); return r; })(liveCommit);
 requestAnimationFrame(frame);
 })();
 </script>

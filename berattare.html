@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Berättaren</title>
+<meta name="description" content="Ett manus om Verkstan som datorns röst läser upp, med stor text i bild, att spela in till en film.">
+<meta name="theme-color" content="#5B45A8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Pixelify+Sans:wght@500;600&display=swap">
+<style>
+:root{
+  --bg:#E8E6EE; --panel:#FAF9FC; --panel-2:#EFEDF4; --ink:#1D1A26; --muted:#5C5768; --line:#CFCBD9; --line-strong:#9A94A8;
+  --accent:#5B45A8; --accent-ink:#FFFFFF; --accent-soft:#E4DEF6; --danger:#C0392F;
+  --f-display:"Pixelify Sans", ui-monospace, "Courier New", monospace;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --r:8px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121018; --panel:#1A1722; --panel-2:#221E2B; --ink:#E8E5EF; --muted:#9C96A9; --line:#2F2A39; --line-strong:#514A5E;
+    --accent:#B49DFF; --accent-ink:#160F2B; --accent-soft:#2E2647; --danger:#F07367; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121018; --panel:#1A1722; --panel-2:#221E2B; --ink:#E8E5EF; --muted:#9C96A9; --line:#2F2A39; --line-strong:#514A5E;
+  --accent:#B49DFF; --accent-ink:#160F2B; --accent-soft:#2E2647; --danger:#F07367; color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--f-body)}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--accent)}
+.wrap{max-width:1120px;margin:0 auto;padding:8px max(16px,env(safe-area-inset-right,0px)) 48px max(16px,env(safe-area-inset-left,0px));display:grid;gap:22px}
+.back{display:inline-flex;align-items:center;min-height:40px;font-weight:700;text-decoration:none}
+h1{font:600 clamp(30px,7vw,42px)/1 var(--f-display);margin:0}
+.lead{margin:6px 0 0;color:var(--muted);max-width:70ch}
+.steps{margin:0;padding-left:22px;display:grid;gap:4px;max-width:80ch}
+kbd{font:600 13px/1 ui-monospace,Consolas,monospace;border:1px solid var(--line-strong);border-bottom-width:2px;border-radius:4px;padding:2px 6px;background:var(--panel)}
+.btn{border:1px solid var(--line-strong);background:var(--panel);border-radius:6px;padding:7px 14px;min-height:40px;cursor:pointer;font-size:15px;touch-action:manipulation}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.btn:disabled{opacity:.5;cursor:default}
+.bar{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center}
+.bar label{display:flex;align-items:center;gap:8px;font-size:15px}
+select{border:1px solid var(--line-strong);border-radius:6px;background:var(--panel);padding:6px 8px;min-height:40px;max-width:100%}
+.voicenote{margin:0;font-size:14px;color:var(--muted)}
+
+/* the screen that is filmed: always dark, always 16:9 */
+.stage{position:relative;aspect-ratio:16/9;width:100%;border-radius:10px;overflow:hidden;background:#15121D;color:#F2EFF8;display:grid;grid-template-rows:auto 1fr auto;padding:4.5% 6%;cursor:pointer;container-type:inline-size}
+.stage:fullscreen{border-radius:0;width:100vw;height:100vh;aspect-ratio:auto}
+.stage .top{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.stage .brand{font:600 3.2cqi/1 var(--f-display);color:#B49DFF}
+.stage .count{font:500 1.7cqi/1 var(--f-body);color:#A9A3B6}
+.stage .mid{display:grid;grid-template-columns:auto 1fr;gap:5cqi;align-items:center;min-height:0}
+.stage canvas,.stage img{width:17cqi;height:17cqi;image-rendering:pixelated;border-radius:1.2cqi;background:#221E2B;padding:1.2cqi}
+.stage h2{font:600 5.4cqi/1.05 var(--f-display);margin:0 0 2cqi}
+.stage .cap{font:700 3.3cqi/1.3 var(--f-body);margin:0;max-width:52ch;text-wrap:balance;min-height:2.6em}
+.stage .foot{display:flex;justify-content:space-between;align-items:end;gap:20px}
+.stage .url{font:600 2.2cqi/1 var(--f-display);color:#B49DFF}
+.stage .legal{font:400 1.25cqi/1.35 var(--f-body);color:#A9A3B6;max-width:70ch;text-align:right}
+.stage .hint{position:absolute;inset:auto 0 3% 0;text-align:center;font:500 1.6cqi/1 var(--f-body);color:#A9A3B6}
+.stage .prog{position:absolute;left:0;bottom:0;height:.5cqi;background:#B49DFF;width:0;transition:width .3s}
+
+.script{display:grid;gap:12px}
+.seg{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:grid;gap:8px}
+.seg.now{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.seg-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.seg input{font:600 18px/1.2 var(--f-display);border:0;background:transparent;padding:4px 0;min-width:0;flex:1}
+.seg textarea{width:100%;min-height:84px;resize:vertical;border:1px solid var(--line);border-radius:6px;background:var(--bg);padding:8px 10px;line-height:1.5}
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.legalnote{border-top:1px solid var(--line);padding-top:14px;font-size:13px;color:var(--muted)}
+.legalnote p{margin:0 0 4px}
+@media (pointer:coarse){.btn{min-height:44px}select{min-height:44px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="./">&larr; Alla verkstäder</a>
+  <header>
+    <h1>Berättaren</h1>
+    <p class="lead">Datorns röst läser manuset om Verkstan, och den stora rutan visar texten i bild. Spela in rutan så har ni en berättad film att klippa ihop med era timelapse-filmer.</p>
+  </header>
+
+  <ol class="steps">
+    <li>Öppna sidan i <b>Microsoft Edge</b> på datorn. Där finns de naturligaste svenska rösterna.</li>
+    <li>Välj röst och tryck <b>Helskärm</b>.</li>
+    <li>Tryck <kbd>Win</kbd> + <kbd>Alt</kbd> + <kbd>R</kbd> för att börja spela in, och klicka sedan i rutan så börjar rösten läsa.</li>
+    <li>När rösten är klar trycker du <kbd>Win</kbd> + <kbd>Alt</kbd> + <kbd>R</kbd> igen. Filmen hamnar i mappen Videor, under Inspelningar.</li>
+  </ol>
+
+  <div class="bar">
+    <label>Röst <select id="voice"></select></label>
+    <label>Takt <input type="range" id="rate" min="0.75" max="1.25" step="0.05" value="0.95"></label>
+    <button class="btn primary" id="playBtn" type="button">Spela upp allt</button>
+    <button class="btn" id="stopBtn" type="button" disabled>Stoppa</button>
+    <button class="btn" id="fullBtn" type="button">Helskärm</button>
+  </div>
+  <p class="voicenote" id="voiceNote"></p>
+
+  <section class="stage" id="stage" aria-label="Rutan som spelas in">
+    <div class="top"><span class="brand">Verkstan</span><span class="count" id="count"></span></div>
+    <div class="mid">
+      <canvas id="pic" width="12" height="12" aria-hidden="true"></canvas>
+      <div><h2 id="title"></h2><p class="cap" id="cap"></p></div>
+    </div>
+    <div class="foot"><span class="url" id="url"></span><span class="legal" id="legal" hidden>Inte en officiell Minecraft-produkt. Inte godkänd av eller kopplad till Mojang eller Microsoft.<br>NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.</span></div>
+    <div class="hint" id="hint">Klicka i rutan för att starta</div>
+    <div class="prog" id="prog"></div>
+  </section>
+
+  <div class="tools">
+    <h3 style="margin:0;font:600 22px/1.1 var(--f-display)">Manus</h3>
+    <button class="btn" id="resetBtn" type="button">Återställ manuset</button>
+    <span class="voicenote">Ändringar sparas i den här webbläsaren.</span>
+  </div>
+  <div class="script" id="script"></div>
+
+  <footer class="legalnote">
+    <p>Ett fristående hobbyprojekt. Inte en officiell Minecraft-produkt. Inte godkänd av eller kopplad till Mojang eller Microsoft.</p>
+    <p lang="en">NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.</p>
+  </footer>
+</div>
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const KEY = 'berattaren.v1';
+const DEFAULT = [
+  { pic:'icon', title:'Välkommen till Verkstan', text:'Hej och välkommen till Verkstan! Här målar vi egna saker till Minecraft Bedrock, pixel för pixel. Allt är gratis och fungerar på datorn, plattan och mobilen.' },
+  { pic:'skin', title:'Skinverkstaden', text:'I Skinverkstaden målar du ditt eget skin. Du kan måla på kartan, eller direkt på figuren i 3D. När du är klar sparar du bilden och laddar upp den i omklädningsrummet i Minecraft.' },
+  { pic:'sword', title:'Föremålsverkstaden', text:'I Föremålsverkstaden gör du mat, vapen, verktyg och rustningar. Du kan hitta på ett helt eget material, smälta det i ugnen och tillverka saker av det på arbetsbänken. En hel rustning kan ge en extra kraft när du har på dig alla delar.' },
+  { pic:'dragon', title:'Mobverkstaden', text:'I Mobverkstaden bygger du egna varelser. Välj nos, horn, svans och vingar. Du kan till och med göra en drake som flyger själv, och som du kan tämja och rida på.' },
+  { pic:'rec', title:'Spela in', text:'Med knappen Spela in blir det en film av allt du målar. Och timelapse snabbspolar hela bygget på några sekunder.' },
+  { pic:'icon', title:'In i spelet', text:'När du är klar trycker du på Spara add-on. Öppna filen, så importeras den i Minecraft. Slå sedan på paketet i världens inställningar, och spela!' },
+  { pic:'icon', title:'Testa själv', text:'Länken finns i beskrivningen. Lycka till med byggandet, och visa gärna vad du har gjort!', legal:true },
+];
+const SPRITES = {
+  skin: { pal:{ h:'#4A2F1B', s:'#E0A97A', d:'#C68A5E', w:'#FFFFFF', e:'#3B5BA8', m:'#9C4F3A', t:'#2C8A55', T:'#1F6B41' }, rows:[
+    '..hhhhhhhh..', '.hhhhhhhhhh.', '.hssssssssh.', '.ssssssssss.', '.swessssews.', '.ssssddssss.',
+    '.ssmmmmmmss.', '..ssssssss..', '.tttttttttt.', 'tttTttttTttt', 'tttTttttTttt', 'tttTttttTttt'] },
+  sword: { pal:{ w:'#F4F4F8', b:'#8FD8E8', B:'#4FA9C4', g:'#C9962E', h:'#6B4423', k:'#3A2414' }, rows:[
+    '..........ww', '.........wbw', '........wbB.', '.......wbB..', '......wbB...', '.g...wbB....',
+    '.gg.wbB.....', '..ggbB......', '..hgg.......', '.hk.gg......', 'hk..........', 'k...........'] },
+  dragon: { pal:{ d:'#7457D4', D:'#4E3896', l:'#A28DF2', e:'#F0AD4C', k:'#160F2B', t:'#FFFFFF', h:'#E8E5EF', r:'#C0392F' }, rows:[
+    '.h..........', '.hh.........', '..dd........', '.ddddd......', 'dldddddd....', 'dlekdddddd..',
+    'dddddddddddd', 'DDddddddtdtd', '.DDdrrrrrrr.', '..DDDtDtDtD.', '...DD.......', '....D.......'] },
+  icon: { pal:{ a:'#1C977A', A:'#146E59', b:'#D7841C', B:'#9C5F14', c:'#BF4279', C:'#8A2F57', e:'#F0AD4C', E:'#B07E37', w:'#FFFFFF' }, rows:[
+    '..........w.', '.aaaA.bbbBw.', '.aaaA.bbbB..', '.aaaA.bbbB..', '.AAAA.BBBB..', '............',
+    '.cccC.eeeE..', '.cccC.eeeE..', '.cccC.eeeE..', '.CCCC.EEEE..', '............', '............'] },
+  rec: { pal:{ r:'#E5484D', R:'#B32D33', w:'#FFFFFF' }, rows:[
+    '............', '....rrrr....', '..rrrrrrrr..', '..rrwwrrrr..', '.rrrwrrrrrR.', '.rrrrrrrrrR.',
+    '.rrrrrrrrrR.', '.rrrrrrrrrR.', '..rrrrrrRR..', '..RrrrrrRR..', '....RRRR....', '............'] },
+};
+let segs = DEFAULT.map(s => ({ ...s }));
+try { const saved = JSON.parse(localStorage.getItem(KEY) || 'null'); if (Array.isArray(saved) && saved.length === DEFAULT.length) segs = saved.map((s, i) => ({ ...DEFAULT[i], title:String(s.title || ''), text:String(s.text || '') })); } catch (e) {}
+const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(segs.map(s => ({ title:s.title, text:s.text })))); } catch (e) {} };
+
+const site = new URL('./', location.href); $('#url').textContent = (site.host + site.pathname).replace(/\/$/, '');
+
+function paintPic(name) {
+  const cv = $('#pic'), c = cv.getContext('2d'), sp = SPRITES[name] || SPRITES.icon;
+  c.clearRect(0, 0, 12, 12);
+  sp.rows.forEach((row, y) => [...row].forEach((ch, x) => { if (sp.pal[ch]) { c.fillStyle = sp.pal[ch]; c.fillRect(x, y, 1, 1); } }));
+}
+function show(i, caption) {
+  const s = segs[i];
+  paintPic(s.pic); $('#title').textContent = s.title; $('#cap').textContent = caption ?? '';
+  $('#count').textContent = `${i + 1} / ${segs.length}`;
+  $('#legal').hidden = !s.legal;
+  document.querySelectorAll('.seg').forEach((el, j) => el.classList.toggle('now', j === i));
+}
+
+/* script editor */
+function renderScript() {
+  const box = $('#script'); box.innerHTML = '';
+  segs.forEach((s, i) => {
+    const el = document.createElement('section'); el.className = 'seg';
+    el.innerHTML = `<div class="seg-head"><input aria-label="Rubrik ${i + 1}"><button class="btn" type="button">Läs den här</button></div><textarea aria-label="Text ${i + 1}"></textarea>`;
+    const [inp, btn, ta] = [el.querySelector('input'), el.querySelector('button'), el.querySelector('textarea')];
+    inp.value = s.title; ta.value = s.text;
+    inp.addEventListener('input', () => { s.title = inp.value; persist(); if (!playing) show(i, ''); });
+    ta.addEventListener('input', () => { s.text = ta.value; persist(); });
+    btn.addEventListener('click', () => play(i, i));
+    box.append(el);
+  });
+}
+$('#resetBtn').addEventListener('click', () => { segs = DEFAULT.map(s => ({ ...s })); persist(); renderScript(); show(0, ''); });
+
+/* voices */
+const synth = window.speechSynthesis;
+let voices = [];
+function score(v) { let s = 0; if (/^sv/i.test(v.lang)) s += 100; if (/natural|neural|online/i.test(v.name)) s += 20; if (v.localService === false) s += 5; return s; }
+function loadVoices() {
+  if (!synth) { $('#voiceNote').textContent = 'Den här webbläsaren kan inte läsa upp text. Öppna sidan i Microsoft Edge eller Chrome.'; $('#playBtn').disabled = true; return; }
+  const all = synth.getVoices(); if (!all.length) return;
+  const sv = all.filter(v => /^sv/i.test(v.lang));
+  voices = (sv.length ? sv : all).slice().sort((a, b) => score(b) - score(a));
+  const sel = $('#voice'), keep = sel.value; sel.innerHTML = '';
+  voices.forEach((v, i) => { const o = document.createElement('option'); o.value = String(i); o.textContent = `${v.name} (${v.lang})`; sel.append(o); });
+  let saved = null; try { saved = localStorage.getItem(KEY + '.voice'); } catch (e) {}
+  const idx = voices.findIndex(v => v.name === (saved || '')); sel.value = idx >= 0 ? String(idx) : keep && voices[+keep] ? keep : '0';
+  $('#voiceNote').textContent = sv.length ? (sv.some(v => /natural|neural|online/i.test(v.name)) ? '' : 'Tips: Microsoft Edge har naturligare svenska röster än den här webbläsaren.') : 'Ingen svensk röst hittades. Öppna sidan i Microsoft Edge, eller lägg till svenska under Tal i Windows inställningar.';
+}
+if (synth) { loadVoices(); synth.addEventListener ? synth.addEventListener('voiceschanged', loadVoices) : (synth.onvoiceschanged = loadVoices); }
+$('#voice').addEventListener('change', () => { const v = voices[+$('#voice').value]; try { localStorage.setItem(KEY + '.voice', v ? v.name : ''); } catch (e) {} });
+
+/* playback: one sentence at a time, so the caption follows the voice */
+let playing = false, runId = 0;
+const sentences = t => (t.match(/[^.!?]+[.!?]*/g) || []).map(x => x.trim()).filter(Boolean);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+function say(text, id) {
+  return new Promise(res => {
+    if (id !== runId) return res();
+    const u = new SpeechSynthesisUtterance(text), v = voices[+$('#voice').value];
+    if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'sv-SE';
+    u.rate = +$('#rate').value;
+    let done = false; const fin = () => { if (!done) { done = true; clearTimeout(guard); res(); } };
+    const guard = setTimeout(fin, 2000 + text.length * 140);
+    u.onend = fin; u.onerror = fin;
+    synth.speak(u);
+  });
+}
+async function play(from = 0, to = segs.length - 1) {
+  if (!synth) return;
+  stop(); const id = ++runId; playing = true; ui();
+  $('#hint').hidden = true;
+  await wait(500);
+  for (let i = from; i <= to && id === runId; i++) {
+    const parts = sentences(segs[i].text);
+    show(i, ''); await wait(350);
+    for (const p of parts) { if (id !== runId) break; $('#cap').textContent = p; $('#prog').style.width = ((i - from + .5) / (to - from + 1) * 100) + '%'; await Promise.all([say(p, id), wait(p.length * 45)]); await wait(180); }
+    $('#prog').style.width = ((i - from + 1) / (to - from + 1) * 100) + '%';
+    await wait(700);
+  }
+  if (id === runId) { playing = false; ui(); }
+}
+function stop() { runId++; playing = false; if (synth) synth.cancel(); ui(); }
+function ui() { $('#playBtn').disabled = playing || !synth; $('#stopBtn').disabled = !playing; }
+$('#playBtn').addEventListener('click', () => play());
+$('#stopBtn').addEventListener('click', () => { stop(); $('#hint').hidden = false; });
+$('#stage').addEventListener('click', () => { if (playing) { stop(); $('#hint').hidden = false; } else { $('#prog').style.width = '0'; play(); } });
+$('#fullBtn').addEventListener('click', () => { const st = $('#stage'); if (st.requestFullscreen) st.requestFullscreen().catch(() => {}); else if (st.webkitRequestFullscreen) st.webkitRequestFullscreen(); });
+document.addEventListener('keydown', e => { if (e.key === ' ' && document.fullscreenElement) { e.preventDefault(); $('#stage').click(); } });
+
+renderScript(); show(0, ''); ui();
+})();
+</script>
+</body>
+</html>

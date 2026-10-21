@@ -81,7 +81,7 @@ for key, src in pages.items():
     body = body.replace(THREE_TAG, '<script src="lib/three.min.js"></script>')
     wr(os.path.join(SITE, key + '.html'), SITE_HEAD + head + '</head>\n<body>\n' + NAV + body + '</body>\n</html>\n')
 
-for f in ['index.html', 'manifest.webmanifest', 'README.md', 'sw.js']:
+for f in ['index.html', 'berattare.html', 'manifest.webmanifest', 'README.md', 'sw.js']:
     p = os.path.join(HERE, 'site-src', f)
     if os.path.exists(p): shutil.copyfile(p, os.path.join(SITE, f))
 icons = os.path.join(HERE, 'site-src', 'icons')

@@ -6,7 +6,7 @@ Tre verkstäder där man målar egna saker till Minecraft Bedrock direkt i webbl
 - **Föremålsverkstaden**: mat, vapen, verktyg, rustningar och material med recept (add-on)
 - **Mobverkstaden**: djur, monster och drakar som kan tämjas och ridas (add-on)
 
-Öppna: https://krajdan.github.io/minecraft-verkstan/
+Öppna: https://krajdan.github.io/skinsverkstan/
 
 Fungerar på dator, platta och mobil. Allt sparas lokalt i webbläsaren.
 
