@@ -56,7 +56,7 @@ window.MVCore = (() => {
     { r:'spike', part:'spikes', origin:[-1, 20, -15 - (i - 1) * 6], size:[2, 4, 3], uv:[112, 0] }] });
   const BODIES = {
     quad: {
-      label:'Fyrbent', size:64, coll:[0.9, 1.25], seat:1.05, wings:'wings',
+      label:'Fyrbent', size:64, coll:[0.9, 1.25], seat:1.05, wings:'wings', bounds:[4, 3.5, 1.25],
       regions: [
         { key:'head',  name:'Huvud',          short:'Huvud', box:[0, 0, 8, 8, 8],    mirror:'head',  group:'head' },
         { key:'snout', name:'Nos',            short:'Nos',   box:[32, 0, 4, 3, 1],   mirror:'snout', group:'head', part:'nose=snout' },
@@ -103,7 +103,7 @@ window.MVCore = (() => {
       ]
     },
     biped: {
-      label:'Tvåbent', size:64, coll:[0.6, 1.9], seat:1.6, wings:null,
+      label:'Tvåbent', size:64, coll:[0.6, 1.9], seat:1.6, wings:null, bounds:[4, 3.5, 1.25],
       regions: [
         { key:'head',  name:'Huvud',           short:'Huvud', box:[0, 0, 8, 8, 8],    mirror:'head',  group:'head' },
         { key:'hat',   name:'Huvud, yttre',    short:'Yttre', box:[32, 0, 8, 8, 8],   mirror:'hat',   group:'head', outer:true },
@@ -128,7 +128,7 @@ window.MVCore = (() => {
       ]
     },
     dragon: {
-      label:'Drake', size:128, coll:[1.8, 1.5], seat:1.4, wings:'always',
+      label:'Drake', size:128, coll:[1.8, 1.5], seat:1.4, wings:'always', bounds:[7, 4, 1.5],
       regions: [
         { key:'head',  name:'Huvud',         short:'Huvud', box:[0, 0, 10, 8, 10],   mirror:'head',  group:'head' },
         { key:'snout', name:'Nos',           short:'Nos',   box:[40, 0, 8, 4, 8],    mirror:'snout', group:'head' },
@@ -171,6 +171,44 @@ window.MVCore = (() => {
         { name:'wingtip_l', parent:'wing_l', pivot:[22, 19, -4], cubes:[
           { r:'tbar', origin:[22, 18.5, -4.5], size:[16, 1, 1], uv:[36, 52], mirror:true }, { r:'tskin', origin:[22, 19, -4], size:[16, 0, 14], uv:[60, 56], mirror:true }] }
       ]
+    },
+    tall: {
+      label:'Lång', size:64, coll:[0.6, 2.9], seat:2.5, wings:null, bounds:[2.5, 4, 1.75],
+      regions: [
+        { key:'head', name:'Huvud',       short:'Huvud', box:[0, 0, 8, 8, 8],    mirror:'head', group:'head' },
+        { key:'body', name:'Kropp',       short:'Kropp', box:[32, 0, 8, 12, 4],  mirror:'body', group:'body' },
+        { key:'rarm', name:'Höger arm',   short:'H arm', box:[0, 16, 2, 28, 2],  mirror:'larm', group:'arms' },
+        { key:'larm', name:'Vänster arm', short:'V arm', box:[8, 16, 2, 28, 2],  mirror:'rarm', group:'arms' },
+        { key:'rleg', name:'Höger ben',   short:'H ben', box:[16, 16, 2, 28, 2], mirror:'lleg', group:'legs' },
+        { key:'lleg', name:'Vänster ben', short:'V ben', box:[24, 16, 2, 28, 2], mirror:'rleg', group:'legs' }
+      ],
+      bones: [
+        { name:'body', pivot:[0, 28, 0], cubes:[{ r:'body', origin:[-4, 28, -2], size:[8, 12, 4], uv:[32, 0] }] },
+        { name:'head', parent:'body', pivot:[0, 40, 0], cubes:[{ r:'head', origin:[-4, 40, -4], size:[8, 8, 8], uv:[0, 0] }] },
+        { name:'rightarm', parent:'body', pivot:[-5, 39, 0], cubes:[{ r:'rarm', origin:[-6, 11, -1], size:[2, 28, 2], uv:[0, 16] }] },
+        { name:'leftarm', parent:'body', pivot:[5, 39, 0], cubes:[{ r:'larm', origin:[4, 11, -1], size:[2, 28, 2], uv:[8, 16] }] },
+        { name:'rightleg', parent:'body', pivot:[-2, 28, 0], cubes:[{ r:'rleg', origin:[-3, 0, -1], size:[2, 28, 2], uv:[16, 16] }] },
+        { name:'leftleg', parent:'body', pivot:[2, 28, 0], cubes:[{ r:'lleg', origin:[1, 0, -1], size:[2, 28, 2], uv:[24, 16] }] }
+      ]
+    },
+    giant: {
+      label:'Jätte', size:128, coll:[0.9, 2.9], seat:2.6, wings:null, bounds:[3.5, 4, 1.75],
+      regions: [
+        { key:'head', name:'Huvud',       short:'Huvud', box:[0, 0, 16, 15, 10],  mirror:'head', group:'head' },
+        { key:'body', name:'Kropp',       short:'Kropp', box:[0, 26, 18, 21, 10], mirror:'body', group:'body' },
+        { key:'rarm', name:'Höger arm',   short:'H arm', box:[60, 0, 8, 28, 8],   mirror:'larm', group:'arms' },
+        { key:'larm', name:'Vänster arm', short:'V arm', box:[92, 0, 8, 28, 8],   mirror:'rarm', group:'arms' },
+        { key:'rleg', name:'Höger ben',   short:'H ben', box:[60, 40, 6, 13, 6],  mirror:'lleg', group:'legs' },
+        { key:'lleg', name:'Vänster ben', short:'V ben', box:[88, 40, 6, 13, 6],  mirror:'rleg', group:'legs' }
+      ],
+      bones: [
+        { name:'body', pivot:[0, 13, 0], cubes:[{ r:'body', origin:[-9, 13, -5], size:[18, 21, 10], uv:[0, 26] }] },
+        { name:'head', parent:'body', pivot:[0, 34, 0], cubes:[{ r:'head', origin:[-8, 34, -5], size:[16, 15, 10], uv:[0, 0] }] },
+        { name:'rightarm', parent:'body', pivot:[-13, 33, 0], cubes:[{ r:'rarm', origin:[-17, 5, -4], size:[8, 28, 8], uv:[60, 0] }] },
+        { name:'leftarm', parent:'body', pivot:[13, 33, 0], cubes:[{ r:'larm', origin:[9, 5, -4], size:[8, 28, 8], uv:[92, 0] }] },
+        { name:'rightleg', parent:'body', pivot:[-5, 13, 0], cubes:[{ r:'rleg', origin:[-8, 0, -3], size:[6, 13, 6], uv:[60, 40] }] },
+        { name:'leftleg', parent:'body', pivot:[5, 13, 0], cubes:[{ r:'lleg', origin:[2, 0, -3], size:[6, 13, 6], uv:[88, 40] }] }
+      ]
     }
   };
   function partOn(m, part) {
@@ -212,7 +250,9 @@ window.MVCore = (() => {
     dragon:  { label:'Drake',   ev:{ ambient:'mob.enderdragon.growl', hurt:'mob.enderdragon.hit', death:'mob.enderdragon.death' }, volume:0.6 },
     zombie:  { label:'Zombie',  ev:{ ambient:'mob.zombie.say', hurt:'mob.zombie.hurt', death:'mob.zombie.death', step:'mob.zombie.step' } },
     skeleton:{ label:'Skelett', ev:{ ambient:'mob.skeleton.say', hurt:'mob.skeleton.hurt', death:'mob.skeleton.death', step:'mob.skeleton.step' } },
-    spider:  { label:'Spindel', ev:{ ambient:'mob.spider.say', hurt:'mob.spider.say', death:'mob.spider.death', step:'mob.spider.step' } }
+    spider:  { label:'Spindel', ev:{ ambient:'mob.spider.say', hurt:'mob.spider.say', death:'mob.spider.death', step:'mob.spider.step' } },
+    enderman:{ label:'Enderman', ev:{ ambient:'mob.endermen.idle', hurt:'mob.endermen.hit', death:'mob.endermen.death' } },
+    warden:  { label:'Warden',  ev:{ ambient:'mob.warden.idle', hurt:'mob.warden.hurt', death:'mob.warden.death', step:'mob.warden.step' } }
   };
   const BIOMES = [
     ['common', 'Där djur och monster brukar finnas'], ['plains', 'Slätter'], ['forest', 'Skog'], ['taiga', 'Barrskog'], ['jungle', 'Djungel'],
@@ -235,10 +275,10 @@ window.MVCore = (() => {
       const bone = { name: b.name, pivot: b.pivot, cubes }; if (b.parent) bone.parent = b.parent;
       bones.push(bone);
     }
-    const big = m.body === 'dragon';
+    const [bw, bh, by] = B.bounds;
     return { format_version: '1.12.0', 'minecraft:geometry': [{
       description: { identifier: `geometry.${ns}.${id}`, texture_width: B.size, texture_height: B.size,
-        visible_bounds_width: big ? 7 : 4, visible_bounds_height: big ? 4 : 3.5, visible_bounds_offset: [0, big ? 1.5 : 1.25, 0] },
+        visible_bounds_width: bw, visible_bounds_height: bh, visible_bounds_offset: [0, by, 0] },
       bones }] };
   }
   function animationsJson(ns) {
@@ -250,6 +290,13 @@ window.MVCore = (() => {
         leg0: { rotation: [w('80.0'), 0, 0] }, leg1: { rotation: [w('-80.0'), 0, 0] }, leg2: { rotation: [w('-80.0'), 0, 0] }, leg3: { rotation: [w('80.0'), 0, 0] } } },
       [`animation.${ns}.mob.biped_walk`]: { loop: true, anim_time_update: 'query.modified_distance_moved', bones: {
         rightarm: { rotation: [w('40.0'), 0, 0] }, leftarm: { rotation: [w('-40.0'), 0, 0] }, rightleg: { rotation: [w('-50.0'), 0, 0] }, leftleg: { rotation: [w('50.0'), 0, 0] } } },
+      [`animation.${ns}.mob.tall_walk`]: { loop: true, anim_time_update: 'query.modified_distance_moved', bones: {
+        rightleg: { rotation: ['math.cos(query.anim_time * 24.0) * 28.0', 0, 0] }, leftleg: { rotation: ['math.cos(query.anim_time * 24.0) * -28.0', 0, 0] },
+        rightarm: { rotation: ['math.cos(query.anim_time * 24.0) * -12.0', 0, 0] }, leftarm: { rotation: ['math.cos(query.anim_time * 24.0) * 12.0', 0, 0] } } },
+      [`animation.${ns}.mob.giant_walk`]: { loop: true, anim_time_update: 'query.modified_distance_moved', bones: {
+        body: { rotation: [0, 0, 'math.cos(query.anim_time * 26.0) * 3.0'] },
+        rightleg: { rotation: ['math.cos(query.anim_time * 26.0) * 24.0', 0, 0] }, leftleg: { rotation: ['math.cos(query.anim_time * 26.0) * -24.0', 0, 0] },
+        rightarm: { rotation: ['math.cos(query.anim_time * 26.0) * -18.0', 0, 0] }, leftarm: { rotation: ['math.cos(query.anim_time * 26.0) * 18.0', 0, 0] } } },
       [`animation.${ns}.mob.arms_forward`]: { loop: true, bones: { rightarm: { rotation: [-80.0, 0, 0] }, leftarm: { rotation: [-80.0, 0, 0] } } },
       [`animation.${ns}.mob.tail_wag`]: { loop: true, bones: { tail: { rotation: [0, 'math.sin(query.life_time * 300.0) * 15.0', 0] }, tail2: { rotation: [0, 'math.sin(query.life_time * 300.0 - 60.0) * 15.0', 0] } } },
       [`animation.${ns}.mob.flap`]: { loop: true, bones: {
@@ -262,7 +309,8 @@ window.MVCore = (() => {
   }
   function clientJson(m, ns, id) {
     const anims = { look: 'animation.common.look_at_target' }, animate = [];
-    if (m.body === 'biped') { anims.walk = `animation.${ns}.mob.biped_walk`; animate.push({ walk: 'query.modified_move_speed' }, 'look'); if (hostile(m)) { anims.arms = `animation.${ns}.mob.arms_forward`; animate.push('arms'); } }
+    if (m.body === 'tall' || m.body === 'giant') { anims.walk = `animation.${ns}.mob.${m.body}_walk`; animate.push({ walk: 'query.modified_move_speed' }, 'look'); }
+    else if (m.body === 'biped') { anims.walk = `animation.${ns}.mob.biped_walk`; animate.push({ walk: 'query.modified_move_speed' }, 'look'); if (hostile(m)) { anims.arms = `animation.${ns}.mob.arms_forward`; animate.push('arms'); } }
     else {
       anims.walk = `animation.${ns}.mob.quad_walk`; animate.push({ walk: 'query.modified_move_speed' }, 'look');
       if (m.body === 'quad' && m.parts.tail !== 'none') { anims.tail = `animation.${ns}.mob.tail_wag`; animate.push('tail'); }
@@ -317,6 +365,8 @@ window.MVCore = (() => {
       });
     }
     if (!RIDE) c['minecraft:physics'] = {};
+    if (m.teleport) c['minecraft:teleport'] = { random_teleports: true, max_random_teleport_time: 30, random_teleport_cube: [32, 32, 32],
+      target_distance: 16, target_teleport_chance: 0.05, light_teleport_chance: 0.05, teleports_on_projectile_hit: true };
     if (m.sound !== 'none') c['minecraft:ambient_sound_interval'] = { value: 8.0, range: 16.0, event_name: 'ambient' };
     if (m.behavior === 'passive') c['minecraft:behavior.panic'] = { priority: 1, speed_multiplier: 1.25 };
     if (fights(m)) {
